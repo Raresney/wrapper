@@ -1,8 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, useRef, type ComponentType } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/lib/theme-context";
+import { WorldCupSlide } from "@/components/pawcup/WorldCupTheme";
 import SlideIntro         from "@/components/slides/SlideIntro";
 import SlideContributions from "@/components/slides/SlideContributions";
 import SlideLanguages     from "@/components/slides/SlideLanguages";
@@ -15,41 +17,59 @@ import PlanetProgress     from "@/components/ui/PlanetProgress";
 import ShareModal         from "@/components/ui/ShareModal";
 import type { WrappedProfile, SlideId, SlideState } from "@/types/wrapped";
 
-// Short chapter title per slide — used in the share caption.
+// Short chapter title per slide, used in the share caption.
 const SLIDE_TITLES: Record<SlideId, string> = {
-  intro: "Liftoff", contributions: "The Chase", languages: "Dodging Bugs", top_repo: "Home Base",
-  journey: "Refuel Stop", achievements: "Trophy Haul", archetype: "The Reveal", share: "Your Planet",
+  intro: "Liftoff",
+  contributions: "The Chase",
+  languages: "Dodging Bugs",
+  top_repo: "Home Base",
+  journey: "Refuel Stop",
+  achievements: "Trophy Haul",
+  archetype: "The Reveal",
+  share: "Your Planet",
+  bonus: "Bonus Round",
 };
 
-// Each slide's planet colour — the top journey dots mirror the planet shown on
-// that slide. The last (share) slide is coloured by the user's top language,
-// matching SlideShare's LANG_PALETTES.
 const SHARE_LANG_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6", Python: "#f1c40f", Rust: "#ff5a1f", Go: "#22d3ee", JavaScript: "#facc15",
+  TypeScript: "#3178c6",
+  Python: "#f1c40f",
+  Rust: "#ff5a1f",
+  Go: "#22d3ee",
+  JavaScript: "#facc15",
 };
+
 function planetColors(profile: WrappedProfile): string[] {
   const shareColor = SHARE_LANG_COLORS[profile.raw?.languages?.[0]?.language ?? ""] ?? "#a78bfa";
   return [
-    "#cbd5e1", // intro — moon (silver)
-    "#ff8c3c", // contributions — orange gas giant
-    "#d6552a", // languages — mars red
-    "#7cff8a", // top_repo — alien green
-    "#ffb627", // journey — amber/gold gas
-    "#ec4899", // achievements — yarn pink
-    "#a855f7", // archetype — party neon
-    shareColor, // share — top language
+    "#cbd5e1",
+    "#ff8c3c",
+    "#d6552a",
+    "#7cff8a",
+    "#ffb627",
+    "#ec4899",
+    "#a855f7",
+    shareColor,
+    "#facc15",
   ];
 }
 
-const SLIDES: SlideId[] = [
-  "intro","contributions","languages","top_repo",
-  "journey","achievements","archetype","share",
+const BASE_SLIDES: SlideId[] = [
+  "intro", "contributions", "languages", "top_repo",
+  "journey", "achievements", "archetype", "share",
 ];
 
+const WORLD_CUP_BONUS_SLIDES: SlideId[] = [...BASE_SLIDES, "bonus"];
+
 const SLIDE_COMPONENTS: Record<SlideId, ComponentType<{ profile: WrappedProfile }>> = {
-  intro: SlideIntro, contributions: SlideContributions, languages: SlideLanguages,
-  top_repo: SlideTopRepo, journey: SlideJourney, achievements: SlideAchievements,
-  archetype: SlideArchetype, share: SlideShare,
+  intro: SlideIntro,
+  contributions: SlideContributions,
+  languages: SlideLanguages,
+  top_repo: SlideTopRepo,
+  journey: SlideJourney,
+  achievements: SlideAchievements,
+  archetype: SlideArchetype,
+  share: SlideShare,
+  bonus: SlideShare,
 };
 
 const EASE = [0.32, 0.72, 0, 1] as const;
@@ -60,7 +80,7 @@ const slideVariants = {
   exit:   (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0, transition: { duration: 0.3, ease: EASE } }),
 };
 
-// ── loading skeleton ───────────────────────────────────────────────────────
+// â”€â”€ loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LoadingScreen() {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-5"
@@ -73,13 +93,13 @@ function LoadingScreen() {
       </div>
       <div className="flex flex-col items-center gap-1">
         <span className="text-[13px] font-medium text-white/70">Loading your story</span>
-        <span className="text-[11px] text-zinc-600">Fetching from the void…</span>
+        <span className="text-[11px] text-zinc-600">Fetching from the voidâ€¦</span>
       </div>
     </div>
   );
 }
 
-// ── close/x icon ──────────────────────────────────────────────────────────
+// â”€â”€ close/x icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CloseIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
@@ -88,7 +108,7 @@ function CloseIcon() {
   );
 }
 
-// ── share icon ──────────────────────────────────────────────────────────────
+// â”€â”€ share icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ShareIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -98,15 +118,18 @@ function ShareIcon() {
   );
 }
 
-// ── chevron icons ──────────────────────────────────────────────────────────
+// â”€â”€ chevron icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ChevronLeft()  { return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
 function ChevronRight() { return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
 
-// ── main ───────────────────────────────────────────────────────────────────
+// â”€â”€ main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function WrappedPage() {
   const router = useRouter();
+  const { worldCup } = useTheme();
+  const activeSlides = worldCup ? WORLD_CUP_BONUS_SLIDES : BASE_SLIDES;
+  const activeTotal = activeSlides.length;
   const [profile,          setProfile]          = useState<WrappedProfile | null>(null);
-  const [slideState,       setSlideState]       = useState<SlideState>({ current: "intro", index: 0, total: 8, visited: [] });
+  const [slideState,       setSlideState]       = useState<SlideState>({ current: "intro", index: 0, total: BASE_SLIDES.length, visited: [] });
   const [direction,        setDirection]        = useState<1 | -1>(1);
   const [loading,          setLoading]          = useState(true);
   const [error,            setError]            = useState<string | null>(null);
@@ -140,39 +163,59 @@ export default function WrappedPage() {
     }
   }, [router, fetchNarrative]);
 
+  useEffect(() => {
+    setSlideState((prev) => {
+      let nextIndex = activeSlides.indexOf(prev.current);
+      let nextCurrent = prev.current;
+      if (nextIndex === -1) {
+        nextIndex = activeSlides.length - 1;
+        nextCurrent = activeSlides[nextIndex];
+      }
+      const filteredVisited = prev.visited.filter((id) => activeSlides.includes(id));
+      if (
+        nextCurrent === prev.current &&
+        nextIndex === prev.index &&
+        prev.total === activeTotal &&
+        filteredVisited.length === prev.visited.length
+      ) {
+        return prev;
+      }
+      return { current: nextCurrent, index: nextIndex, total: activeTotal, visited: filteredVisited };
+    });
+  }, [activeSlides, activeTotal]);
+
   const goNext = useCallback(() => {
     setSlideState(prev => {
-      if (prev.index >= SLIDES.length - 1) return prev;
+      if (prev.index >= activeSlides.length - 1) return prev;
       setDirection(1);
-      return { current: SLIDES[prev.index + 1], index: prev.index + 1, total: 8, visited: [...prev.visited, prev.current] };
+      return { current: activeSlides[prev.index + 1], index: prev.index + 1, total: activeTotal, visited: [...prev.visited, prev.current] };
     });
-  }, []);
+  }, [activeSlides, activeTotal]);
 
   const goPrev = useCallback(() => {
     setSlideState(prev => {
       if (prev.index <= 0) return prev;
       setDirection(-1);
-      return { current: SLIDES[prev.index - 1], index: prev.index - 1, total: 8, visited: prev.visited.slice(0, -1) };
+      return { current: activeSlides[prev.index - 1], index: prev.index - 1, total: activeTotal, visited: prev.visited.slice(0, -1) };
     });
-  }, []);
+  }, [activeSlides, activeTotal]);
 
   const goTo = useCallback((index: number) => {
     setSlideState(prev => {
-      if (index === prev.index || index < 0 || index > SLIDES.length - 1) return prev;
+      if (index === prev.index || index < 0 || index > activeSlides.length - 1) return prev;
       setDirection(index > prev.index ? 1 : -1);
-      return { current: SLIDES[index], index, total: 8, visited: [...prev.visited, prev.current] };
+      return { current: activeSlides[index], index, total: activeTotal, visited: [...prev.visited, prev.current] };
     });
-  }, []);
+  }, [activeSlides, activeTotal]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") goNext();
       else if (e.key === "ArrowLeft") goPrev();
-      else if (e.key === "Escape") router.push("/");
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [goNext, goPrev, router]);
+  }, [goNext, goPrev]);
 
   if (loading) return <LoadingScreen />;
 
@@ -197,53 +240,76 @@ export default function WrappedPage() {
         if (d > 50) goNext(); else if (d < -50) goPrev();
       }}
     >
+      {/* world cup decorative layer â€” renders behind all content */}
       {/* ambient glow */}
-      <div className="pointer-events-none fixed inset-0"
+      <div className={`pointer-events-none fixed inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${worldCup ? "opacity-0" : "opacity-100"}`}
         style={{ background: "radial-gradient(ellipse at 50% 0%,rgba(139,92,246,0.12) 0%,transparent 65%)" }} />
       {/* film grain */}
-      <div className="pointer-events-none fixed inset-0 opacity-[0.028]"
+      <div className={`pointer-events-none fixed inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${worldCup ? "opacity-0" : "opacity-[0.028]"}`}
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px" }} />
 
-      {/* ── top bar ── */}
+      {/* â”€â”€ top bar â”€â”€ */}
       <div className="fixed inset-x-0 top-0 z-40 px-3 pt-3 pb-2 sm:px-5 sm:pt-4 sm:pb-3">
         <div className="flex items-center gap-1.5 sm:gap-3">
           {/* prev button */}
           <button onClick={goPrev}
-            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] text-white/40 transition-all duration-200 hover:border-white/20 hover:text-white/70 ${slideState.index === 0 ? "invisible" : ""}`}>
+            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white ${slideState.index === 0 ? "invisible" : ""}`}>
             <ChevronLeft />
           </button>
 
           {/* planet journey bar */}
           <div className="flex-1">
-            <PlanetProgress total={8} current={slideState.index} colors={planetColors(profile)} onNavigate={goTo} />
+            <PlanetProgress total={activeTotal} current={slideState.index} colors={planetColors(profile)} onNavigate={goTo} />
           </div>
 
           {/* share button */}
           <button onClick={() => setShareOpen(true)} aria-label="Share this slide"
-            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/15 text-violet-200 transition-all duration-200 hover:border-violet-400/60 hover:bg-violet-500/25">
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-violet-300/55 bg-violet-500/28 text-white shadow-[0_8px_24px_rgba(76,29,149,0.35)] backdrop-blur-md transition-all duration-200 hover:border-violet-200/80 hover:bg-violet-500/40">
             <ShareIcon />
           </button>
 
           {/* close button */}
           <button onClick={() => router.push("/")}
-            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] text-white/40 transition-all duration-200 hover:border-white/20 hover:text-white/70">
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white">
             <CloseIcon />
           </button>
         </div>
       </div>
 
-      {/* ── slide ── */}
+      {/* â”€â”€ slide â”€â”€ */}
       <div ref={slideAreaRef} className="absolute inset-0 z-10">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div key={slideState.current} custom={direction}
             variants={slideVariants} initial="enter" animate="center" exit="exit"
             className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-contain lg:overflow-hidden">
-            <CurrentSlide profile={profile} />
+            <div className="relative h-full w-full overflow-hidden">
+              <div
+                className={`absolute inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
+                  worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+                }`}
+              >
+                <CurrentSlide profile={profile} />
+              </div>
+              <div
+                className={`absolute inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
+                  worldCup ? "opacity-100" : "pointer-events-none opacity-0"
+                }`}
+              >
+                <div className="wc-pawcup-scene absolute inset-0">
+                  <WorldCupSlide index={slideState.index} profile={profile} />
+                </div>
+                <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={slideState.current}>
+                  {slideState.current === "archetype"
+                    ? <SlideArchetype profile={profile} sparse />
+                    : <CurrentSlide profile={profile} />}
+                </div>
+              </div>
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* ── tap zones with hover arrows (desktop only; mobile uses swipe + vertical scroll) ── */}
+      {/* â”€â”€ tap zones with hover arrows (desktop only; mobile uses swipe + vertical scroll) â”€â”€ */}
       <div className="absolute inset-0 z-30 hidden pointer-events-none lg:flex">
         <div className="w-2/5 h-full pointer-events-auto group flex items-center cursor-pointer" onClick={goPrev}>
           <span className="ml-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/0 bg-white/0 text-white/0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:border-white/10 group-hover:bg-white/5 group-hover:text-white/50">
@@ -257,7 +323,7 @@ export default function WrappedPage() {
         </div>
       </div>
 
-      {/* ── mobile nav arrows (small floating buttons; don't block vertical scroll) ── */}
+      {/* â”€â”€ mobile nav arrows (small floating buttons; don't block vertical scroll) â”€â”€ */}
       <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2 lg:hidden">
         <button onClick={goPrev} aria-label="Previous slide"
           className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${slideState.index === 0 ? "invisible" : ""}`}
@@ -271,12 +337,12 @@ export default function WrappedPage() {
         </button>
       </div>
 
-      {/* ── narrative loading indicator ── */}
+      {/* â”€â”€ narrative loading indicator â”€â”€ */}
       {narrativeLoading && (slideState.current === "archetype" || slideState.current === "share") && (
         <div className="pointer-events-none fixed bottom-10 right-5 z-30 flex items-center gap-2 rounded-full border border-white/[0.07] bg-black/40 px-3 py-1.5"
           style={{ backdropFilter: "blur(12px)" }}>
           <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--violet-glow)" }} />
-          <span className="text-[10px] text-zinc-500">Generating story…</span>
+          <span className="text-[10px] text-zinc-500">Generating storyâ€¦</span>
         </div>
       )}
 
@@ -290,3 +356,5 @@ export default function WrappedPage() {
     </div>
   );
 }
+
+

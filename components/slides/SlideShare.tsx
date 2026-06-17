@@ -10,6 +10,7 @@ import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { captureElement } from "@/lib/captureElement";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
+import { SlideCard } from "@/components/wrapped/SlideCard";
 
 
 const LANG_PALETTES: Record<string, { a: string; b: string; glow: string }> = {
@@ -55,11 +56,9 @@ function Planet({ palette, archetype, username }: { palette: { a: string; b: str
           );
         })}
       </motion.div>
-      <div className="relative" style={{ width: 360, height: 360 }}>
-        <div className="absolute inset-0 rounded-full"
-          style={{ boxShadow: `0 0 120px 40px ${palette.glow}`, background: `radial-gradient(circle at 50% 50%, ${palette.glow}, transparent 70%)` }} />
+      <div className="relative overflow-hidden rounded-full" style={{ width: 360, height: 360 }}>
         <motion.div className="relative h-full w-full overflow-hidden rounded-full"
-          style={{ background: `radial-gradient(circle at 30% 30%, ${palette.b}, ${palette.a} 55%, #000 110%)`, boxShadow: `inset -30px -30px 80px rgba(0,0,0,0.7), inset 20px 20px 60px ${palette.glow}` }}
+          style={{ background: `radial-gradient(circle at 30% 30%, ${palette.b}, ${palette.a} 55%, #000 110%)`, boxShadow: `0 0 54px ${palette.glow}, inset -30px -30px 80px rgba(0,0,0,0.7), inset 20px 20px 60px ${palette.glow}` }}
           animate={{ rotate: 360 }} transition={{ duration: 90, repeat: Infinity, ease: "linear" }}>
           {geometric && (
             <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full opacity-50">
@@ -169,7 +168,7 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
     <>
     <main className="relative min-h-full overflow-hidden" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute inset-0"
-        style={{ background: `radial-gradient(ellipse at 75% 50%, ${palette.glow}, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(120,80,200,0.18), transparent 60%)` }} />
+        style={{ background: "radial-gradient(ellipse at 15% 80%, rgba(120,80,200,0.18), transparent 60%)" }} />
       <Stars />
       <ChapterHeadingAnchor n={8} title="Your Planet" />
 
@@ -191,7 +190,7 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
             <ChapterHeadingMobile n={8} title="Your Planet" />
             <MobilePlanet color={palette.a} />
           </div>
-          <div ref={cardRef} data-share-card className="w-full max-w-[380px] [&::-webkit-scrollbar]:hidden" style={{ maxWidth: 380, height: "min(580px, 84vh)", overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
+          <SlideCard ref={cardRef} accentColor={palette.a} chapter={8} title="Your Planet">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-base font-bold text-white"
                 style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 20px ${palette.glow}` }}>
@@ -236,11 +235,7 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
                 </div>
               ))}
             </div>
-            <button onClick={share} data-share-ignore className="mt-3 w-full rounded-full px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98]"
-              style={{ background: "linear-gradient(90deg, #7c3aed, #a78bfa)", boxShadow: "0 8px 30px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.2)" }}>
-              Share your planet
-            </button>
-          </div>
+          </SlideCard>
 
           {/* mobile: animated scene below the card (scroll to reveal) */}
           <div className="mt-6 flex justify-center lg:hidden">
@@ -262,7 +257,11 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
     </main>
     {mounted && createPortal(
       <motion.div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
-        <button onClick={startOver} className="text-xs uppercase tracking-[0.3em] text-zinc-500 transition hover:text-zinc-200">
+        <button onClick={startOver} className="flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm font-medium text-white/70 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
           Start over
         </button>
       </motion.div>,

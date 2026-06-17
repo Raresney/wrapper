@@ -205,22 +205,22 @@ export function SlideShell({
   mobileFooter?: ReactNode;
 }) {
   return (
-    <div className="relative min-h-full w-full overflow-hidden text-white" style={{ background: "#080612" }}>
-      <Stars />
+    <div className="relative min-h-full w-full overflow-hidden text-white" style={{ background: "var(--slide-bg, #080612)" }}>
+      <div className="slide-stars-bg"><Stars /></div>
       {overlay}
       {/* violet nebula glow behind right column */}
       <div
-        className="pointer-events-none absolute -right-40 top-1/2 h-[900px] w-[900px] -translate-y-1/2 rounded-full"
+        className="slide-nebula-glow pointer-events-none absolute -right-40 top-1/2 h-[900px] w-[900px] -translate-y-1/2 rounded-full"
         style={{ background: "radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 60%)" }}
       />
       {/* responsive grid — single column on mobile, 3 columns on desktop */}
-      <div className="relative z-10 mx-auto grid min-h-[calc(100dvh-90px)] max-w-[1500px] grid-cols-1 items-start gap-4 px-4 pb-10 pt-16 lg:h-[calc(100vh-150px)] lg:min-h-0 lg:grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] lg:items-stretch lg:px-6 lg:pt-20">
+      <div className="relative z-10 mx-auto grid min-h-[calc(100dvh-90px)] max-w-[1500px] grid-cols-1 items-start gap-4 px-4 pb-10 pt-16 lg:min-h-screen lg:grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] lg:items-stretch lg:px-6 lg:py-12">
         {/* LEFT — Rocket + optional chapter title (desktop only) */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.4 }}
-          className="relative hidden lg:block"
+          className="relative hidden lg:block slide-left-col"
         >
           <div className="absolute inset-0">
             <Rocket />
@@ -247,7 +247,7 @@ export function SlideShell({
           initial={{ opacity: 0, x: 40, scale: 0.9 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.5 }}
-          className="relative hidden lg:block"
+          className="relative hidden lg:block slide-right-col"
         >
           {right}
         </motion.div>

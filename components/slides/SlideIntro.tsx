@@ -6,6 +6,9 @@ import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
 import { PlanetStage, SlideShell, MobilePlanet, Rocket } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
+import { SlideCard } from "@/components/wrapped/SlideCard";
+
+const ACCENT = "#8b5cf6";
 
 // ── Moon ───────────────────────────────────────────────────────────────────
 function Moon() {
@@ -100,8 +103,13 @@ const cardItem = {
 
 function StatBox({ label, value, accent }: { label: string; value: number | string; accent: string }) {
   return (
-    <div className="rounded-xl border border-white/10 px-2.5 py-2" style={{ background: "rgba(255,255,255,0.03)" }}>
-      <div className="text-[9px] uppercase tracking-[0.18em] text-white/40">{label}</div>
+    <div
+      className="rounded-xl px-2.5 py-2"
+      style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}28` }}
+    >
+      <div className="text-[9px] uppercase tracking-[0.18em]" style={{ color: `${ACCENT}70` }}>
+        {label}
+      </div>
       <div
         className="text-xl font-bold tabular-nums"
         style={{ color: accent, textShadow: `0 0 12px ${accent}80` }}
@@ -116,100 +124,111 @@ function ProfileCard({ flat }: { flat: Flat }) {
   const maxRepo = Math.max(...flat.topRepos.map((r) => r.commits), 1);
   return (
     <motion.div
-      data-share-card
       initial="hidden"
       animate="show"
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
-      className="relative mt-0 w-full max-w-[380px] rounded-3xl border border-white/10 p-4 text-white h-[min(580px,84vh)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:-translate-y-6"
-      style={{
-        background: "linear-gradient(160deg,rgba(30,20,60,0.55),rgba(10,8,25,0.65))",
-        backdropFilter: "blur(24px)",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.08)",
-      }}
+      className="relative mt-0 w-full max-w-[380px] text-white"
     >
-      <motion.div variants={cardItem} className="flex items-center gap-4">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={flat.avatarUrl}
-          alt={flat.username}
-          className="h-10 w-10 rounded-full border-2 border-violet-400/50 shadow-[0_0_20px_rgba(139,92,246,0.4)]"
-        />
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-violet-300/70">Commander</div>
-          <div className="text-base font-bold">@{flat.username}</div>
-        </div>
-      </motion.div>
-      {flat.bio && (
-        <motion.p variants={cardItem} className="mt-3 text-sm leading-relaxed text-white/60">
-          {flat.bio}
-        </motion.p>
-      )}
-      <motion.div variants={cardItem} className="mt-3">
-        <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">Total commits</div>
-        <div
-          className="text-4xl font-black tracking-tight"
-          style={{
-            background: "linear-gradient(90deg,#c4b5fd,#a78bfa,#818cf8)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            filter: "drop-shadow(0 0 18px rgba(139,92,246,0.5))",
-          }}
-        >
-          <Counter to={flat.totalCommits} />
-        </div>
-      </motion.div>
-      <motion.div variants={cardItem} className="mt-2">
-        <div className="mb-1 text-[10px] uppercase tracking-[0.2em] text-white/40">Top languages</div>
-        <div className="space-y-1">
-          {flat.languages.slice(0, 3).map((l, i) => (
-            <div key={l.name}>
-              <div className="mb-1 flex justify-between text-xs">
-                <span className="text-white/80">{l.name}</span>
-                <span className="text-white/40">{l.percent}%</span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${l.percent}%` }}
-                  transition={{ duration: 1.2, delay: 1 + i * 0.1, ease: "easeOut" }}
-                  className="h-full rounded-full"
-                  style={{
-                    background: `linear-gradient(90deg,${l.color},${l.color}cc)`,
-                    boxShadow: `0 0 10px ${l.color}80`,
-                  }}
-                />
-              </div>
+      <SlideCard accentColor={ACCENT} chapter={1} title="Liftoff">
+        <motion.div variants={cardItem} className="flex items-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={flat.avatarUrl}
+            alt={flat.username}
+            className="h-10 w-10 rounded-full border-2 shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+            style={{ borderColor: `${ACCENT}80` }}
+          />
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: `${ACCENT}80` }}>
+              Commander
             </div>
-          ))}
-        </div>
-      </motion.div>
-      <motion.div variants={cardItem} className="mt-2 grid grid-cols-2 gap-2">
-        <StatBox label="Current streak" value={`${flat.currentStreak}d`} accent="#f97316" />
-        <StatBox label="Longest streak" value={`${flat.longestStreak}d`} accent="#a78bfa" />
-      </motion.div>
-      <motion.div variants={cardItem} className="mt-2">
-        <div className="mb-1 text-[10px] uppercase tracking-[0.2em] text-white/40">Top repositories</div>
-        <div className="space-y-1">
-          {flat.topRepos.slice(0, 3).map((r, i) => (
-            <div key={r.name} className="flex items-center gap-3 text-xs">
-              <span className="w-28 truncate text-white/80">{r.name}</span>
-              <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/5">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(r.commits / maxRepo) * 100}%` }}
-                  transition={{ duration: 1, delay: 1.4 + i * 0.08 }}
-                  className="h-full rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400"
-                />
+            <div className="text-base font-bold">@{flat.username}</div>
+          </div>
+        </motion.div>
+
+        {flat.bio && (
+          <motion.p variants={cardItem} className="mt-3 text-sm leading-relaxed text-white/60">
+            {flat.bio}
+          </motion.p>
+        )}
+
+        <motion.div variants={cardItem} className="mt-3">
+          <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: `${ACCENT}65` }}>
+            Total commits
+          </div>
+          <div
+            className="text-4xl font-black tracking-tight"
+            style={{
+              background: "linear-gradient(90deg,#c4b5fd,#a78bfa,#818cf8)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              filter: "drop-shadow(0 0 18px rgba(139,92,246,0.5))",
+            }}
+          >
+            <Counter to={flat.totalCommits} />
+          </div>
+        </motion.div>
+
+        <motion.div variants={cardItem} className="mt-2">
+          <div className="mb-1 text-[10px] uppercase tracking-[0.2em]" style={{ color: `${ACCENT}65` }}>
+            Top languages
+          </div>
+          <div className="space-y-1">
+            {flat.languages.slice(0, 3).map((l, i) => (
+              <div key={l.name}>
+                <div className="mb-1 flex justify-between text-xs">
+                  <span className="text-white/80">{l.name}</span>
+                  <span className="text-white/40">{l.percent}%</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${l.percent}%` }}
+                    transition={{ duration: 1.2, delay: 1 + i * 0.1, ease: "easeOut" }}
+                    className="h-full rounded-full"
+                    style={{
+                      background: `linear-gradient(90deg,${l.color},${l.color}cc)`,
+                      boxShadow: `0 0 10px ${l.color}80`,
+                    }}
+                  />
+                </div>
               </div>
-              <span className="w-10 text-right tabular-nums text-white/50">{r.commits}</span>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-      <motion.div variants={cardItem} className="mt-2 grid grid-cols-2 gap-2">
-        <StatBox label="PRs opened" value={flat.prsOpened} accent="#22d3ee" />
-        <StatBox label="PRs merged" value={flat.prsMerged} accent="#4ade80" />
-      </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div variants={cardItem} className="mt-2 grid grid-cols-2 gap-2">
+          <StatBox label="Current streak" value={`${flat.currentStreak}d`} accent="#f97316" />
+          <StatBox label="Longest streak" value={`${flat.longestStreak}d`} accent="#a78bfa" />
+        </motion.div>
+
+        <motion.div variants={cardItem} className="mt-2">
+          <div className="mb-1 text-[10px] uppercase tracking-[0.2em]" style={{ color: `${ACCENT}65` }}>
+            Top repositories
+          </div>
+          <div className="space-y-1">
+            {flat.topRepos.slice(0, 3).map((r, i) => (
+              <div key={r.name} className="flex items-center gap-3 text-xs">
+                <span className="w-28 truncate text-white/80">{r.name}</span>
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/5">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(r.commits / maxRepo) * 100}%` }}
+                    transition={{ duration: 1, delay: 1.4 + i * 0.08 }}
+                    className="h-full rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400"
+                  />
+                </div>
+                <span className="w-10 text-right tabular-nums text-white/50">{r.commits}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div variants={cardItem} className="mt-2 grid grid-cols-2 gap-2">
+          <StatBox label="PRs opened" value={flat.prsOpened} accent="#22d3ee" />
+          <StatBox label="PRs merged" value={flat.prsMerged} accent="#4ade80" />
+        </motion.div>
+      </SlideCard>
     </motion.div>
   );
 }

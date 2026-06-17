@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(npx eslint *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('build:', p.scripts.build\\); console.log\\('lint:', p.scripts.lint\\)\")",
+      "Bash(ls C:\\\\Users\\\\gvcor\\\\Desktop\\\\pawCup 2>/dev/null || ls \"C:\\\\Users\\\\gvcor\\\\Desktop\\\\pawCup\")",
+      "PowerShell($env:USERPROFILE; [System.Environment]::GetFolderPath\\(\"Desktop\"\\))",
+      "PowerShell(for \\($i = 1; $i -le 7; $i++\\) { echo \"=== SLIDE $i ===\"; Get-Content \"C:\\\\Users\\\\gvcor\\\\OneDrive\\\\Desktop\\\\pawCup\\\\src\\\\routes\\\\slide-$i.tsx\" | Select-Object -First 60 })",
+      "Bash(\\\\.ts\" | wc -l)"
+    ]
+  }
+}

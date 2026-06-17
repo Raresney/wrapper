@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AiTone } from "@/types/wrapped";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
+import { useTheme } from "@/lib/theme-context";
+import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
 
 // ── constants ──────────────────────────────────────────────────────────────
 const PERIODS = [
@@ -27,6 +29,14 @@ const EASE = [0.32, 0.72, 0, 1] as const;
 const pillBase = "rounded-full px-3 py-1.5 text-[11px] font-medium cursor-pointer transition-all duration-300 border";
 const pillOff  = "bg-white/[0.04] border-white/[0.08] text-zinc-500 hover:border-white/20 hover:text-zinc-300";
 const pillOn   = "bg-violet-500/[0.15] border-violet-500/40 text-violet-300 shadow-[0_0_14px_-4px_rgba(139,92,246,0.5)]";
+
+function authCallbackUrl() {
+  if (typeof window === "undefined") return "/";
+  if (window.location.hash) {
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+  }
+  return `${window.location.origin}${window.location.pathname}`;
+}
 
 // ── git branch commit nodes animation ─────────────────────────────────────
 // Positions detected via PIL at 72×72 display: original_px * 72/1024
@@ -189,12 +199,33 @@ function SoccerBallMark() {
 
 // Theme switcher (nav): trophy = active theme emblem, spinning ball = toggle
 function ThemeSwitch() {
+  const { worldCup, toggleWorldCup } = useTheme();
+  const [boosted, setBoosted] = useState(false);
+  const boostTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (boostTimerRef.current) clearTimeout(boostTimerRef.current);
+    };
+  }, []);
+
+  const handleToggle = () => {
+    setBoosted(true);
+    if (boostTimerRef.current) clearTimeout(boostTimerRef.current);
+    boostTimerRef.current = setTimeout(() => setBoosted(false), 950);
+    toggleWorldCup();
+  };
   return (
     <button
       type="button"
-      aria-label="Active theme: World Cup — switch theme"
-      title="Monthly theme · World Cup"
-      className="group relative flex items-center gap-1.5 rounded-full border border-white/[0.12] bg-black/40 py-1 pl-2 pr-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-emerald-300/40 hover:bg-zinc-900/70 active:scale-[0.97] sm:pr-3"
+      onClick={handleToggle}
+      aria-label={worldCup ? "Switch to normal theme" : "Switch to World Cup theme"}
+      title={worldCup ? "World Cup theme active — click to switch back" : "Monthly theme · World Cup — click to activate"}
+      className={`group relative flex items-center gap-1.5 rounded-full border py-1 pl-2 pr-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] sm:pr-3 ${
+        worldCup
+          ? "border-amber-400/50 bg-amber-950/50 hover:border-amber-300/70 hover:bg-amber-950/70"
+          : "border-white/[0.12] bg-black/40 hover:border-emerald-300/40 hover:bg-zinc-900/70"
+      }`}
       style={{ backdropFilter: "blur(12px)" }}
     >
       <span className="grid place-items-center">
@@ -202,16 +233,21 @@ function ThemeSwitch() {
       </span>
       <motion.span
         className="grid place-items-center"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+        animate={{ rotate: 360, scale: boosted ? [1, 1.12, 1] : 1 }}
+        transition={{
+          rotate: { duration: boosted ? 1.7 : 7, repeat: Infinity, ease: "linear" },
+          scale: { duration: 0.95, ease: [0.22, 1, 0.36, 1] },
+        }}
       >
         <SoccerBallMark />
       </motion.span>
       <span className="hidden flex-col items-start leading-none sm:flex">
-        <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500 transition-colors group-hover:text-emerald-300/70">Theme</span>
-        <span className="text-[11px] font-semibold tracking-[-0.01em] text-white/90">World Cup</span>
+        <span className={`text-[8px] font-bold uppercase tracking-[0.16em] transition-colors ${worldCup ? "text-amber-400/80 group-hover:text-amber-300" : "text-zinc-500 group-hover:text-emerald-300/70"}`}>Theme</span>
+        <span className={`text-[11px] font-semibold tracking-[-0.01em] transition-colors ${worldCup ? "text-amber-200" : "text-white/90"}`}>
+          World Cup
+        </span>
       </span>
-      <span className="pointer-events-none absolute inset-0 rounded-full bg-emerald-300/0 transition-colors duration-500 group-hover:bg-emerald-300/[0.06]" />
+      <span className={`pointer-events-none absolute inset-0 rounded-full transition-colors duration-500 ${worldCup ? "bg-amber-300/[0.08]" : "bg-emerald-300/0 group-hover:bg-emerald-300/[0.06]"}`} />
     </button>
   );
 }
@@ -219,9 +255,9 @@ function ThemeSwitch() {
 function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
-      <div className="mx-auto max-w-5xl px-3 pt-4 pointer-events-auto sm:px-5 sm:pt-5">
+      <div className="mx-auto max-w-6xl px-3 pt-4 pointer-events-auto sm:px-5 sm:pt-5">
         {/* floating glass pill */}
-        <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-3 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
+        <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
           <a href="/" className="relative z-10 flex items-center gap-1.5 sm:gap-2">
@@ -417,6 +453,7 @@ function StarPixelText({ onConnect, isLoggedIn }: { onConnect: () => void; isLog
 // ── main page ──────────────────────────────────────────────────────────────
 function HomePageInner() {
   const { data: session } = useSession();
+  const { worldCup } = useTheme();
   const isLoggedIn = !!session?.user;
   const sessionUsername = session?.login ?? "";
 
@@ -467,17 +504,36 @@ function HomePageInner() {
 
       {/* ══ HERO — full-screen scene, content overlaid at bottom ══════════ */}
       <section className="relative flex min-h-[100dvh] flex-col items-center justify-end pb-4 pt-20">
-        <HeroScene />
+        <div
+          className={`absolute inset-0 z-[1] will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
+            worldCup ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+        >
+            <WorldCupLanding isLoggedIn={isLoggedIn} />
+        </div>
+        <div
+          className={`absolute inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
+            worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+        >
+          <HeroScene />
+        </div>
 
         {/* top fade — covers nav area */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-36"
           style={{ background: "linear-gradient(to bottom,color-mix(in oklab,var(--space-deep) 85%,transparent),transparent)" }} />
         {/* bottom fade — blends scene into content */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%]"
-          style={{ background: "linear-gradient(to top,var(--space-deep) 35%,color-mix(in oklab,var(--space-deep) 50%,transparent) 68%,transparent)" }} />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] transition-colors duration-700"
+          style={{
+            background: worldCup
+              ? "linear-gradient(to top, var(--space-deep) 0%, rgba(26,8,45,0.98) 28%, rgba(54,20,86,0.68) 58%, rgba(74,24,112,0.22) 82%, transparent 100%)"
+              : "linear-gradient(to top,var(--space-deep) 18%,color-mix(in oklab,var(--space-deep) 62%,transparent) 68%,transparent)",
+          }}
+        />
 
         {/* ── hero TV — right side, xl screens only ── */}
-        <motion.div
+        {!worldCup && <motion.div
           className="pointer-events-none absolute right-10 top-[54%] z-[5] hidden -translate-y-1/2 xl:block"
           style={{ width: "min(21vw, 270px)" }}
           animate={{ y: [0, -10, 0] }}
@@ -548,18 +604,18 @@ function HomePageInner() {
             <div className="h-[5px] w-20 rounded-full"
               style={{ background: "linear-gradient(90deg, transparent 0%, rgba(139,92,246,0.5) 30%, rgba(74,222,128,0.35) 70%, transparent 100%)", boxShadow: "0 0 14px 2px rgba(139,92,246,0.35)" }} />
           </div>
-        </motion.div>
+        </motion.div>}
 
         {/* ── star callout — left center ── */}
-        <motion.div
+        {!worldCup && <motion.div
           className="pointer-events-none absolute left-24 z-[6] hidden lg:block"
           style={{ top: "60%", transform: "translateY(-50%)" }}
           initial={{ opacity: 0, x: -18 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.2, delay: 1.0, ease: EASE }}
         >
-          <StarPixelText isLoggedIn={isLoggedIn} onConnect={() => signIn("github")} />
-        </motion.div>
+          <StarPixelText isLoggedIn={isLoggedIn} onConnect={() => signIn("github", { callbackUrl: authCallbackUrl() })} />
+        </motion.div>}
 
         {/* ── content overlay ── */}
         <div className="relative z-10 mx-auto w-full max-w-xl px-5">
@@ -669,7 +725,23 @@ function HomePageInner() {
       </section>
 
       {/* ══ HOW IT WORKS ══════════════════════════════════════════════════ */}
-      <section id="features" className="relative scroll-mt-28 px-5 py-32">
+      <section
+        id="features"
+        className="relative scroll-mt-28 px-5 py-32 transition-colors duration-700"
+        style={{
+          background: worldCup
+            ? "linear-gradient(180deg, rgba(26,8,45,0.98) 0%, rgba(16,8,28,0.96) 22%, var(--space-deep) 68%)"
+            : "var(--space-deep)",
+        }}
+      >
+        <div
+          className="pointer-events-none absolute inset-x-0 -top-40 h-72 transition-opacity duration-700"
+          style={{
+            opacity: worldCup ? 1 : 0,
+            background: "radial-gradient(ellipse at 50% 0%, rgba(168,85,247,0.24), rgba(92,38,132,0.16) 42%, transparent 72%)",
+            filter: "blur(18px)",
+          }}
+        />
         <div className="mx-auto max-w-4xl">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }}>

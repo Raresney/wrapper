@@ -3,6 +3,14 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 
+function authCallbackUrl() {
+  if (typeof window === "undefined") return "/";
+  if (window.location.hash) {
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+  }
+  return `${window.location.origin}${window.location.pathname}`;
+}
+
 export default function AuthButton() {
   const { data: session, status } = useSession();
 
@@ -26,7 +34,7 @@ export default function AuthButton() {
         )}
         <span className="text-xs text-zinc-400">{session.user.name}</span>
         <button
-          onClick={() => signOut()}
+          onClick={() => signOut({ callbackUrl: authCallbackUrl() })}
           className="text-xs text-zinc-600 hover:text-zinc-400 ml-1 cursor-pointer transition-colors"
         >
           Sign out
@@ -37,7 +45,7 @@ export default function AuthButton() {
 
   return (
     <button
-      onClick={() => signIn("github")}
+      onClick={() => signIn("github", { callbackUrl: authCallbackUrl() })}
       className="whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] font-semibold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] sm:px-5"
       style={{
         background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",

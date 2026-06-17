@@ -275,7 +275,8 @@ export type SlideId =
   | "journey"
   | "achievements"
   | "archetype"
-  | "share";
+  | "share"
+  | "bonus";
 
 export type SlideState = {
   current: SlideId;

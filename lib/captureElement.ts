@@ -1,4 +1,4 @@
-﻿// Screenshot helper built on modern-screenshot (SVG foreignObject — supports oklch/oklab).
+// Screenshot helper built on modern-screenshot (SVG foreignObject — supports oklch/oklab).
 //
 // CARD mode:  full slide render → crop to card → composite on themed background
 //             (dark #080612 + stars + radial glow in card's accent color)
@@ -24,18 +24,25 @@ function seededRand(seed: number): () => number {
  * The `card` canvas contains a BLEED of Math.round(3*scale) pixels on all sides.
  * We account for this to position the border stroke at the actual card edge.
  */
+type CardFrameMetrics = {
+  bleed: number;
+  radius: number;
+  borderWidth: number;
+};
+
 function compositeCardOnBg(
   card: HTMLCanvasElement,
   accent: string,
   paddingPx: number,
   scale: number,
+  frame: CardFrameMetrics,
 ): HTMLCanvasElement {
   const [r, g, b] = hexToRgb(accent);
-  const BLEED = Math.round(3 * scale); // must match captureElement crop bleed
   const pad = Math.round(paddingPx * scale);
   const W = card.width + pad * 2;
   const H = card.height + pad * 2;
-  const radius = Math.round(24 * scale); // rounded-3xl
+  const lineWidth = Math.max(1, frame.borderWidth);
+  const inset = lineWidth / 2;
 
   const out = document.createElement("canvas");
   out.width = W;
@@ -89,24 +96,45 @@ function compositeCardOnBg(
   ctx.drawImage(card, pad, pad);
 
   // 7 ── explicit card border at actual card position (skipping the bleed margin)
-  // The CSS `border: 1px solid accentColor+2e` (18% opacity) is too faint and
-  // unreliable in foreignObject. Draw it explicitly so all four sides are visible.
-  // The CSS top accent bar is already rendered correctly in the foreignObject image —
-  // we do NOT redraw it here to avoid doubling.
-  const cardX = pad + BLEED;
-  const cardY = pad + BLEED;
-  const cardW = card.width - BLEED * 2;
-  const cardH = card.height - BLEED * 2;
+  // The CSS `border: 1px solid accentColor+2e` (18% opacity) may be too faint in
+  // foreignObject. Redraw it explicitly so all four sides are always visible.
+  // The CSS top accent bar is already rendered in the foreignObject image — we do NOT
+  // redraw it here to avoid doubling.
+  const cardX = pad + frame.bleed + inset;
+  const cardY = pad + frame.bleed + inset;
+  const cardW = card.width - frame.bleed * 2 - lineWidth;
+  const cardH = card.height - frame.bleed * 2 - lineWidth;
 
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(cardX, cardY, cardW, cardH, radius);
+  ctx.roundRect(cardX, cardY, cardW, cardH, Math.max(0, frame.radius - inset));
   ctx.strokeStyle = `rgba(${r},${g},${b},0.28)`;
-  ctx.lineWidth = Math.ceil(1 * scale);
+  ctx.lineWidth = lineWidth;
   ctx.stroke();
   ctx.restore();
 
   return out;
+}
+
+function resolveCardFrameMetrics(cardEl: HTMLElement | null, scale: number): CardFrameMetrics {
+  const bleed = Math.round(3 * scale);
+  if (!cardEl) {
+    return {
+      bleed,
+      radius: Math.round(24 * scale),
+      borderWidth: Math.max(1, Math.ceil(scale)),
+    };
+  }
+
+  const cs = getComputedStyle(cardEl);
+  const radiusPx = parseFloat(cs.borderTopLeftRadius) || 24;
+  const borderWidthPx = parseFloat(cs.borderTopWidth) || 1;
+
+  return {
+    bleed,
+    radius: radiusPx * scale,
+    borderWidth: Math.max(1, borderWidthPx * scale),
+  };
 }
 
 /**
@@ -140,6 +168,109 @@ function extractCSSVars(): string {
   return out + "}";
 }
 
+// ── text-fix helpers ──────────────────────────────────────────────────────────
+
+/**
+ * Resolve CSS lineHeight to a pixel value.
+ * Tailwind utility classes (leading-tight = line-height:1.25) produce a unitless
+ * computed value in getComputedStyle. We detect this and multiply by fontSize.
+ */
+function resolveLineHeightPx(cs: CSSStyleDeclaration): number {
+  const raw = cs.lineHeight;
+  const fontSize = parseFloat(cs.fontSize) || 16;
+  const parsed = parseFloat(raw);
+  return (parsed > 0 && parsed < 10) ? parsed * fontSize : (parsed || fontSize * 1.2);
+}
+
+/**
+ * Apply fixes to a single element before foreignObject capture:
+ *  - Remove backdrop-filter (not supported in foreignObject)
+ *  - Lock flex/grid containers to their live width
+ *  - Force short multi-word text (2–5 words) to a single line via
+ *      width:max-content + white-space:nowrap +   substitution.
+ *    This handles badge labels that sit inside flex-col/items-center parents
+ *    and therefore receive min-content width (already 2 lines in the DOM).
+ *  - Apply white-space:nowrap to other provably-single-line elements.
+ */
+function applyNodeFixes(
+  el: HTMLElement,
+  cs: CSSStyleDeclaration,
+  setStyle: (el: HTMLElement, props: Record<string, string>) => void,
+  onTextReplace: (el: HTMLElement, orig: string) => void,
+) {
+  // 1. Backdrop-filter
+  if (cs.backdropFilter !== "none" || cs.getPropertyValue("-webkit-backdrop-filter") !== "none") {
+    setStyle(el, { "backdrop-filter": "none", "-webkit-backdrop-filter": "none" });
+  }
+
+  const d = cs.display;
+  const rect = el.getBoundingClientRect();
+  const widthPx = rect.width > 0 ? `${rect.width}px` : null;
+
+  // 2. Lock flex/grid containers to their live width — foreignObject can shrink them
+  if (d === "flex" || d === "grid" || d === "inline-flex" || d === "inline-grid") {
+    if (widthPx) {
+      setStyle(el, { "min-width": widthPx });
+    }
+  }
+
+  // 3. inline-flex (pills, chips): also prevent text reflow
+  if (d === "inline-flex" || d === "inline-grid") {
+    const props: Record<string, string> = {
+      "white-space": "nowrap",
+      "flex-wrap": "nowrap",
+      "flex-shrink": "0",
+    };
+    if (widthPx) {
+      props.width = widthPx;
+      props["max-width"] = widthPx;
+    }
+    setStyle(el, props);
+    return; // children will be handled individually
+  }
+
+  // 4. Skip block flex/grid containers — only handle text-bearing elements below
+  if (d === "flex" || d === "grid") return;
+
+  const text = el.textContent ?? "";
+  if (!text.trim()) return;
+
+  // 5. Short multi-word leaf text (badge labels, rarity pills, stat labels, etc.)
+  //    Force to a single line unconditionally — the primary fix for foreignObject
+  //    font-metric drift that causes badges to wrap.
+  if (el.childElementCount === 0 && text.includes(" ")) {
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    if (words.length >= 2 && words.length <= 5) {
+      const orig = text;
+      // Replace regular spaces with non-breaking spaces ( ).
+      //   cannot break in ANY renderer, including SVG foreignObject.
+      el.textContent = orig.replace(/ /g, " ");
+      const preserveMeasuredWidth =
+        el.classList.contains("truncate") ||
+        cs.textOverflow === "ellipsis" ||
+        cs.overflow === "hidden";
+      // Elements that already truncate in the live DOM should keep their exact
+      // measured width; simple chip labels can expand to max-content safely.
+      setStyle(
+        el,
+        preserveMeasuredWidth && widthPx
+          ? { "white-space": "nowrap", width: widthPx, "max-width": widthPx }
+          : { "white-space": "nowrap", width: "max-content" },
+      );
+      onTextReplace(el, orig);
+      return;
+    }
+  }
+
+  // 6. All other non-wrapping single-line elements: just nowrap
+  if (cs.whiteSpace !== "nowrap") {
+    const lh = resolveLineHeightPx(cs);
+    if (el.clientHeight > 0 && el.clientHeight <= lh * 1.5) {
+      setStyle(el, { "white-space": "nowrap" });
+    }
+  }
+}
+
 // ── live-DOM capture ──────────────────────────────────────────────────────────
 
 type Opts = { scale?: number; background?: string; cropTo?: HTMLElement | null };
@@ -162,55 +293,12 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     });
   };
 
-  // Fix rendering in foreignObject:
-  //   - Neutralise backdrop-filter (unsupported)
-  //   - Lock all flex/grid containers to their live width (prevents layout collapse)
-  //   - Apply white-space: nowrap for inline-flex (badges/pills)
-  //   - Apply white-space: nowrap + replace spaces with   for single-line leaf text
-  //     (  = non-breaking space, respected universally even in SVG foreignObject)
   const nodes: HTMLElement[] = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
   for (const el of nodes) {
     const cs = getComputedStyle(el);
-
-    if (cs.backdropFilter !== "none" || cs.getPropertyValue("-webkit-backdrop-filter") !== "none") {
-      setStyle(el, { "backdrop-filter": "none", "-webkit-backdrop-filter": "none" });
-    }
-
-    const d = cs.display;
-
-    // Lock all flex/grid containers to their live width — foreignObject can shrink them
-    if (d === "flex" || d === "grid" || d === "inline-flex" || d === "inline-grid") {
-      const rect = el.getBoundingClientRect();
-      if (rect.width > 0) {
-        setStyle(el, { "min-width": `${rect.width}px` });
-      }
-    }
-
-    if (d === "inline-flex" || d === "inline-grid") {
-      // Pills/badges: also force nowrap so text doesn't reflow
-      setStyle(el, { "white-space": "nowrap" });
-    } else if (d !== "flex" && d !== "grid") {
-      // Block/inline elements: nowrap for single-line content
-      const text = el.textContent;
-      if (text && text.trim() && cs.whiteSpace !== "nowrap") {
-        const rawLh = cs.lineHeight;
-        const fontSize = parseFloat(cs.fontSize) || 16;
-        const parsedLh = parseFloat(rawLh);
-        // lineHeight may be unitless (e.g. "1.25") or pixel (e.g. "15px").
-        // If < 10, treat as a multiplier and multiply by fontSize.
-        const lh = (parsedLh > 0 && parsedLh < 10) ? parsedLh * fontSize : (parsedLh || fontSize * 1.2);
-        if (el.clientHeight > 0 && el.clientHeight <= lh * 1.5) {
-          setStyle(el, { "white-space": "nowrap" });
-          // For leaf text nodes with spaces: replace with non-breaking spaces.
-          // This is the most reliable fix —   cannot break across lines in any renderer.
-          if (el.childElementCount === 0 && text.includes(" ")) {
-            const orig = text;
-            el.textContent = orig.replace(/ /g, " ");
-            restores.push(() => { el.textContent = orig; });
-          }
-        }
-      }
-    }
+    applyNodeFixes(el, cs, setStyle, (elem, orig) => {
+      restores.push(() => { elem.textContent = orig; });
+    });
   }
 
   try {
@@ -247,7 +335,13 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     }
 
     const accent = cropTo.getAttribute("data-accent") ?? "#7c3aed";
-    const final = compositeCardOnBg(cropped, accent, 68, scale);
+    const final = compositeCardOnBg(
+      cropped,
+      accent,
+      68,
+      scale,
+      resolveCardFrameMetrics(cropTo, scale),
+    );
     return await new Promise<Blob | null>((res) => final.toBlob((b) => res(b), "image/png"));
   } finally {
     restores.forEach((fn) => fn());
@@ -339,14 +433,14 @@ export async function captureDesktopElement(
     await waitForImages(clone);
     await new Promise((r) => setTimeout(r, 320));
 
-    // Fix clone elements
+    // Fix clone elements — same logic as captureElement but without restore bookkeeping
     const nodes = [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))];
     for (const el of nodes) {
       // Reset Framer Motion inline opacity so we capture the settled (visible) state
       if (el.style.opacity !== "" && parseFloat(el.style.opacity) < 1) {
         el.style.removeProperty("opacity");
       }
-      // Reset FM translate/scale frozen at entry state
+      // Reset FM translate frozen at entry state
       if (el.style.transform && el.style.transform !== "none") {
         if (/translateY\((?:1[5-9]|[2-9]\d)px\)/.test(el.style.transform)) {
           el.style.removeProperty("transform");
@@ -354,44 +448,16 @@ export async function captureDesktopElement(
       }
 
       const cs = win.getComputedStyle(el);
-      if (
-        cs.backdropFilter !== "none" ||
-        cs.getPropertyValue("-webkit-backdrop-filter") !== "none"
-      ) {
-        el.style.setProperty("backdrop-filter", "none");
-        el.style.setProperty("-webkit-backdrop-filter", "none");
-      }
 
-      const d = cs.display;
+      // Inline setter (no restore needed — clone is throw-away)
+      const setStyleInline = (_el: HTMLElement, props: Record<string, string>) => {
+        for (const k of Object.keys(props)) _el.style.setProperty(k, props[k]);
+      };
 
-      // Lock all flex/grid containers to their live width
-      if (d === "flex" || d === "grid" || d === "inline-flex" || d === "inline-grid") {
-        const rect = el.getBoundingClientRect();
-        if (rect.width > 0) {
-          el.style.setProperty("min-width", `${rect.width}px`);
-        }
-      }
-
-      if (d === "inline-flex" || d === "inline-grid") {
-        el.style.setProperty("white-space", "nowrap");
-      } else if (d !== "flex" && d !== "grid") {
-        const text = el.textContent;
-        if (text && text.trim() && cs.whiteSpace !== "nowrap") {
-          const rawLh = cs.lineHeight;
-        const fontSize = parseFloat(cs.fontSize) || 16;
-        const parsedLh = parseFloat(rawLh);
-        // lineHeight may be unitless (e.g. "1.25") or pixel (e.g. "15px").
-        // If < 10, treat as a multiplier and multiply by fontSize.
-        const lh = (parsedLh > 0 && parsedLh < 10) ? parsedLh * fontSize : (parsedLh || fontSize * 1.2);
-          if (el.clientHeight > 0 && el.clientHeight <= lh * 1.5) {
-            el.style.setProperty("white-space", "nowrap");
-            // Replace spaces with non-breaking spaces in leaf text nodes
-            if (el.childElementCount === 0 && text.includes(" ")) {
-              el.textContent = text.replace(/ /g, " ");
-            }
-          }
-        }
-      }
+      applyNodeFixes(el, cs, setStyleInline, (elem, _orig) => {
+        // No restore needed in iframe clone
+        void elem; void _orig;
+      });
     }
 
     const cropEl = cropToSelector
@@ -432,7 +498,13 @@ export async function captureDesktopElement(
     }
 
     const accent = cropEl.getAttribute("data-accent") ?? "#7c3aed";
-    const final = compositeCardOnBg(cropped, accent, 68, scale);
+    const final = compositeCardOnBg(
+      cropped,
+      accent,
+      68,
+      scale,
+      resolveCardFrameMetrics(cropEl, scale),
+    );
     return await new Promise<Blob | null>((res) => final.toBlob((b) => res(b), "image/png"));
   } finally {
     iframe.remove();

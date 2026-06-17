@@ -69,10 +69,6 @@ function Slide3() {
       {/* ====== RIGHT: Holographic tactics board ====== */}
       <div className="absolute right-0 top-0 bottom-0 w-[28%] z-10 pointer-events-none">
         <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute right-6 top-6 text-purple-300/70 text-[10px] tracking-[0.35em] font-mono text-right">
-            HOLO · PLAYBOOK
-          </div>
-
           {/* sparks around hologram */}
           {sparks.map((s, i) => (
             <div
@@ -381,7 +377,6 @@ function CoachCat() {
 }
 
 export default Slide3;
-
 
 
 

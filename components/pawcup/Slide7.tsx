@@ -180,8 +180,6 @@ function Slide7() {
       {/* ====== RIGHT: modern flat-screen TV ====== */}
       <div className="absolute right-0 top-0 bottom-0 w-[32%] z-10 flex items-center justify-center">
         <div className="relative w-[65%]">
-          <div className="absolute right-2 -top-6 text-purple-300/70 text-[10px] tracking-[0.35em] font-mono text-right">STADIUM · LIVE</div>
-
           {/* TV chassis — slim dark panel */}
           <div className="relative rounded-[10px] shadow-[0_30px_80px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.4)]"
                style={{ background: "linear-gradient(160deg,#d4d4d8,#a1a1aa,#71717a)", padding: "9px 9px 12px", border: "2px solid #6b7280" }}>
@@ -370,7 +368,6 @@ function Teammate({ className, src, delay, style }: { className?: string; src: s
 }
 
 export default Slide7;
-
 
 
 

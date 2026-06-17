@@ -51,6 +51,14 @@ function imp(rarity: BadgeRarity, boost = 0) { return IMP[rarity] + boost; }
 export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
   const s = t.scores;
   const nightPct = t.totalCommits > 0 ? t.nightCommits / t.totalCommits : 0;
+  const activeMonths = (t.commitsByMonth ?? []).filter((v) => v > 0).length;
+  const summerRatio = (() => {
+    const months = t.commitsByMonth;
+    if (!months?.length) return 0;
+    const total = months.reduce((sum, value) => sum + value, 0);
+    const summer = (months[5] ?? 0) + (months[6] ?? 0) + (months[7] ?? 0);
+    return total > 0 ? summer / total : 0;
+  })();
 
   const candidates: (Omit<TraitBadge, "importance"> & { importance: number; earned: boolean })[] = [
     // ── CORE PERSONALITY ──────────────────────────────────────────
@@ -184,6 +192,18 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       explanation: "Your GitHub is a gallery of projects. You don't just code — you collect.",
       earned: (t.ownedRepoCount ?? 0) >= 20,
     },
+    {
+      id: "bridge_builder", label: "Bridge Builder", icon: "bridge", color: "#38bdf8", rarity: "rare",
+      importance: imp("rare", 3), detail: `${t.mergedPRs ?? 0} PRs / ${t.totalForks ?? 0} forks`,
+      explanation: "Your work crosses boundaries: merged pull requests on one side, other builders forking your repos on the other.",
+      earned: (t.mergedPRs ?? 0) >= 25 && (t.totalForks ?? 0) >= 8,
+    },
+    {
+      id: "orbit_steward", label: "Orbit Steward", icon: "orbit", color: "#4ade80", rarity: "uncommon",
+      importance: imp("uncommon", 5), detail: `${t.ownedRepoCount ?? 0} repos tended`,
+      explanation: "You don't just start projects — you keep a whole orbit of repositories moving and maintained.",
+      earned: (t.ownedRepoCount ?? 0) >= 12 && t.totalCommits >= 250,
+    },
 
     // ── VOLUME MILESTONES ─────────────────────────────────────────
     {
@@ -256,6 +276,12 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       explanation: "200+ followers. Your GitHub is a destination. People watch what you build.",
       earned: (t.followersCount ?? 0) >= 200,
     },
+    {
+      id: "beacon_crafter", label: "Beacon Crafter", icon: "beacon", color: "#f472b6", rarity: "rare",
+      importance: imp("rare", 4), detail: `${t.totalStars ?? 0} stars / ${t.followersCount ?? 0} followers`,
+      explanation: "People can find your work from a distance. The signal is strong, visible, and unmistakably yours.",
+      earned: (t.totalStars ?? 0) >= 40 && (t.followersCount ?? 0) >= 40,
+    },
 
     // ── TIME OF DAY ───────────────────────────────────────────────
     {
@@ -282,6 +308,12 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       explanation: "The most extreme night owl. When others sleep, you're in full flow.",
       earned: s.nocturnal >= 60,
     },
+    {
+      id: "anchor_mode", label: "Anchor Mode", icon: "anchor", color: "#60a5fa", rarity: "rare",
+      importance: imp("rare", 2), detail: `${s.focus} focus / ${t.longestStreak}d streak`,
+      explanation: "You lock onto one direction and hold it. Stable focus plus staying power is what sets your pace.",
+      earned: s.focus >= 75 && t.longestStreak >= 21,
+    },
 
     // ── LANGUAGE / STACK ──────────────────────────────────────────
     {
@@ -302,6 +334,18 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       explanation: "You code close to the metal — Rust, Go, C, or C++. Performance is the obsession.",
       earned: ["Rust", "Go", "C", "C++"].includes(t.topLanguage ?? ""),
     },
+    {
+      id: "prism_mind", label: "Prism Mind", icon: "prism", color: "#67e8f9", rarity: "rare",
+      importance: imp("rare", 6), detail: `${t.featRatioPct ?? 0}% feat / ${t.refactorRatioPct ?? 0}% refactor`,
+      explanation: "You bend one codebase through multiple modes at once: building, refining, and protecting quality without losing shape.",
+      earned: (t.featRatioPct ?? 0) >= 20 && (t.refactorRatioPct ?? 0) >= 10 && (t.testRatioPct ?? 0) >= 8,
+    },
+    {
+      id: "patch_poet", label: "Patch Poet", icon: "quill", color: "#fda4af", rarity: "uncommon",
+      importance: imp("uncommon", 6), detail: `${t.docsCount ?? 0} docs / ${t.fixRatioPct ?? 0}% fixes`,
+      explanation: "You leave behind both cleaner bugs and clearer words. The patch lands, and the story of it lands too.",
+      earned: (t.docsCount ?? 0) >= 5 && (t.fixRatioPct ?? 0) >= 15,
+    },
 
     // ── TENURE & ACTIVITY ─────────────────────────────────────────
     {
@@ -314,7 +358,7 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       id: "all_year_dev", label: "All-Year Dev", icon: "hourglass", color: "#94a3b8", rarity: "rare",
       importance: imp("rare", 5), detail: "10+ active months",
       explanation: "You were active in almost every month. No off-season, no excuses.",
-      earned: (t.commitsByMonth ?? []).filter((v) => v > 0).length >= 10,
+      earned: activeMonths >= 10,
     },
     {
       id: "winter_coder", label: "Winter Coder", icon: "snowflake", color: "#93c5fd", rarity: "common",
@@ -328,12 +372,28 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
         return total > 0 && winter / total >= 0.35;
       })(),
     },
+    {
+      id: "pulse_keeper", label: "Pulse Keeper", icon: "pulse", color: "#22c55e", rarity: "uncommon",
+      importance: imp("uncommon", 4), detail: `${activeMonths} active months`,
+      explanation: "Your output never really flatlines. Month after month, the signal stays alive and steady.",
+      earned: activeMonths >= 11,
+    },
+    {
+      id: "summer_current", label: "Summer Current", icon: "kite", color: "#fbbf24", rarity: "common",
+      importance: imp("common", 3), detail: `${Math.round(summerRatio * 100)}% summer`,
+      explanation: "Your momentum spikes when the air feels lighter. Summer is where your work catches wind.",
+      earned: summerRatio >= 0.38,
+    },
   ];
 
   return candidates
     .filter((b) => b.earned)
     .sort((a, b) => b.importance - a.importance)
-    .map(({ earned: _earned, ...b }): TraitBadge => b);
+    .map((badge): TraitBadge => {
+      const { earned, ...rest } = badge;
+      void earned;
+      return rest;
+    });
 }
 
-export const BADGE_COUNT = 42;
+export const BADGE_COUNT = 50;

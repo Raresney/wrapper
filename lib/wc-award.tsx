@@ -117,6 +117,10 @@ export function BestYoungPlayerIcon({ className }: { className?: string }) {
       {/* small rising star accent */}
       <path d="M50 8 L51.5 13 L57 13 L52.7 16 L54.3 21 L50 18 L45.7 21 L47.3 16 L43 13 L48.5 13 Z"
             fill="currentColor" fillOpacity="0.65"/>
+      {/* inner spark */}
+      <circle cx="32" cy="24" r="3.2" fill="white" fillOpacity="0.22"/>
+      <path d="M32 19.5V15.5M27.5 24H23.5M36.5 24H40.5"
+            stroke="white" strokeWidth="1.4" strokeLinecap="round" opacity="0.4"/>
       {/* upward arrow below star */}
       <path d="M32 44 L32 56" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" opacity="0.5"/>
       <path d="M26 50 L32 44 L38 50" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/>
@@ -157,6 +161,8 @@ export function TournamentMvpIcon({ className }: { className?: string }) {
       {/* central star */}
       <path d="M32 10 L35 20 L46 20 L37.5 26.5 L40.5 37 L32 30.5 L23.5 37 L26.5 26.5 L18 20 L29 20 Z"
             fill="currentColor" fillOpacity="0.95"/>
+      <circle cx="32" cy="24" r="3" fill="white" fillOpacity="0.18"/>
+      <path d="M25 44 C28 46 36 46 39 44" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.35"/>
     </svg>
   );
 }
@@ -206,22 +212,26 @@ export function FairPlayTrophyIcon({ className }: { className?: string }) {
 export function TopAssistIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* passer player circle */}
-      <circle cx="12" cy="32" r="8" fill="currentColor" fillOpacity="0.85"/>
-      {/* receiver player circle */}
-      <circle cx="52" cy="32" r="8" fill="currentColor" fillOpacity="0.7"/>
+      {/* passer player */}
+      <circle cx="13" cy="30" r="5.5" fill="currentColor" fillOpacity="0.82"/>
+      <path d="M8 42 C8 37 10 34 13 34 C16 34 18 37 18 42"
+            stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.8"/>
+      {/* receiver player */}
+      <circle cx="51" cy="28" r="5.5" fill="currentColor" fillOpacity="0.68"/>
+      <path d="M46 40 C46 35 48 32 51 32 C54 32 56 35 56 40"
+            stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.7"/>
       {/* ball */}
-      <circle cx="32" cy="20" r="6" fill="currentColor" fillOpacity="0.9" stroke="white" strokeWidth="1" strokeOpacity="0.3"/>
-      {/* curved pass path from passer to ball */}
-      <path d="M18 27 C22 18 26 16 26 20"
-            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6"/>
-      {/* arrow from ball to receiver */}
-      <path d="M38 20 C42 16 46 20 46 26"
+      <circle cx="31.5" cy="18.5" r="5.5" fill="currentColor" fillOpacity="0.92" stroke="white" strokeWidth="1.2" strokeOpacity="0.28"/>
+      <path d="M31.5 13.8 L33 16.2 L31.5 18.7 L30 16.2 Z" fill="white" fillOpacity="0.26"/>
+      {/* pass arcs */}
+      <path d="M18 26 C23 16 27 13 29.5 15.5"
+            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+      <path d="M37 18.5 C43 15 47 18.5 47.5 24.5"
             stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-      <path d="M43 22 L46 26 L42 28"
+      <path d="M44.5 20.5 L47.5 24.5 L43.3 26.5"
             stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      {/* ground line */}
-      <path d="M8 44 L56 44" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3"/>
+      {/* midfield line */}
+      <path d="M7 47 L57 47" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.24"/>
     </svg>
   );
 }
@@ -241,7 +251,12 @@ export function ComebackAwardIcon({ className }: { className?: string }) {
       <circle cx="24" cy="44" r="4.5" fill="currentColor" fillOpacity="0.7"/>
       {/* peak dot */}
       <circle cx="54" cy="8" r="4.5" fill="currentColor" fillOpacity="0.95"/>
-      {/* direction labels */}
+      {/* rebound accents */}
+      <path d="M18 20 L14 16 M21 26 L17 23"
+            stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.28"/>
+      <path d="M33 39 C36 35 39 31 41 26"
+            stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.26"/>
+      {/* base line */}
       <path d="M8 56 L56 56" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2"/>
     </svg>
   );
@@ -288,6 +303,10 @@ export function PenaltyHeroIcon({ className }: { className?: string }) {
       <line x1="32" y1="34" x2="32" y2="50" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
       <line x1="14" y1="28" x2="20" y2="28" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.7"/>
       <line x1="44" y1="28" x2="54" y2="28" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.7"/>
+      {/* keeper dive hint */}
+      <path d="M18 46 C22 42 25 42 29 45"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.22"/>
+      <circle cx="22" cy="42.5" r="2.2" fill="currentColor" fillOpacity="0.18"/>
       {/* penalty spot */}
       <circle cx="32" cy="58" r="3" fill="currentColor" fillOpacity="0.7"/>
     </svg>
@@ -309,6 +328,9 @@ export function HatTrickHeroIcon({ className }: { className?: string }) {
       {/* connecting swoosh */}
       <path d="M20 33 L32 38 L44 33"
             stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.35"/>
+      <circle cx="32" cy="20" r="3" fill="white" fillOpacity="0.16"/>
+      <path d="M16 32 C22 28 26 27 32 29 C38 27 42 28 48 32"
+            stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.22"/>
     </svg>
   );
 }
@@ -355,6 +377,7 @@ export function FinalsPerformerIcon({ className }: { className?: string }) {
             fill="currentColor" fillOpacity="0.7" stroke="none"/>
       {/* ribbon clasp */}
       <rect x="26" y="16" width="12" height="6" rx="2" fill="currentColor" fillOpacity="0.55"/>
+      <circle cx="32" cy="36" r="5" fill="white" fillOpacity="0.12"/>
     </svg>
   );
 }
@@ -384,6 +407,8 @@ export function GroupStageWinnerIcon({ className }: { className?: string }) {
       {/* star in winner box */}
       <path d="M52 26.5 L53 29.8 L56.5 29.8 L53.8 31.8 L54.8 35.1 L52 33.1 L49.2 35.1 L50.2 31.8 L47.5 29.8 L51 29.8 Z"
             fill="white" fillOpacity="0.92"/>
+      <path d="M7 9.5h8M7 23.5h8M7 40.5h8M7 54.5h8M27 15.5h8M27 48.5h8"
+            stroke="white" strokeWidth="0.9" strokeLinecap="round" opacity="0.18"/>
     </svg>
   );
 }

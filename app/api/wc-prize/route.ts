@@ -20,7 +20,7 @@ const PRESENTER_VOICES = [
   "a legendary retired footballer who won three World Cups and now hosts the ceremony with theatrical gravitas",
   "a booming stadium announcer who treats every sentence like the opening of a Champions League final",
   "a poetic sports journalist whose words make grown footballers weep with pride",
-  "an overly dramatic FIFA official reading from a golden scroll with maximum ceremony",
+  "an overly dramatic tournament official reading from a golden scroll with maximum ceremony",
   "a retired referee who has witnessed every great moment in football history and cannot contain his emotion",
   "a passionate South American commentator known for his legendary 30-second 'GOOOOOL' calls",
   "a stoic English football pundit who shows respect through understatement and perfectly chosen words",
@@ -46,7 +46,7 @@ const FORBIDDEN_WORDS = [
   "developer", "code", "coding", "software", "repository", "commit",
   "programming", "engineer", "keyboard", "terminal", "GitHub", "tech",
   "deploy", "build", "feature", "bug", "hack", "algorithm", "database",
-  "framework", "library", "function", "variable", "script", "API",
+  "framework", "library", "function", "variable", "script", "API", "FIFA",
 ];
 
 function pickOne<T>(arr: T[]): T {
@@ -57,20 +57,63 @@ function pickN<T>(arr: T[], n: number): T[] {
   return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
 }
 
+function sanitizeSpeech(text: string): string {
+  return text
+    .replace(/\bFIFA\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([,.!?;:])/g, "$1")
+    .trim();
+}
+
 // ── Fallback speeches ─────────────────────────────────────────────────────────
 
 function getFallback(awardName: string, username: string, keyStat: string): string {
-  const fallbacks: Record<string, string> = {
-    "Golden Boot":
-      `Ladies and gentlemen, the stadium holds its breath. @${username} has done what no one believed possible — ${keyStat}, making them the undisputed top scorer of this entire tournament. When the history books are written, only one name will appear next to the Golden Boot: theirs.`,
-    "Golden Ball":
-      `The votes are in, the envelope is opened, and the announcement silences 80,000 fans. @${username} — ${keyStat} — has played the most complete and breathtaking tournament of any player on this pitch. The Golden Ball goes to the legend who did it all.`,
-    "Golden Glove":
-      `Behind every great team stands a goalkeeper the world trusts with everything, and @${username} earned that trust match after match — ${keyStat}. Not a single shot got past them when it truly mattered. The Golden Glove belongs to the best in the world.`,
+  const fallbacks: Record<string, string[]> = {
+    "Golden Boot": [
+      `Ladies and gentlemen, the stadium holds its breath as @${username} is called forward. With ${keyStat}, they turned every half-chance into a roar that shook the stands. The Golden Boot belongs to the finisher who defined this tournament.`,
+      `There are scorers, and then there is @${username}. ${keyStat} tells the story of a player who punished every defence brave enough to stand in the way. Tonight, the Golden Boot goes to the name every goalkeeper feared.`,
+      `From the opening whistle to the final spotlight, @${username} never stopped hunting the net. ${keyStat} made them the most ruthless attacker on this stage. Raise the Golden Boot for the striker who made goals feel inevitable.`,
+      `When this tournament needed a decisive touch, @${username} answered again and again. ${keyStat} placed them above every other scorer in the competition. The Golden Boot is not a debate tonight, it is a coronation.`,
+      `The crowd remembers every finish, but one name kept returning to the scoreboard: @${username}. ${keyStat} crowned a run of precision, nerve, and pure attacking instinct. The Golden Boot goes to the player who made scoring look like destiny.`,
+      `Every tournament has a striker who bends matches toward one inevitable outcome. For this competition, that player was @${username}, and ${keyStat} is the proof. The Golden Boot is lifted by the forward who gave defenders sleepless nights.`,
+      `A great scorer senses the smallest opening and turns it into history, and @${username} did exactly that. ${keyStat} separated them from every challenger in this tournament. The Golden Boot belongs to the coldest finisher under the brightest lights.`,
+      `Goals decided the biggest nights of this tournament, and @${username} was at the center of them. With ${keyStat}, they built a campaign of timing, movement, and ruthless execution. The Golden Boot has found its rightful owner.`,
+    ],
+    "Golden Ball": [
+      `Silence falls across the stadium because everyone knows this is the grandest individual honour of them all. @${username}, with ${keyStat}, controlled matches, lifted teammates, and bent the tournament to their rhythm. The Golden Ball goes to the player who ruled every inch of the stage.`,
+      `Some players shine, but @${username} commanded the tournament from first whistle to last. ${keyStat} is the proof of a campaign filled with genius, authority, and unforgettable moments. The Golden Ball is awarded to the heartbeat of this World Cup.`,
+      `The envelope opens, the crowd rises, and one name carries above the noise: @${username}. With ${keyStat}, they delivered the kind of all-around brilliance that defines an era. The Golden Ball belongs to the player who made this tournament feel like their own.`,
+      `Football's biggest stage asked for a master, and @${username} answered with ${keyStat}. Every pass, every surge, every moment of calm under pressure pushed this campaign toward greatness. The Golden Ball now rests with the artist who led the tournament.`,
+      `This honour is reserved for the player who shaped the tournament itself, and that was @${username}. ${keyStat} captures only a fraction of the control, imagination, and competitive fire they brought to every match. The Golden Ball belongs to the leader of this entire spectacle.`,
+      `When the tournament demanded invention, authority, and nerve, @${username} delivered all three. ${keyStat} stands beside a run of performances that changed the temperature of every stadium. The Golden Ball goes to the player everyone else had to orbit.`,
+      `There are outstanding tournaments, and then there are campaigns that leave a permanent mark on memory. @${username} produced that kind of run, and ${keyStat} confirms it. The Golden Ball is awarded to the player who turned pressure into art.`,
+      `Tonight we honour not only excellence, but influence of the highest order. @${username}, with ${keyStat}, made every phase of the game feel richer, sharper, and more dangerous. The Golden Ball is theirs because this tournament moved to their rhythm.`,
+    ],
+    "Golden Glove": [
+      `Behind every charge toward glory stands a goalkeeper who refuses to blink, and that was @${username}. ${keyStat} marks a tournament built on nerve, command, and impossible saves at impossible times. The Golden Glove is carried to the keeper who guarded the dream.`,
+      `When panic spread in the box, @${username} brought calm to the entire stadium. ${keyStat} captures a run of saves that changed matches and protected history. The Golden Glove belongs to the wall no striker could truly solve.`,
+      `This tournament produced many heroes, but few were as unshakable as @${username}. With ${keyStat}, they turned the goalmouth into sacred ground and shut the door when everything was on the line. The Golden Glove is awarded to the safest hands in football.`,
+      `There is no trophy without trust, and no trust without a goalkeeper like @${username}. ${keyStat} tells the story of reflexes, courage, and command under the fiercest lights. The Golden Glove goes to the guardian who stood tallest.`,
+      `Every champion needs a final line that never loses its nerve, and @${username} was exactly that. ${keyStat} reflects a tournament of brave positioning, huge moments, and saves that bent history away from danger. The Golden Glove belongs to the keeper who made belief possible.`,
+      `The brightest attacking stars met one stubborn truth in this tournament: @${username} would not yield. With ${keyStat}, they turned pressure into control and chaos into certainty. The Golden Glove is lifted by the goalkeeper who made the impossible feel routine.`,
+      `When the ball flashed through crowded boxes and panic threatened to take over, @${username} stayed above it all. ${keyStat} seals a campaign of command and courage under relentless pressure. The Golden Glove goes to the guardian every back line dreams of.`,
+      `A great goalkeeper does more than save shots, they steady an entire team, and @${username} did that from start to finish. ${keyStat} crowns a tournament full of authority and timing. The Golden Glove belongs to the last line that never broke.`,
+    ],
   };
-  return (
-    fallbacks[awardName] ??
-    `Ladies and gentlemen, please rise for @${username}. With ${keyStat}, they have written their name into the history books of FIFA World Cup 2026. The ${awardName} is theirs — a triumph that will echo through stadiums for generations to come.`
+
+  return sanitizeSpeech(
+    pickOne(
+      fallbacks[awardName] ?? [
+        `Ladies and gentlemen, please rise for @${username}. With ${keyStat}, they have written their name into the history books of World Cup 2026. The ${awardName} is theirs, a triumph that will echo through stadiums for years to come.`,
+        `Tonight belongs to @${username}, whose ${keyStat} transformed a brilliant campaign into lasting history. The ${awardName} now finds its rightful owner on football's greatest stage. Let the applause meet a moment worthy of legend.`,
+        `The lights, the crowd, the pressure, none of it shook @${username}. ${keyStat} sealed a tournament run strong enough to claim the ${awardName} with authority. This is the kind of moment that lives forever in the sport.`,
+        `On the grandest night of the tournament, @${username} stands above the rest. ${keyStat} made this award impossible to give to anyone else. The ${awardName} is theirs, and the stadium knows it.`,
+        `This stage has seen giants before, and tonight @${username} joins that company. ${keyStat} turned a remarkable run into an undeniable claim on the ${awardName}. The ovation is for a performance that belonged among the tournament's finest.`,
+        `The stadium asked for greatness and @${username} answered with ${keyStat}. Across every decisive moment, they built a campaign worthy of the ${awardName}. This is a football memory that will stay loud for a long time.`,
+        `No one walks to this podium by accident, and @${username} proved that with ${keyStat}. The ${awardName} is the reward for composure, quality, and a tournament played at the highest level. Let the night remember this name properly.`,
+        `Under the heaviest lights, @${username} found their best football. ${keyStat} placed them above every contender for the ${awardName}. The crowd rises because it knows it has witnessed something lasting.`,
+      ],
+    ),
   );
 }
 
@@ -118,7 +161,7 @@ export async function POST(request: Request) {
   const rollId = Math.random().toString(36).slice(2, 10);
 
   const systemPrompt =
-    `You are a FIFA World Cup 2026 awards ceremony presenter. Each call MUST produce genuinely different text.\n` +
+    `You are a World Cup 2026 awards ceremony presenter. Each call MUST produce genuinely different text.\n` +
     `Output ONLY the speech text — no JSON, no labels, no quotes, nothing else.\n\n` +
     `Rules:\n` +
     `1. Speak ONLY in football/soccer language — no tech jargon whatsoever.\n` +
@@ -126,7 +169,8 @@ export async function POST(request: Request) {
     `3. Write exactly 3 sentences. No more, no less.\n` +
     `4. Apply the presenter voice, dramatic element, and forbidden words given below — they change each call to force genuine variety.\n` +
     `5. Maximum 95 words total.\n` +
-    `6. Forbidden words — do NOT use any of: ${banned}.`;
+    `6. Forbidden words — do NOT use any of: ${banned}.\n` +
+    `7. Never mention the word FIFA.`;
 
   const userPrompt =
     `[Run ${rollId}]\n` +
@@ -170,7 +214,7 @@ export async function POST(request: Request) {
     }
 
     const json = (await res.json()) as GroqResponse;
-    const speech = json.choices[0]?.message.content?.trim() ?? "";
+    const speech = sanitizeSpeech(json.choices[0]?.message.content?.trim() ?? "");
     console.log(`[wc-prize] response: "${speech.slice(0, 120)}..."`);
 
     return NextResponse.json(

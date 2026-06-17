@@ -170,7 +170,15 @@ export type AchievementId =
   | "galaxy_impact"
   | "social_butterfly"
   | "sprint_king"
-  | "language_wizard";
+  | "language_wizard"
+  | "new_year_hacker"
+  | "halloween_hacker"
+  | "seven_day_circuit"
+  | "full_spectrum"
+  | "relay_runner"
+  | "time_capsule"
+  | "double_shift"
+  | "lighthouse_repo";
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
@@ -187,14 +195,20 @@ export type Achievement = {
 };
 
 export type ArchetypeId =
-  | "builder"
-  | "night_owl"
-  | "explorer"
-  | "architect"
-  | "ghost"
-  | "open_source_hero"
-  | "grinder"
-  | "chaotic_builder";
+  | "foundry"
+  | "afterglow"
+  | "trail_mapper"
+  | "cartographer"
+  | "silent_current"
+  | "signal_booster"
+  | "anvil"
+  | "chaos_pilot"
+  | "flashpoint"
+  | "constellation_weaver"
+  | "caretaker"
+  | "deep_diver"
+  | "archive_keeper"
+  | "lone_orbit";
 
 export type ArchetypeWeight = {
   id: ArchetypeId;

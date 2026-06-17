@@ -10,7 +10,9 @@ export type GlyphName =
   | "shield" | "fork" | "sunrise" | "trending" | "target" | "layers" | "trophy"
   | "heart" | "feather" | "telescope"
   | "infinity" | "mountain" | "atom" | "satellite" | "hourglass" | "bug"
-  | "snowflake" | "flask" | "merge" | "coffee";
+  | "snowflake" | "flask" | "merge" | "coffee"
+  | "pulse" | "bridge" | "beacon" | "quill" | "prism" | "orbit"
+  | "anchor" | "firework" | "lantern" | "key" | "kite";
 
 function inner(name: GlyphName): ReactNode {
   switch (name) {
@@ -53,7 +55,12 @@ function inner(name: GlyphName): ReactNode {
         </>
       );
     case "star":
-      return <path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 18.4 6.1 21.5l1.2-6.5L2.5 9.4l6.6-.9 2.9-6Z" fill="currentColor" fillOpacity="0.18" />;
+      return (
+        <>
+          <path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 18.4 6.1 21.5l1.2-6.5L2.5 9.4l6.6-.9 2.9-6Z" fill="currentColor" fillOpacity="0.18" />
+          <path d="M12 6.3 13.4 9l3 .4-2.2 2.1.6 3-2.8-1.5-2.8 1.5.6-3-2.2-2.1 3-.4L12 6.3Z" fill="currentColor" fillOpacity="0.3" />
+        </>
+      );
     case "crown":
       return (
         <>
@@ -65,22 +72,28 @@ function inner(name: GlyphName): ReactNode {
       return (
         <>
           <path d="M12 2c3 1.5 5 5 5 9l-2 4H9l-2-4c0-4 2-7.5 5-9Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="M9.2 14.8h5.6" strokeOpacity="0.35" />
           <circle cx="12" cy="9" r="2" />
           <path d="M9 16c-1.5 1-2 2.5-2 4 1.5 0 3-.5 4-2M15 16c1.5 1 2 2.5 2 4-1.5 0-3-.5-4-2" />
+          <path d="M10.3 18.2 12 21l1.7-2.8" fill="currentColor" fillOpacity="0.26" />
         </>
       );
     case "compass":
       return (
         <>
           <circle cx="12" cy="12" r="9" fill="currentColor" fillOpacity="0.07" />
+          <circle cx="12" cy="12" r="2" fill="currentColor" fillOpacity="0.18" />
           <path d="m15.5 8.5-2 5-5 2 2-5 5-2Z" fill="currentColor" fillOpacity="0.2" />
+          <path d="M12 5.5v1.7M18.5 12h-1.7M12 18.5v-1.7M5.5 12h1.7" strokeOpacity="0.38" />
         </>
       );
     case "columns":
       return (
         <>
           <path d="M4 8 12 3l8 5" fill="currentColor" fillOpacity="0.12" />
-          <path d="M6 9v8M12 9v8M18 9v8M4 20h16M4 8.5h16" />
+          <path d="M4 20h16M4 8.5h16" />
+          <path d="M6 9v8M12 9v8M18 9v8" />
+          <path d="M5.2 12h1.6M11.2 12h1.6M17.2 12h1.6M5.2 15h1.6M11.2 15h1.6M17.2 15h1.6" strokeOpacity="0.36" />
         </>
       );
     case "calendar":
@@ -89,6 +102,7 @@ function inner(name: GlyphName): ReactNode {
           <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="currentColor" fillOpacity="0.08" />
           <path d="M3.5 9.5h17M8 3v4M16 3v4" />
           <path d="M7.5 13h2M11 13h2M14.5 13h2M7.5 16.5h2M11 16.5h2" />
+          <path d="M15.2 16.2 16 17l1.6-1.8" />
         </>
       );
     case "skull":
@@ -135,10 +149,17 @@ function inner(name: GlyphName): ReactNode {
         <>
           <path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5V5.5Z" fill="currentColor" fillOpacity="0.1" />
           <path d="M20 5.5C20 4.7 19.3 4 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5V5.5Z" fill="currentColor" fillOpacity="0.05" />
+          <path d="M11.2 6.5H6.8M11.2 9.5H6.8M17.2 8H14.6M17.2 11H14.6M12 4v15" strokeOpacity="0.4" />
         </>
       );
     case "wrench":
-      return <path d="M14.7 6.3a4 4 0 0 0-5 5L3.5 17.5a2.1 2.1 0 0 0 3 3l6.2-6.2a4 4 0 0 0 5-5l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6Z" fill="currentColor" fillOpacity="0.12" />;
+      return (
+        <>
+          <path d="M14.7 6.3a4 4 0 0 0-5 5L3.5 17.5a2.1 2.1 0 0 0 3 3l6.2-6.2a4 4 0 0 0 5-5l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6Z" fill="currentColor" fillOpacity="0.12" />
+          <circle cx="5.2" cy="18.8" r="0.9" fill="currentColor" />
+          <path d="m10.5 10.5 3 3" strokeOpacity="0.38" />
+        </>
+      );
     case "diamond":
       return (
         <>
@@ -176,7 +197,16 @@ function inner(name: GlyphName): ReactNode {
         </>
       );
     case "trending":
-      return <path d="M3 17 10 10l4 4 7-7M15 7h6v6" fill="none" />;
+      return (
+        <>
+          <path d="M4 19V7.5" strokeOpacity="0.35" />
+          <path d="M4 19h16" strokeOpacity="0.35" />
+          <path d="M5.5 15.5 10 11l3.5 3.5L20 8" />
+          <path d="M15.5 8H20v4.5" />
+          <circle cx="10" cy="11" r="1" fill="currentColor" />
+          <circle cx="13.5" cy="14.5" r="1" fill="currentColor" />
+        </>
+      );
     case "target":
       return (
         <>
@@ -205,7 +235,7 @@ function inner(name: GlyphName): ReactNode {
       return (
         <>
           <path d="M19 5a5.5 5.5 0 0 0-7.8 0L5 11.2V19h7.8L19 12.8A5.5 5.5 0 0 0 19 5Z" fill="currentColor" fillOpacity="0.1" />
-          <path d="M16 8 8 16M14 9H9.5M14.5 12.5H10" />
+          <path d="M16 8 8 16M14 9H9.5M14.5 12.5H10M12.7 6.9l4.4 4.4" />
         </>
       );
     case "telescope":
@@ -213,6 +243,8 @@ function inner(name: GlyphName): ReactNode {
         <>
           <path d="m3.5 14 11-4 1.5 4-11 4-1.5-4Z" fill="currentColor" fillOpacity="0.12" />
           <path d="m14.5 10 3-1.2 1.3 3.4-3 1.2M9 16l2 5M6.5 17l2 4" />
+          <circle cx="18.9" cy="10.2" r="0.9" fill="currentColor" />
+          <path d="M4.5 13.6 3 11.5" strokeOpacity="0.38" />
         </>
       );
     case "infinity":
@@ -332,6 +364,107 @@ function inner(name: GlyphName): ReactNode {
           <path d="M4.5 19.8h15" />
           <path d="M5.5 10.5h13" strokeOpacity="0.3" />
           <path d="M9 6.2c0 0-.7-1.4 0-2.7M12 5.8c0 0-.7-1.4 0-2.7M15 6.2c0 0-.7-1.4 0-2.7" />
+        </>
+      );
+    case "pulse":
+      return (
+        <>
+          <path d="M3 12h3.2l2.1-4.2 3.5 8.4 3.1-6.2 1.6 2H21" />
+          <path d="M4 19a8.5 8.5 0 0 1 16 0" fill="currentColor" fillOpacity="0.06" />
+          <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+        </>
+      );
+    case "bridge":
+      return (
+        <>
+          <path d="M3 18h18" />
+          <path d="M5 18V9M19 18V9" />
+          <path d="M5 9c2.3-3 4.6-4.5 7-4.5S16.7 6 19 9" fill="currentColor" fillOpacity="0.08" />
+          <path d="M5 9c2.3-3 4.6-4.5 7-4.5S16.7 6 19 9" />
+          <path d="M8 18v-4M12 18v-5M16 18v-4" strokeOpacity="0.42" />
+        </>
+      );
+    case "beacon":
+      return (
+        <>
+          <path d="M9 21h6l-1.2-5H10.2L9 21Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="M10 16h4l1-8h-6l1 8Z" />
+          <path d="M9.5 8 12 3l2.5 5Z" fill="currentColor" fillOpacity="0.18" />
+          <path d="M7 10.5 4.5 8M17 10.5 19.5 8M6.5 14H3.5M17.5 14h3" />
+        </>
+      );
+    case "quill":
+      return (
+        <>
+          <path d="M19.5 4.5c-4.5.4-8.4 2.9-10.9 7L6 16l4.5-2.6c4.1-2.4 6.5-6.3 7-10.9Z" fill="currentColor" fillOpacity="0.1" />
+          <path d="M19.5 4.5c-4.5.4-8.4 2.9-10.9 7L6 16l4.5-2.6c4.1-2.4 6.5-6.3 7-10.9Z" />
+          <path d="M8.8 13.2 4 20M11.5 10.7 8.5 7.7" strokeOpacity="0.45" />
+          <circle cx="16.8" cy="7.2" r="1" fill="currentColor" />
+        </>
+      );
+    case "prism":
+      return (
+        <>
+          <path d="m12 3 8 5v8l-8 5-8-5V8l8-5Z" fill="currentColor" fillOpacity="0.09" />
+          <path d="m12 3 8 5v8l-8 5-8-5V8l8-5Z" />
+          <path d="M12 3v18M4 8l8 5 8-5M4 16l8-5 8 5" strokeOpacity="0.38" />
+        </>
+      );
+    case "orbit":
+      return (
+        <>
+          <circle cx="12" cy="12" r="2" fill="currentColor" />
+          <ellipse cx="12" cy="12" rx="9" ry="4.8" fill="currentColor" fillOpacity="0.05" />
+          <ellipse cx="12" cy="12" rx="9" ry="4.8" />
+          <ellipse cx="12" cy="12" rx="9" ry="4.8" transform="rotate(60 12 12)" />
+          <circle cx="19.2" cy="12" r="1.2" fill="currentColor" />
+          <circle cx="7.8" cy="5.8" r="1" fill="currentColor" fillOpacity="0.75" />
+        </>
+      );
+    case "anchor":
+      return (
+        <>
+          <circle cx="12" cy="5" r="2" />
+          <path d="M12 7v10" />
+          <path d="M7 12H5.5a6.5 6.5 0 0 0 13 0H17" />
+          <path d="M9 18.5 12 17l3 1.5" fill="currentColor" fillOpacity="0.16" />
+          <path d="M8 12a4 4 0 0 0 8 0" />
+        </>
+      );
+    case "firework":
+      return (
+        <>
+          <circle cx="12" cy="12" r="2" fill="currentColor" />
+          <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" />
+          <path d="M12 7.5v2M12 14.5v2M7.5 12h2M14.5 12h2" strokeOpacity="0.45" />
+        </>
+      );
+    case "lantern":
+      return (
+        <>
+          <path d="M8 7.5h8l1.2 3.2-1.8 6.8H8.6l-1.8-6.8L8 7.5Z" fill="currentColor" fillOpacity="0.1" />
+          <path d="M8 7.5h8l1.2 3.2-1.8 6.8H8.6l-1.8-6.8L8 7.5Z" />
+          <path d="M10 7.5V5.8A2 2 0 0 1 12 3.8a2 2 0 0 1 2 2v1.7" />
+          <path d="M9.3 12h5.4M10.4 14.5h3.2" strokeOpacity="0.4" />
+          <path d="M7 21h10" />
+        </>
+      );
+    case "key":
+      return (
+        <>
+          <circle cx="8.5" cy="12" r="3.5" fill="currentColor" fillOpacity="0.12" />
+          <circle cx="8.5" cy="12" r="3.5" />
+          <path d="M12 12h8M16 12v3M18.5 12v2" />
+          <circle cx="8.5" cy="12" r="0.9" fill="currentColor" />
+        </>
+      );
+    case "kite":
+      return (
+        <>
+          <path d="M12 3 18 10 12 17 6 10 12 3Z" fill="currentColor" fillOpacity="0.1" />
+          <path d="M12 3 18 10 12 17 6 10 12 3Z" />
+          <path d="M12 17v4M12 21c1-1.2 2.2-1.2 3.2 0M12 19.2c-.9-1.1-2-1.1-2.9 0" />
+          <path d="M9.2 9.8h5.6" strokeOpacity="0.42" />
         </>
       );
   }

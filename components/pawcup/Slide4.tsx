@@ -68,7 +68,7 @@ function Slide4() {
 
       {/* ====== LEFT: ticket booth ====== */}
       <div className="absolute left-0 top-0 bottom-0 w-[28%] z-10 flex items-end justify-center pb-[4%]">
-        <div className="relative w-full flex flex-col items-center">
+        <div className="relative w-[90%] translate-y-[2%] flex flex-col items-center">
           <img
             src="/ticket-booth.png"
             alt="Ticket booth"
@@ -190,9 +190,6 @@ function Slide4() {
 
           </div>{/* end billboard frame */}
 
-          <div className="absolute right-0 -top-6 text-purple-300/70 text-[10px] tracking-[0.35em] font-mono">
-            STADIUM · BILLBOARD
-          </div>
         </div>
       </div>
 
@@ -358,8 +355,5 @@ function TrophySVG() {
 }
 
 export default Slide4;
-
-
-
 
 

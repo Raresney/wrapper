@@ -170,13 +170,6 @@ function Slide0() {
             />
           ))}
 
-          {/* caption */}
-          <div className="absolute right-6 top-6 text-amber-300/80 text-[10px] tracking-[0.35em] font-mono text-right">
-            THE · TROPHY
-          </div>
-          <div className="absolute right-6 bottom-[6%] text-purple-300/60 text-[10px] tracking-[0.35em] font-mono text-right">
-            2026
-          </div>
         </div>
       </div>
 
@@ -280,8 +273,6 @@ function Bar({ label, value, color }: { label: string; value: number; color: str
 }
 
 export default Slide0;
-
-
 
 
 

@@ -7,6 +7,9 @@ import { mapToFlat } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
+import { SlideCard } from "@/components/wrapped/SlideCard";
+
+const ACCENT = "#c084fc";
 
 function CountUpInner({ value }: { value: number }) {
   const mv = useMotionValue(0);
@@ -18,22 +21,29 @@ function CountUpInner({ value }: { value: number }) {
   return <motion.span>{rounded}</motion.span>;
 }
 
-function Confetti() {
-  const pieces = useMemo(() => Array.from({ length: 60 }, (_, i) => {
-    const r = (k: number) => { const v = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v); };
-    return {
-      x: r(1) * 100, delay: r(2) * 6, dur: r(3) * 6 + 6, rot: r(4) * 360,
-      color: ["#ff3ea5", "#a855f7", "#22d3ee", "#facc15", "#f472b6"][Math.floor(r(5) * 5)],
-      w: r(6) * 6 + 4, h: r(7) * 10 + 6,
-    };
-  }), []);
+function Confetti({ sparse = false }: { sparse?: boolean }) {
+  const pieces = useMemo(() => {
+    const count = sparse ? 8 : 60;
+    return Array.from({ length: count }, (_, i) => {
+      const r = (k: number) => { const v = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v); };
+      return {
+        x: r(1) * 100,
+        delay: sparse ? r(2) * 10 : r(2) * 6,
+        dur: sparse ? r(3) * 8 + 10 : r(3) * 6 + 6,
+        rot: r(4) * 360,
+        color: ["#ff3ea5", "#a855f7", "#22d3ee", "#facc15", "#f472b6"][Math.floor(r(5) * 5)],
+        w: sparse ? r(6) * 5 + 3 : r(6) * 6 + 4,
+        h: sparse ? r(7) * 8 + 5 : r(7) * 10 + 6,
+      };
+    });
+  }, [sparse]);
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {pieces.map((p, i) => (
         <motion.span key={i} className="absolute top-[-5%]"
-          style={{ left: `${p.x}%`, width: p.w, height: p.h, background: p.color, borderRadius: 2, boxShadow: `0 0 8px ${p.color}` }}
-          initial={{ y: -40, rotate: p.rot, opacity: 0 }}
-          animate={{ y: "110vh", rotate: p.rot + 720, opacity: [0, 1, 1, 0] }}
+          style={{ left: `${p.x}%`, width: p.w, height: p.h, background: p.color, borderRadius: 2, ...(sparse ? { opacity: 0.55 } : { boxShadow: `0 0 8px ${p.color}` }) }}
+          initial={{ y: -40, rotate: p.rot, opacity: sparse ? undefined : 0 }}
+          animate={{ y: "110vh", rotate: p.rot + (sparse ? 540 : 720), opacity: sparse ? undefined : [0, 1, 1, 0] }}
           transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: "linear" }} />
       ))}
     </div>
@@ -69,22 +79,22 @@ function DiscoBall() {
   );
 }
 
-function DanceFloor() {
-  const cols = 8;
-  const rows = 5;
+function DanceFloor({ sparse = false }: { sparse?: boolean }) {
+  const cols = sparse ? 6 : 8;
+  const rows = sparse ? 3 : 5;
   const colors = ["#ff3ea5", "#a855f7", "#22d3ee", "#facc15", "#f472b6", "#34d399"];
   const tiles = useMemo(() => Array.from({ length: cols * rows }, (_, i) => ({
-    i, delay: ((i * 137) % 100) / 100 * 2, color: colors[i % colors.length],
-  })), []);
+    i, delay: ((i * 137) % 100) / 100 * (sparse ? 3 : 2), color: colors[i % colors.length],
+  })), [cols, rows, sparse]);
   return (
     <div className="mx-auto mt-6"
-      style={{ width: "92%", maxWidth: 420, transform: "perspective(600px) rotateX(55deg)", transformOrigin: "center top" }}>
+      style={{ width: sparse ? "80%" : "92%", maxWidth: sparse ? 320 : 420, transform: "perspective(600px) rotateX(55deg)", transformOrigin: "center top" }}>
       <div className="grid gap-1 rounded-md p-2"
-        style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, background: "rgba(0,0,0,0.4)", boxShadow: "0 0 60px rgba(168,85,247,0.4)" }}>
+        style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, background: sparse ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.4)", boxShadow: sparse ? "0 0 40px rgba(168,85,247,0.25)" : "0 0 60px rgba(168,85,247,0.4)" }}>
         {tiles.map((t) => (
           <motion.div key={t.i} className="aspect-square rounded-sm" style={{ background: t.color }}
-            animate={{ opacity: [0.15, 1, 0.15] }}
-            transition={{ duration: 1.6, repeat: Infinity, delay: t.delay, ease: "easeInOut" }} />
+            animate={{ opacity: sparse ? [0.1, 0.7, 0.1] : [0.15, 1, 0.15] }}
+            transition={{ duration: sparse ? 2.8 : 1.6, repeat: Infinity, delay: t.delay, ease: "easeInOut" }} />
         ))}
       </div>
     </div>
@@ -100,7 +110,7 @@ function StatItem({ label, value }: { label: string; value: number }) {
   );
 }
 
-export default function SlideArchetype({ profile }: { profile: WrappedProfile }) {
+export default function SlideArchetype({ profile, sparse = false }: { profile: WrappedProfile; sparse?: boolean }) {
   const flat = mapToFlat(profile);
   const badges = flat.traitBadges.slice(0, 6);
   const topBadgeId = badges[0]?.id;
@@ -115,7 +125,7 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(60% 50% at 20% 30%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(50% 50% at 85% 70%, rgba(34,211,238,0.15), transparent 60%), radial-gradient(40% 40% at 70% 20%, rgba(255,62,165,0.12), transparent 60%)" }} />
       <Stars />
-      <Confetti />
+      <Confetti sparse={sparse} />
       <ChapterHeadingAnchor n={7} title="The Reveal" />
 
       <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-16 lg:grid-cols-[1fr_auto_1fr]">
@@ -134,18 +144,18 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
                 style={{ filter: "drop-shadow(0 18px 40px rgba(168,85,247,0.5)) drop-shadow(0 0 30px rgba(255,62,165,0.3))" }}
                 draggable={false} />
             </motion.div>
-            <DanceFloor />
+            <DanceFloor sparse={sparse} />
           </div>
         </motion.div>
 
         {/* CENTER — glass card */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }} className="relative w-[min(380px,92vw)] justify-self-center lg:-translate-y-10">
+          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }} className={`relative w-[min(380px,92vw)] justify-self-center ${sparse ? "lg:-translate-y-8" : "lg:-translate-y-16"}`}>
           <div className="lg:hidden">
             <ChapterHeadingMobile n={7} title="The Reveal" />
             <MobilePlanet color="#a855f7" />
           </div>
-          <div data-share-card className="relative [&::-webkit-scrollbar]:hidden" style={{ height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px rgba(0,0,0,0.5)" }}>
+          <SlideCard accentColor={ACCENT} chapter={7} title="The Reveal">
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}
@@ -270,7 +280,7 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
                 {archetypeDisplay}
               </div>
             </div>
-          </div>
+          </SlideCard>
 
           {/* mobile: animated disco scene below the card (scroll to reveal) */}
           <div className="mt-8 flex flex-col items-center lg:hidden">
@@ -280,7 +290,7 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
               <img src="/wrapped/cats-only.png" alt="Cat astronauts celebrating" className="w-full select-none"
                 style={{ filter: "drop-shadow(0 18px 40px rgba(168,85,247,0.5))" }} draggable={false} />
             </motion.div>
-            <DanceFloor />
+            <DanceFloor sparse={sparse} />
           </div>
         </motion.div>
 

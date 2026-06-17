@@ -6,6 +6,9 @@ import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
+import { SlideCard } from "@/components/wrapped/SlideCard";
+
+const ACCENT = "#34d399";
 
 function CountUp({ value }: { value: number }) {
   const mv = useMotionValue(0);
@@ -105,8 +108,6 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
     <div className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute -left-40 top-1/3 h-[500px] w-[500px] rounded-full opacity-40"
         style={{ background: "radial-gradient(closest-side, rgba(74,222,128,0.25), transparent)" }} />
-      <div className="pointer-events-none absolute -right-40 bottom-0 h-[600px] w-[600px] rounded-full opacity-50"
-        style={{ background: "radial-gradient(closest-side, rgba(34,211,238,0.18), transparent)" }} />
       <Stars />
       <ChapterHeadingAnchor n={4} title="Home Base" />
       <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-4 pb-10 pt-16 lg:px-12 lg:py-8">
@@ -137,9 +138,8 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
             <ChapterHeadingMobile n={4} title="Home Base" />
             <MobilePlanet color="#7cff8a" />
           </div>
-          <motion.div data-share-card {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full" style={{ maxWidth: 400 }}>
-            <div className="relative w-full p-4 text-white [&::-webkit-scrollbar]:hidden"
-              style={{ height: 580, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px -20px rgba(0,0,0,0.6)" }}>
+          <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full max-w-[380px]">
+            <SlideCard accentColor={ACCENT} chapter={4} title="Home Base" className="text-white">
               <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={flat.avatarUrl} alt={flat.username} className="h-10 w-10 rounded-full border border-white/15 bg-white/5 object-cover" />
@@ -233,7 +233,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                   </div>
                 </motion.div>
               )}
-            </div>
+            </SlideCard>
           </motion.div>
 
           {/* mobile: animated UFO scene below the card (scroll to reveal) */}
@@ -257,14 +257,23 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
           className="relative col-span-12 hidden overflow-hidden lg:col-span-4 lg:block">
           <PlanetStage>
           <div className="relative flex h-[520px] w-[520px] items-center justify-center">
-            <div className="pointer-events-none absolute inset-0 rounded-full"
-              style={{ background: "radial-gradient(circle, rgba(74,222,128,0.45) 0%, rgba(74,222,128,0.12) 35%, transparent 65%)", filter: "blur(30px)" }} />
-            <motion.img src="/wrapped/slide4-planet.png" alt="Alien green planet"
-              className="relative h-full w-full select-none object-contain"
+            <motion.div
+              className="relative h-[86%] w-[86%] overflow-hidden rounded-full"
               animate={{ y: [0, -10, 0], rotate: 360 }}
               transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 240, repeat: Infinity, ease: "linear" } }}
-              style={{ filter: "drop-shadow(0 0 50px rgba(74,222,128,0.6))" }}
-              draggable={false} />
+              style={{
+                filter: "drop-shadow(0 0 36px rgba(74,222,128,0.5)) drop-shadow(0 0 72px rgba(74,222,128,0.18))",
+                WebkitMaskImage: "radial-gradient(circle at 50% 50%, black 0 55%, transparent 61%)",
+                maskImage: "radial-gradient(circle at 50% 50%, black 0 55%, transparent 61%)",
+              }}
+            >
+              <img
+                src="/wrapped/slide4-planet.png"
+                alt="Alien green planet"
+                className="block h-full w-full select-none object-cover"
+                draggable={false}
+              />
+            </motion.div>
           </div>
           </PlanetStage>
         </motion.div>

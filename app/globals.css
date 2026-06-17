@@ -22,6 +22,124 @@ body {
   color: var(--foreground);
 }
 
+/* WorldCup slides use the original pawCup scenes, but the live app card data.
+   Each WC slide's center-card div carries data-wc-center-card so CSS can target
+   it without fragile Tailwind class-string matching. */
+.wc-pawcup-scene [data-wc-center-card] {
+  display: none !important;
+}
+
+/* bonus slide: hide the GitHub card layer and show Slide8's own card instead */
+.wc-original-card-layer[data-wc-slide="bonus"] {
+  display: none !important;
+}
+.wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) [data-wc-center-card] {
+  display: flex !important;
+}
+
+.wc-original-card-layer {
+  pointer-events: none;
+}
+
+.wc-original-card-layer [data-share-card] {
+  pointer-events: auto;
+  width: min(400px, 92vw) !important;
+  max-width: min(400px, 92vw) !important;
+  height: min(580px, 84vh) !important;
+  min-height: min(580px, 84vh) !important;
+  overflow-y: auto !important;
+  scrollbar-width: none !important;
+}
+
+/* per-slide vertical nudges — only slides that differ from 0 */
+.wc-original-card-layer[data-wc-slide="intro"] [data-share-card] {
+  transform: translateY(6px) !important;
+}
+.wc-original-card-layer[data-wc-slide="archetype"] [data-share-card] {
+  transform: translateY(18px) !important;
+}
+
+.wc-original-card-layer[data-wc-slide="intro"] main > .relative.z-10.grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) {
+  transform: translateY(10px) !important;
+}
+.wc-original-card-layer[data-wc-slide="archetype"] main > .relative.z-10.grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) {
+  transform: translateY(20px) !important;
+}
+
+.wc-original-card-layer [data-share-card]::-webkit-scrollbar {
+  display: none !important;
+}
+
+.wc-original-card-layer [data-share-card] > div[style*="height: 500"],
+.wc-original-card-layer [data-share-card] > div[style*="height: 580"],
+.wc-original-card-layer [data-share-card] > div[style*="height: min(580px, 84vh)"],
+.wc-original-card-layer [data-share-card][style*="height: 500"],
+.wc-original-card-layer [data-share-card][style*="height: 564"],
+.wc-original-card-layer [data-share-card][style*="height: min(580px, 84vh)"] {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+.wc-original-card-layer [src="/wrapped/slide4-ufo.png"],
+.wc-original-card-layer [src="/wrapped/slide4-planet.png"],
+.wc-original-card-layer [src="/cat-rocket.png"] {
+  display: none !important;
+}
+
+.wc-original-card-layer > main,
+.wc-original-card-layer > div,
+.wc-original-card-layer main,
+.wc-original-card-layer main > div:first-child {
+  background: transparent !important;
+}
+
+.wc-original-card-layer > div > .pointer-events-none.absolute,
+.wc-original-card-layer main > .pointer-events-none.absolute,
+.wc-original-card-layer main > .slide-stars-bg,
+.wc-original-card-layer main > .slide-nebula-glow,
+.wc-original-card-layer .slide-stars-bg,
+.wc-original-card-layer .slide-nebula-glow,
+.wc-original-card-layer .slide-left-col,
+.wc-original-card-layer .slide-right-col {
+  display: none !important;
+}
+
+.wc-original-card-layer main > .relative.z-10.grid,
+.wc-original-card-layer > div > .relative.z-10.grid,
+.wc-original-card-layer > div > .relative.z-10.mx-auto.grid {
+  display: flex !important;
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4rem 1rem 2rem !important;
+}
+
+.wc-original-card-layer main > .relative.z-10.grid > :not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.grid > :not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.mx-auto.grid > :not(:has([data-share-card])) {
+  display: none !important;
+}
+
+.wc-original-card-layer main > .relative.z-10.grid > :has([data-share-card]),
+.wc-original-card-layer > div > .relative.z-10.grid > :has([data-share-card]),
+.wc-original-card-layer > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) {
+  display: flex !important;
+  min-height: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.wc-original-card-layer main > .relative.z-10.grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])) {
+  display: none !important;
+}
+
 /* ── star twinkle ── */
 @keyframes twinkle {
   0%, 100% { opacity: 1;    transform: scale(1); }

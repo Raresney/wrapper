@@ -48,26 +48,26 @@ export default function ShareModal({
   const caption = `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GitHubWrapped`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
-  const capture = useCallback(async (): Promise<Blob | null> => {
+  const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
     // On viewports below the desktop breakpoint, render the slide in an off-screen
     // desktop-width iframe so the share image matches the desktop layout.
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      return await captureDesktopElement(slide, { cropToSelector: scope === "card" ? "[data-share-card]" : null });
+      return await captureDesktopElement(slide, {
+        cropToSelector: scope === "card" ? "[data-share-card]" : null,
+        scale,
+      });
     }
     if (scope === "card") {
-      // Render the (pixel-accurate) full slide and crop to the card, so the card
-      // image is identical to what's on screen.
       const card = document.querySelector("[data-share-card]") as HTMLElement | null;
       if (!card) return null;
-      return await captureElement(slide, { cropTo: card });
+      return await captureElement(slide, { cropTo: card, scale });
     }
-    return await captureElement(slide, {});
+    return await captureElement(slide, { scale });
   }, [scope, slideRef]);
 
-  // (Re)generate the preview whenever the modal opens or the scope changes.
-  // All state updates happen inside the async callback (not the effect body).
+  // Generate preview at scale=1 (crisp at display size) then hi-res in background.
   useEffect(() => {
     if (!open) return;
     let alive = true;
@@ -77,12 +77,16 @@ export default function ShareModal({
       setBusy(true);
       setPreview(null);
       setFailed(false);
-      const blob = await capture();
+      // Low-res first → fast, pixel-perfect at modal display size
+      const prev = await capture(1);
       if (!alive) return;
-      blobRef.current = blob;
-      setPreview(blob ? URL.createObjectURL(blob) : null);
-      setFailed(!blob);
+      setPreview(prev ? URL.createObjectURL(prev) : null);
+      setFailed(!prev);
       setBusy(false);
+      // Hi-res in background → used for download/share
+      const hi = await capture(2.5);
+      if (!alive) return;
+      blobRef.current = hi;
     }, 80);
     return () => { alive = false; clearTimeout(t); };
   }, [open, scope, capture]);
@@ -187,10 +191,10 @@ export default function ShareModal({
             </div>
 
             {/* preview */}
-            <div className="mt-4 flex min-h-[180px] items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/40">
+            <div className="mt-4 flex min-h-[200px] items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/40">
               {preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={preview} alt="Share preview" className="max-h-[300px] w-auto object-contain" />
+                <img src={preview} alt="Share preview" className="max-h-[460px] w-auto max-w-full object-contain" />
               ) : failed ? (
                 <span className="py-10 text-[11px] text-white/40">Couldn&apos;t render this slide.</span>
               ) : (

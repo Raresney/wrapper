@@ -60,8 +60,6 @@ function Slide5() {
       {/* ====== RIGHT: VAR room ====== */}
       <div className="absolute right-0 top-0 bottom-0 w-[31%] z-10 flex items-center justify-center">
         <div className="relative w-[92%]">
-          <div className="absolute right-2 -top-6 text-purple-300/70 text-[10px] tracking-[0.35em] font-mono text-right">VAR · ROOM</div>
-
           {/* VAR room panel */}
           <div className="rounded-2xl border border-purple-400/20 bg-[#0d0820]/80 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,0,0,0.7)] p-3">
 
@@ -237,7 +235,6 @@ function Slide5() {
 }
 
 export default Slide5;
-
 
 
 

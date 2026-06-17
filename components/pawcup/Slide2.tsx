@@ -57,122 +57,124 @@ function Slide2() {
 
       {/* ====== LEFT: cat fans cheering ====== */}
       <div className="absolute left-0 top-0 bottom-0 w-[30%] z-10 pointer-events-none">
-        {/* stadium bleachers */}
-        <div className="absolute right-[-2%] top-[42%] h-[38%] w-[88%] rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.6)]">
-          <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="standFade" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#1e0a3c" />
-                <stop offset="100%" stopColor="#2d1060" />
-              </linearGradient>
-            </defs>
-            <rect width="120" height="120" fill="url(#standFade)" />
-            {Array.from({ length: 3 }).map((_, row) => {
-              const rowH = 40;
-              const y = row * rowH;
-              const riserH = 13;
-              const riserShade = row % 2 === 0 ? "#1a0840" : "#22105a";
-              const seatColors = [["#7c3aed","#f59e0b","#9333ea"], ["#a855f7","#7c3aed","#facc15"], ["#6d28d9","#a855f7","#f59e0b"]];
-              return (
-                <g key={row}>
-                  <rect x="0" y={y} width="120" height={riserH} fill={riserShade} />
-                  {[0,1,2].map((col) => (
-                    <rect key={col} x={col * 38 + 8} y={y + riserH + 3} width="28" height="22" rx="4" fill={seatColors[row][col]} opacity="0.9" />
-                  ))}
-                  <line x1="0" y1={y + rowH} x2="120" y2={y + rowH} stroke="rgba(168,85,247,0.25)" strokeWidth="0.5" />
-                </g>
-              );
-            })}
-          </svg>
-        </div>
+        <div className="absolute inset-0 translate-y-[4%]">
+          {/* stadium bleachers */}
+          <div className="absolute right-[-2%] top-[42%] h-[38%] w-[88%] rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.6)]">
+            <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="standFade" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#1e0a3c" />
+                  <stop offset="100%" stopColor="#2d1060" />
+                </linearGradient>
+              </defs>
+              <rect width="120" height="120" fill="url(#standFade)" />
+              {Array.from({ length: 3 }).map((_, row) => {
+                const rowH = 40;
+                const y = row * rowH;
+                const riserH = 13;
+                const riserShade = row % 2 === 0 ? "#1a0840" : "#22105a";
+                const seatColors = [["#7c3aed","#f59e0b","#9333ea"], ["#a855f7","#7c3aed","#facc15"], ["#6d28d9","#a855f7","#f59e0b"]];
+                return (
+                  <g key={row}>
+                    <rect x="0" y={y} width="120" height={riserH} fill={riserShade} />
+                    {[0,1,2].map((col) => (
+                      <rect key={col} x={col * 38 + 8} y={y + riserH + 3} width="28" height="22" rx="4" fill={seatColors[row][col]} opacity="0.9" />
+                    ))}
+                    <line x1="0" y1={y + rowH} x2="120" y2={y + rowH} stroke="rgba(168,85,247,0.25)" strokeWidth="0.5" />
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
 
-        {/* stadium light beams */}
-        <div className="absolute -top-6 left-[10%] w-[40%] h-[60%]"
-          style={{
-            background: "linear-gradient(180deg, rgba(250,204,21,0.25) 0%, transparent 100%)",
-            clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)",
-            filter: "blur(4px)",
-            animation: "spot-sway 4s ease-in-out infinite",
-          }}
-        />
-        <div className="absolute -top-6 right-[10%] w-[40%] h-[60%]"
-          style={{
-            background: "linear-gradient(180deg, rgba(168,85,247,0.3) 0%, transparent 100%)",
-            clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)",
-            filter: "blur(4px)",
-            animation: "spot-sway 5s ease-in-out infinite reverse",
-          }}
-        />
-
-        {/* confetti falling */}
-        {[...Array(14)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute animate-confetti-fall pointer-events-none"
+          {/* stadium light beams */}
+          <div className="absolute -top-6 left-[10%] w-[40%] h-[60%]"
             style={{
-              left: `${5 + i * 7}%`,
-              top: "-6%",
-              width: 6,
-              height: 13,
-              background: ["#a855f7","#f59e0b","#22c55e","#f472b6","#60a5fa","#facc15","#e879f9"][i % 7],
-              borderRadius: 2,
-              animationDelay: `${i * 0.22}s`,
-              animationDuration: `${2.2 + (i % 4) * 0.4}s`,
+              background: "linear-gradient(180deg, rgba(250,204,21,0.25) 0%, transparent 100%)",
+              clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)",
+              filter: "blur(4px)",
+              animation: "spot-sway 4s ease-in-out infinite",
             }}
           />
-        ))}
+          <div className="absolute -top-6 right-[10%] w-[40%] h-[60%]"
+            style={{
+              background: "linear-gradient(180deg, rgba(168,85,247,0.3) 0%, transparent 100%)",
+              clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)",
+              filter: "blur(4px)",
+              animation: "spot-sway 5s ease-in-out infinite reverse",
+            }}
+          />
 
-        {/* flag poles above bleachers */}
-        {[
-          { left: "24%", color: "#a855f7", stripe: "#7c3aed", delay: "0s" },
-          { left: "60%", color: "#facc15", stripe: "#f59e0b", delay: "0.3s" },
-          { left: "94%", color: "#a855f7", stripe: "#7c3aed", delay: "0.6s" },
-        ].map((flag, i) => (
-          <div key={i} className="absolute" style={{ left: flag.left, top: "30%", transform: "translateX(-50%)" }}>
-            {/* pennant */}
+          {/* confetti falling */}
+          {[...Array(14)].map((_, i) => (
             <div
+              key={i}
+              className="absolute animate-confetti-fall pointer-events-none"
               style={{
-                width: 36,
-                height: 22,
-                background: `linear-gradient(135deg, ${flag.color} 50%, ${flag.stripe} 50%)`,
-                borderRadius: "0 5px 5px 0",
-                transformOrigin: "0% 50%",
-                animation: `flag-wave ${1.6 + i * 0.25}s ease-in-out infinite`,
-                animationDelay: flag.delay,
-                boxShadow: `0 2px 8px rgba(0,0,0,0.4)`,
-                marginLeft: 2,
+                left: `${5 + i * 7}%`,
+                top: "-6%",
+                width: 6,
+                height: 13,
+                background: ["#a855f7","#f59e0b","#22c55e","#f472b6","#60a5fa","#facc15","#e879f9"][i % 7],
+                borderRadius: 2,
+                animationDelay: `${i * 0.22}s`,
+                animationDuration: `${2.2 + (i % 4) * 0.4}s`,
               }}
             />
-            {/* pole */}
-            <div style={{ width: 2, height: 78, background: "linear-gradient(180deg, #d1d5db, #6b7280)", margin: "0 auto", marginTop: -22 }} />
-            {/* base */}
-            <div style={{ width: 8, height: 4, background: "#4b5563", borderRadius: 2, margin: "0 auto" }} />
+          ))}
+
+          {/* flag poles above bleachers */}
+          {[
+            { left: "24%", color: "#a855f7", stripe: "#7c3aed", delay: "0s" },
+            { left: "60%", color: "#facc15", stripe: "#f59e0b", delay: "0.3s" },
+            { left: "94%", color: "#a855f7", stripe: "#7c3aed", delay: "0.6s" },
+          ].map((flag, i) => (
+            <div key={i} className="absolute" style={{ left: flag.left, top: "30%", transform: "translateX(-50%)" }}>
+              {/* pennant */}
+              <div
+                style={{
+                  width: 36,
+                  height: 22,
+                  background: `linear-gradient(135deg, ${flag.color} 50%, ${flag.stripe} 50%)`,
+                  borderRadius: "0 5px 5px 0",
+                  transformOrigin: "0% 50%",
+                  animation: `flag-wave ${1.6 + i * 0.25}s ease-in-out infinite`,
+                  animationDelay: flag.delay,
+                  boxShadow: `0 2px 8px rgba(0,0,0,0.4)`,
+                  marginLeft: 2,
+                }}
+              />
+              {/* pole */}
+              <div style={{ width: 2, height: 78, background: "linear-gradient(180deg, #d1d5db, #6b7280)", margin: "0 auto", marginTop: -22 }} />
+              {/* base */}
+              <div style={{ width: 8, height: 4, background: "#4b5563", borderRadius: 2, margin: "0 auto" }} />
+            </div>
+          ))}
+
+          {/* fans · centered in the left panel */}
+          <div className="absolute right-[-2%] bottom-[6%] flex items-end justify-end animate-fans-cheer origin-bottom">
+            <img
+              src={catFans.url}
+              alt="Cat fans cheering in the stands"
+              className="block w-[86%] h-auto drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]"
+            />
           </div>
-        ))}
+
+          {/* floating hearts + sparks */}
+          <div className="absolute left-[14%] top-[32%] text-pink-300 text-xl animate-note-rise" style={{ animationDelay: "0s" }}>{"\u2764"}</div>
+          <div className="absolute left-[78%] top-[38%] text-amber-300 text-lg animate-note-rise" style={{ animationDelay: "1.4s" }}>{"\u2605"}</div>
+          <div className="absolute left-[44%] top-[28%] text-purple-300 text-xl animate-note-rise" style={{ animationDelay: "2.2s" }}>{"\u2726"}</div>
+          <div className="absolute left-[62%] top-[34%] text-cyan-300 text-lg animate-note-rise" style={{ animationDelay: "0.8s" }}>{"\u2665"}</div>
+        </div>
 
         {/* GTH Ultras banner */}
-        <div className="absolute top-[18%] left-[8%] right-[8%] flex items-center justify-center gap-2 z-10">
+        <div className="absolute top-[24%] left-[20%] right-[-4%] flex items-center justify-center gap-2 z-10">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-purple-400/50" />
           <div className="bg-purple-800/80 backdrop-blur border border-purple-400/40 text-purple-100 text-[9px] font-black tracking-[0.35em] px-3 py-1 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.4)]">
             GTH · ULTRAS
           </div>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-purple-400/50" />
         </div>
-
-        {/* fans · centered in the left panel */}
-        <div className="absolute right-[-2%] bottom-[6%] flex items-end justify-end animate-fans-cheer origin-bottom">
-          <img
-            src={catFans.url}
-            alt="Cat fans cheering in the stands"
-            className="block w-[86%] h-auto drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]"
-          />
-        </div>
-
-        {/* floating hearts + sparks */}
-        <div className="absolute left-[14%] top-[32%] text-pink-300 text-xl animate-note-rise" style={{ animationDelay: "0s" }}>{"\u2764"}</div>
-        <div className="absolute left-[78%] top-[38%] text-amber-300 text-lg animate-note-rise" style={{ animationDelay: "1.4s" }}>{"\u2605"}</div>
-        <div className="absolute left-[44%] top-[28%] text-purple-300 text-xl animate-note-rise" style={{ animationDelay: "2.2s" }}>{"\u2726"}</div>
-        <div className="absolute left-[62%] top-[34%] text-cyan-300 text-lg animate-note-rise" style={{ animationDelay: "0.8s" }}>{"\u2665"}</div>
       </div>
 
       {/* ====== RIGHT: goal + celebrating cat ====== */}
@@ -204,9 +206,6 @@ function Slide2() {
         {/* shadow under cat */}
         <div className="absolute right-[6%] bottom-[3%] w-[44%] h-4 rounded-[50%] bg-black/60 blur-md" />
 
-        <div className="absolute right-6 top-6 text-amber-300/80 text-[10px] tracking-[0.35em] font-mono text-right">
-          MIN · 87'
-        </div>
       </div>
 
       {/* ====== CENTER: scoreboard card (same shell) ====== */}
@@ -423,8 +422,4 @@ function Bar({ label, value, color }: { label: string; value: number; color: str
 }
 
 export default Slide2;
-
-
-
-
 

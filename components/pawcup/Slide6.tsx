@@ -56,7 +56,7 @@ function Slide6() {
       {/* HEADER */}
 
       {/* ====== LEFT: live match on pitch ====== */}
-      <div className="absolute left-[3%] top-[10%] bottom-[10%] w-[27%] z-10 pointer-events-none">
+      <div className="absolute left-[3%] top-[16%] bottom-[7%] w-[27%] z-10 pointer-events-none">
         {/* pitch */}
         <div className="absolute inset-4 rounded-2xl overflow-hidden border-2 border-emerald-700/60 shadow-[0_20px_60px_rgba(34,197,94,0.25)]"
              style={{ background: "repeating-linear-gradient(90deg, #166534 0 40px, #15803d 40px 80px)" }}>
@@ -253,9 +253,6 @@ function Slide6() {
             <div className="w-[2px] h-10 bg-gradient-to-t from-zinc-500 to-zinc-300 rotate-[15deg] origin-bottom" />
           </div>
 
-          <div className="absolute right-2 -top-6 text-purple-300/70 text-[10px] tracking-[0.35em] font-mono text-right">
-            BROADCAST · CH 26
-          </div>
         </div>
       </div>
 
@@ -414,8 +411,5 @@ function Player({ x, y, kit, num, delay = "0s" }: { x: number; y: number; kit: "
 }
 
 export default Slide6;
-
-
-
 
 

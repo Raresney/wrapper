@@ -288,7 +288,9 @@ export default function WrappedPage() {
                   worldCup ? "pointer-events-none opacity-0" : "opacity-100"
                 }`}
               >
-                <CurrentSlide profile={profile} />
+                {slideState.current === "share"
+                  ? <SlideShare profile={profile} showStartOver={!worldCup} />
+                  : <CurrentSlide profile={profile} />}
               </div>
               <div
                 className={`absolute inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
@@ -301,7 +303,9 @@ export default function WrappedPage() {
                 <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={slideState.current}>
                   {slideState.current === "archetype"
                     ? <SlideArchetype profile={profile} sparse />
-                    : <CurrentSlide profile={profile} />}
+                    : slideState.current === "share"
+                      ? <SlideShare profile={profile} showStartOver={false} />
+                      : <CurrentSlide profile={profile} />}
                 </div>
               </div>
             </div>
@@ -356,5 +360,4 @@ export default function WrappedPage() {
     </div>
   );
 }
-
 

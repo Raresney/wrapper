@@ -247,6 +247,38 @@ function busiestDay(data: GitHubRawData): [string, number] {
   for (const c of data.contributions) totals[c.date] = (totals[c.date] ?? 0) + c.count;
   return Object.entries(totals).sort((a, b) => b[1] - a[1])[0] ?? ["", 0];
 }
+function distinctHourCount(data: GitHubRawData): number {
+  return new Set(
+    data.contributions
+      .filter((c) => c.count > 0 && c.hour >= 0 && c.hour <= 23)
+      .map((c) => c.hour)
+  ).size;
+}
+function activeWeekdayCount(data: GitHubRawData): number {
+  return new Set(
+    data.contributions
+      .filter((c) => c.count > 0)
+      .map((c) => new Date(c.date).getDay())
+  ).size;
+}
+function mergedRepoCount(data: GitHubRawData): number {
+  return new Set(
+    data.pullRequests
+      .filter((pr) => pr.state === "merged")
+      .map((pr) => pr.repoName)
+  ).size;
+}
+function doubleShiftDays(data: GitHubRawData): number {
+  const flags = new Map<string, { early: boolean; late: boolean }>();
+  for (const c of data.contributions) {
+    if (c.count <= 0) continue;
+    if (!flags.has(c.date)) flags.set(c.date, { early: false, late: false });
+    const entry = flags.get(c.date)!;
+    if (c.hour >= 0 && c.hour <= 5) entry.early = true;
+    if (c.hour >= 18 && c.hour <= 23) entry.late = true;
+  }
+  return [...flags.values()].filter((v) => v.early && v.late).length;
+}
 
 const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
   // ── volume ──
@@ -437,6 +469,53 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
       return days.size >= 200 ? `${days.size} active days` : null;
     },
   },
+  // ── calendar / rhythm / signature ──
+  {
+    id: "new_year_hacker", icon: "firework", rarity: "common", boost: 1, label: "New Year Hacker", description: "Committed on Jan 1st",
+    check: (data) => data.contributions.some((c) => c.count > 0 && c.date.slice(5) === "01-01") ? "Opened the year with code" : null,
+  },
+  {
+    id: "halloween_hacker", icon: "lantern", rarity: "uncommon", boost: 1, label: "Halloween Hacker", description: "Committed on Oct 31st",
+    check: (data) => data.contributions.some((c) => c.count > 0 && c.date.slice(5) === "10-31") ? "Shipped on Halloween" : null,
+  },
+  {
+    id: "seven_day_circuit", icon: "orbit", rarity: "rare", boost: 2, label: "Seven-Day Circuit", description: "Active on all seven weekdays",
+    check: (data) => activeWeekdayCount(data) === 7 ? "Touched every day of the week" : null,
+  },
+  {
+    id: "full_spectrum", icon: "prism", rarity: "epic", boost: 1, label: "Full Spectrum", description: "Committed across 18+ hours of the day",
+    check: (data) => {
+      const hours = distinctHourCount(data);
+      return hours >= 18 ? `${hours} distinct hours active` : null;
+    },
+  },
+  {
+    id: "relay_runner", icon: "bridge", rarity: "rare", boost: 3, label: "Relay Runner", description: "Merged PRs across 8+ repos",
+    check: (data) => {
+      const repos = mergedRepoCount(data);
+      return repos >= 8 ? `${repos} repos with merged PRs` : null;
+    },
+  },
+  {
+    id: "time_capsule", icon: "key", rarity: "rare", boost: 1, label: "Time Capsule", description: "Contributed to a repo created 8+ years ago",
+    check: (data) => {
+      const cutoff = new Date(data.period.endDate);
+      cutoff.setFullYear(cutoff.getFullYear() - 8);
+      const oldRepo = data.repos.find((repo) =>
+        data.contributions.some((c) => c.count > 0 && c.repoName === repo.name) &&
+        !!repo.createdAt &&
+        new Date(repo.createdAt) <= cutoff
+      );
+      return oldRepo ? `${oldRepo.name} predates the current era` : null;
+    },
+  },
+  {
+    id: "double_shift", icon: "pulse", rarity: "epic", boost: 4, label: "Double Shift", description: "Early and late commits on 12+ separate days",
+    check: (data) => {
+      const days = doubleShiftDays(data);
+      return days >= 12 ? `${days} two-shift days` : null;
+    },
+  },
   // ── ultra-tier achievements ──
   {
     id: "galaxy_impact", icon: "heart", rarity: "legendary", boost: 6, label: "Galaxy Impact", description: "1,000+ stars received",
@@ -453,6 +532,10 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
   {
     id: "language_wizard", icon: "broom", rarity: "epic", boost: 3, label: "Language Wizard", description: "8+ programming languages",
     check: (data) => data.languages.length >= 8 ? `${data.languages.length} languages` : null,
+  },
+  {
+    id: "lighthouse_repo", icon: "beacon", rarity: "legendary", boost: 4, label: "Lighthouse Repo", description: "Top repo reached 500+ stars",
+    check: (_, m) => !m.topRepo.isFork && m.topRepo.stargazersCount >= 500 ? `${m.topRepo.name} · ${m.topRepo.stargazersCount} stars` : null,
   },
 ];
 

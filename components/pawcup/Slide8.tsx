@@ -60,6 +60,11 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
       .finally(() => setSpeechLoading(false));
   }, [award, profile]);
 
+  const startOver = () => {
+    try { sessionStorage.removeItem("wrappedProfile"); } catch {}
+    window.location.href = "/";
+  };
+
   return (
     <div
       className="relative h-screen w-screen overflow-hidden bg-[#0b0418]"
@@ -86,7 +91,7 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
       <div data-wc-center-card className="absolute inset-0 z-20 flex items-center justify-center px-4 pointer-events-none">
         {award && profile ? (
           <div
-            className="relative w-[420px] max-w-[88vw] overflow-hidden rounded-3xl pointer-events-auto"
+            className="relative w-[430px] min-h-[540px] max-w-[90vw] overflow-hidden rounded-3xl pointer-events-auto"
             style={{
               background: "rgba(10,4,24,0.94)",
               border: `1px solid ${award.border}`,
@@ -114,7 +119,7 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
                     className="text-[9px] font-black tracking-[0.55em] mb-0.5"
                     style={{ color: `${award.color}99` }}
                   >
-                    FIFA WORLD CUP 2026
+                    WORLD CUP 2026
                   </div>
                   <div
                     className="text-[11px] font-semibold tracking-[0.22em]"
@@ -212,7 +217,7 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
                   </p>
                 ) : (
                   <p className="text-[12px] leading-relaxed text-white/50 italic">
-                    &ldquo;A performance for the ages. The FIFA World Cup 2026 crowns its newest legend.&rdquo;
+                    &ldquo;A performance for the ages. World Cup 2026 crowns its newest legend.&rdquo;
                   </p>
                 )}
               </div>
@@ -226,12 +231,25 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
           </div>
         ) : (
           /* fallback — no profile (shouldn't happen in WC mode) */
-          <div className="relative w-[420px] max-w-[88vw] overflow-hidden rounded-3xl border border-amber-400/30 bg-[#0d0820]/92 p-6 backdrop-blur-xl">
+          <div className="relative w-[430px] min-h-[540px] max-w-[90vw] overflow-hidden rounded-3xl border border-amber-400/30 bg-[#0d0820]/92 p-6 backdrop-blur-xl">
             <div className="text-center text-amber-400 text-lg font-black tracking-widest">
-              FIFA WORLD CUP 2026
+              WORLD CUP 2026
             </div>
           </div>
         )}
+      </div>
+
+      <div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2">
+        <button
+          onClick={startOver}
+          className="flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm font-medium text-white/70 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Start over
+        </button>
       </div>
 
       <style>{`

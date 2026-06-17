@@ -37,69 +37,71 @@ function Slide1() {
 
       {/* ====== LEFT: training equipment ====== */}
       <div className="absolute left-[3%] top-0 bottom-0 w-[28%] z-10 pointer-events-none">
-        {/* Realistic 3D training field */}
-        <div className="absolute left-[2%] right-[2%] top-[15%] bottom-[15%]">
-          {/* perspective grass surface */}
-          <div style={{
-            position: "absolute", bottom: 0, left: "0%", right: "0%", height: "100%",
-            transform: "perspective(900px) rotateX(16deg)",
-            transformOrigin: "50% 100%",
-          }}>
-            {/* alternating mower stripes */}
+        <div className="absolute inset-0 translate-y-[7%]">
+          {/* Realistic 3D training field */}
+          <div className="absolute left-[2%] right-[2%] top-[15%] bottom-[15%]">
+            {/* perspective grass surface */}
             <div style={{
-              position: "absolute", inset: 0,
-              background: "repeating-linear-gradient(0deg,#14532d 0px,#14532d 48px,#166534 48px,#166534 96px)",
-            }} />
-            {/* grass sheen overlay */}
+              position: "absolute", bottom: 0, left: "0%", right: "0%", height: "100%",
+              transform: "perspective(900px) rotateX(16deg)",
+              transformOrigin: "50% 100%",
+            }}>
+              {/* alternating mower stripes */}
+              <div style={{
+                position: "absolute", inset: 0,
+                background: "repeating-linear-gradient(0deg,#14532d 0px,#14532d 48px,#166534 48px,#166534 96px)",
+              }} />
+              {/* grass sheen overlay */}
+              <div style={{
+                position: "absolute", inset: 0,
+                background: "linear-gradient(90deg, rgba(0,0,0,0.18) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.18) 100%)",
+              }} />
+              {/* field boundary */}
+              <div style={{
+                position: "absolute", top: "8%", left: "6%", right: "6%", bottom: "2%",
+                border: "2px solid rgba(255,255,255,0.75)",
+              }} />
+              {/* center horizontal line */}
+              <div style={{
+                position: "absolute", top: "54%", left: "6%", right: "6%",
+                height: "2px", background: "rgba(255,255,255,0.75)",
+              }} />
+              {/* penalty box top */}
+              <div style={{
+                position: "absolute", top: "8%", left: "28%", right: "28%",
+                height: "18%", border: "2px solid rgba(255,255,255,0.6)", borderTop: "none",
+              }} />
+              {/* penalty box bottom */}
+              <div style={{
+                position: "absolute", bottom: "2%", left: "28%", right: "28%",
+                height: "18%", border: "2px solid rgba(255,255,255,0.6)", borderBottom: "none",
+              }} />
+            </div>
+            {/* ground-level glow */}
             <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(90deg, rgba(0,0,0,0.18) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.18) 100%)",
-            }} />
-            {/* field boundary */}
-            <div style={{
-              position: "absolute", top: "8%", left: "6%", right: "6%", bottom: "2%",
-              border: "2px solid rgba(255,255,255,0.75)",
-            }} />
-            {/* center horizontal line */}
-            <div style={{
-              position: "absolute", top: "54%", left: "6%", right: "6%",
-              height: "2px", background: "rgba(255,255,255,0.75)",
-            }} />
-            {/* penalty box top */}
-            <div style={{
-              position: "absolute", top: "8%", left: "28%", right: "28%",
-              height: "18%", border: "2px solid rgba(255,255,255,0.6)", borderTop: "none",
-            }} />
-            {/* penalty box bottom */}
-            <div style={{
-              position: "absolute", bottom: "2%", left: "28%", right: "28%",
-              height: "18%", border: "2px solid rgba(255,255,255,0.6)", borderBottom: "none",
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "32px",
+              background: "linear-gradient(to top, rgba(20,83,45,0.6), transparent)",
             }} />
           </div>
-          {/* ground-level glow */}
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: "32px",
-            background: "linear-gradient(to top, rgba(20,83,45,0.6), transparent)",
-          }} />
+
+          {/* Slalom course · jalons arranged in a deliberate S-curve */}
+          <Jalon className="absolute left-[23%] bottom-[63%]" color="#facc15" h={170} delay="0s" />
+          <Jalon className="absolute left-[57%] bottom-[54%]" color="#ef4444" h={185} delay="0.35s" />
+          <Jalon className="absolute left-[27%] bottom-[44%]" color="#facc15" h={175} delay="0.7s" />
+          <Jalon className="absolute left-[63%] bottom-[34%]" color="#ef4444" h={165} delay="1.05s" />
+
+          {/* Cones · flanking the slalom path */}
+          <Cone className="absolute left-[13%] bottom-[35%]" />
+          <Cone className="absolute left-[41%] bottom-[29%]" big />
+          <Cone className="absolute left-[71%] bottom-[25%]" />
+          <Cone className="absolute left-[53%] bottom-[21%]" small />
+          <Cone className="absolute left-[11%] bottom-[22%]" small />
+
+          {/* Soccer balls · more realistic, better positioned */}
+          <Ball className="absolute left-[39%] bottom-[38%]" size={68} delay="0s" />
+          <Ball className="absolute left-[69%] bottom-[32%]" size={68} delay="0.9s" />
+          <Ball className="absolute left-[17%] bottom-[28%]" size={68} delay="1.8s" />
         </div>
-
-        {/* Slalom course · jalons arranged in a deliberate S-curve */}
-        <Jalon className="absolute left-[23%] bottom-[63%]" color="#facc15" h={170} delay="0s" />
-        <Jalon className="absolute left-[57%] bottom-[54%]" color="#ef4444" h={185} delay="0.35s" />
-        <Jalon className="absolute left-[27%] bottom-[44%]" color="#facc15" h={175} delay="0.7s" />
-        <Jalon className="absolute left-[63%] bottom-[34%]" color="#ef4444" h={165} delay="1.05s" />
-
-        {/* Cones · flanking the slalom path */}
-        <Cone className="absolute left-[13%] bottom-[35%]" />
-        <Cone className="absolute left-[41%] bottom-[29%]" big />
-        <Cone className="absolute left-[71%] bottom-[25%]" />
-        <Cone className="absolute left-[53%] bottom-[21%]" small />
-        <Cone className="absolute left-[11%] bottom-[22%]" small />
-
-        {/* Soccer balls · more realistic, better positioned */}
-        <Ball className="absolute left-[39%] bottom-[38%]" size={68} delay="0s" />
-        <Ball className="absolute left-[69%] bottom-[32%]" size={68} delay="0.9s" />
-        <Ball className="absolute left-[17%] bottom-[28%]" size={68} delay="1.8s" />
 
         {/* caption */}
       </div>
@@ -122,10 +124,6 @@ function Slide1() {
           {/* floor shadow */}
           <div className="absolute right-[8%] bottom-[4%] w-[55%] h-6 rounded-[50%] bg-black/60 blur-md" />
 
-          {/* caption */}
-          <div className="absolute right-6 top-6 text-purple-300/70 text-[10px] tracking-[0.35em] font-mono text-right">
-            STUDYING · TACTICS
-          </div>
         </div>
       </div>
 

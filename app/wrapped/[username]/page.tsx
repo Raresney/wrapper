@@ -80,6 +80,23 @@ const slideVariants = {
   exit:   (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0, transition: { duration: 0.3, ease: EASE } }),
 };
 
+function normalizeSlideState(state: SlideState, slides: SlideId[]): SlideState {
+  let index = slides.indexOf(state.current);
+  let current = state.current;
+
+  if (index === -1) {
+    index = slides.length - 1;
+    current = slides[index];
+  }
+
+  return {
+    current,
+    index,
+    total: slides.length,
+    visited: state.visited.filter((id) => slides.includes(id)),
+  };
+}
+
 // â”€â”€ loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LoadingScreen() {
   return (
@@ -137,6 +154,7 @@ export default function WrappedPage() {
   const [shareOpen,        setShareOpen]        = useState(false);
   const touchStartX = useRef(0);
   const slideAreaRef = useRef<HTMLDivElement>(null);
+  const normalizedSlideState = normalizeSlideState(slideState, activeSlides);
 
   const fetchNarrative = useCallback(async (p: WrappedProfile) => {
     setNarrativeLoading(true);
@@ -163,48 +181,45 @@ export default function WrappedPage() {
     }
   }, [router, fetchNarrative]);
 
-  useEffect(() => {
-    setSlideState((prev) => {
-      let nextIndex = activeSlides.indexOf(prev.current);
-      let nextCurrent = prev.current;
-      if (nextIndex === -1) {
-        nextIndex = activeSlides.length - 1;
-        nextCurrent = activeSlides[nextIndex];
-      }
-      const filteredVisited = prev.visited.filter((id) => activeSlides.includes(id));
-      if (
-        nextCurrent === prev.current &&
-        nextIndex === prev.index &&
-        prev.total === activeTotal &&
-        filteredVisited.length === prev.visited.length
-      ) {
-        return prev;
-      }
-      return { current: nextCurrent, index: nextIndex, total: activeTotal, visited: filteredVisited };
-    });
-  }, [activeSlides, activeTotal]);
-
   const goNext = useCallback(() => {
     setSlideState(prev => {
-      if (prev.index >= activeSlides.length - 1) return prev;
+      const currentState = normalizeSlideState(prev, activeSlides);
+      if (currentState.index >= activeSlides.length - 1) return currentState;
       setDirection(1);
-      return { current: activeSlides[prev.index + 1], index: prev.index + 1, total: activeTotal, visited: [...prev.visited, prev.current] };
+      return {
+        current: activeSlides[currentState.index + 1],
+        index: currentState.index + 1,
+        total: activeTotal,
+        visited: [...currentState.visited, currentState.current],
+      };
     });
   }, [activeSlides, activeTotal]);
 
   const goPrev = useCallback(() => {
     setSlideState(prev => {
-      if (prev.index <= 0) return prev;
+      const currentState = normalizeSlideState(prev, activeSlides);
+      if (currentState.index <= 0) return currentState;
       setDirection(-1);
-      return { current: activeSlides[prev.index - 1], index: prev.index - 1, total: activeTotal, visited: prev.visited.slice(0, -1) };
+      return {
+        current: activeSlides[currentState.index - 1],
+        index: currentState.index - 1,
+        total: activeTotal,
+        visited: currentState.visited.slice(0, -1),
+      };
     });
   }, [activeSlides, activeTotal]);
 
   const goTo = useCallback((index: number) => {
     setSlideState(prev => {
-      if (index === prev.index || index < 0 || index > activeSlides.length - 1) return prev;
-      setDirection(index > prev.index ? 1 : -1);
-      return { current: activeSlides[index], index, total: activeTotal, visited: [...prev.visited, prev.current] };
+      const currentState = normalizeSlideState(prev, activeSlides);
+      if (index === currentState.index || index < 0 || index > activeSlides.length - 1) return currentState;
+      setDirection(index > currentState.index ? 1 : -1);
+      return {
+        current: activeSlides[index],
+        index,
+        total: activeTotal,
+        visited: [...currentState.visited, currentState.current],
+      };
     });
   }, [activeSlides, activeTotal]);
 
@@ -229,7 +244,7 @@ export default function WrappedPage() {
     </div>
   );
 
-  const CurrentSlide = SLIDE_COMPONENTS[slideState.current];
+  const CurrentSlide = SLIDE_COMPONENTS[normalizedSlideState.current];
 
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden"
@@ -237,7 +252,7 @@ export default function WrappedPage() {
       onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
       onTouchEnd={e => {
         const d = e.changedTouches[0].clientX - touchStartX.current;
-        if (d > 50) goNext(); else if (d < -50) goPrev();
+        if (d > 50) goPrev(); else if (d < -50) goNext();
       }}
     >
       {/* world cup decorative layer â€” renders behind all content */}
@@ -253,13 +268,13 @@ export default function WrappedPage() {
         <div className="flex items-center gap-1.5 sm:gap-3">
           {/* prev button */}
           <button onClick={goPrev}
-            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white ${slideState.index === 0 ? "invisible" : ""}`}>
+            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
             <ChevronLeft />
           </button>
 
           {/* planet journey bar */}
           <div className="flex-1">
-            <PlanetProgress total={activeTotal} current={slideState.index} colors={planetColors(profile)} onNavigate={goTo} />
+            <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
           </div>
 
           {/* share button */}
@@ -279,7 +294,7 @@ export default function WrappedPage() {
       {/* â”€â”€ slide â”€â”€ */}
       <div ref={slideAreaRef} className="absolute inset-0 z-10">
         <AnimatePresence mode="wait" custom={direction}>
-          <motion.div key={slideState.current} custom={direction}
+          <motion.div key={normalizedSlideState.current} custom={direction}
             variants={slideVariants} initial="enter" animate="center" exit="exit"
             className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-contain lg:overflow-hidden">
             <div className="relative h-full w-full overflow-hidden">
@@ -288,7 +303,7 @@ export default function WrappedPage() {
                   worldCup ? "pointer-events-none opacity-0" : "opacity-100"
                 }`}
               >
-                {slideState.current === "share"
+                {normalizedSlideState.current === "share"
                   ? <SlideShare profile={profile} showStartOver={!worldCup} />
                   : <CurrentSlide profile={profile} />}
               </div>
@@ -298,12 +313,12 @@ export default function WrappedPage() {
                 }`}
               >
                 <div className="wc-pawcup-scene absolute inset-0">
-                  <WorldCupSlide index={slideState.index} profile={profile} />
+                  <WorldCupSlide index={normalizedSlideState.index} profile={profile} />
                 </div>
-                <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={slideState.current}>
-                  {slideState.current === "archetype"
+                <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={normalizedSlideState.current}>
+                  {normalizedSlideState.current === "archetype"
                     ? <SlideArchetype profile={profile} sparse />
-                    : slideState.current === "share"
+                    : normalizedSlideState.current === "share"
                       ? <SlideShare profile={profile} showStartOver={false} />
                       : <CurrentSlide profile={profile} />}
                 </div>
@@ -330,19 +345,19 @@ export default function WrappedPage() {
       {/* â”€â”€ mobile nav arrows (small floating buttons; don't block vertical scroll) â”€â”€ */}
       <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2 lg:hidden">
         <button onClick={goPrev} aria-label="Previous slide"
-          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${slideState.index === 0 ? "invisible" : ""}`}
+          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${normalizedSlideState.index === 0 ? "invisible" : ""}`}
           style={{ backdropFilter: "blur(8px)" }}>
           <ChevronLeft />
         </button>
         <button onClick={goNext} aria-label="Next slide"
-          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${slideState.index >= slideState.total - 1 ? "invisible" : ""}`}
+          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${normalizedSlideState.index >= normalizedSlideState.total - 1 ? "invisible" : ""}`}
           style={{ backdropFilter: "blur(8px)" }}>
           <ChevronRight />
         </button>
       </div>
 
       {/* â”€â”€ narrative loading indicator â”€â”€ */}
-      {narrativeLoading && (slideState.current === "archetype" || slideState.current === "share") && (
+      {narrativeLoading && (normalizedSlideState.current === "archetype" || normalizedSlideState.current === "share") && (
         <div className="pointer-events-none fixed bottom-10 right-5 z-30 flex items-center gap-2 rounded-full border border-white/[0.07] bg-black/40 px-3 py-1.5"
           style={{ backdropFilter: "blur(12px)" }}>
           <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--violet-glow)" }} />
@@ -355,9 +370,8 @@ export default function WrappedPage() {
         onClose={() => setShareOpen(false)}
         slideRef={slideAreaRef}
         username={profile.user.login}
-        slideTitle={SLIDE_TITLES[slideState.current]}
+        slideTitle={SLIDE_TITLES[normalizedSlideState.current]}
       />
     </div>
   );
 }
-

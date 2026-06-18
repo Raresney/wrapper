@@ -162,17 +162,23 @@ function scoreAllInsights(data: GitHubRawData, metrics: CalculatedMetrics): Insi
 }
 
 function achievementToInsight(a: Achievement): Insight {
-  const importanceScore = 0.7 * RARITY_RARE * 1.0;
-  const noveltyBonus = 0.1;
-  const emotionBonus = 0.15;
+  const rarityFactor =
+    a.rarity === "legendary" || a.rarity === "epic" ? RARITY_LEGENDARY
+    : a.rarity === "rare" ? RARITY_RARE
+    : a.rarity === "uncommon" ? RARITY_UNCOMMON
+    : RARITY_COMMON;
+  const importanceScore = Math.min(a.importance / 100, 1) * rarityFactor;
+  const noveltyBonus = a.rarity === "legendary" || a.rarity === "epic" ? 0.15 : 0.05;
+  const emotionBonus = a.rarity === "legendary" ? 0.2 : a.rarity === "epic" ? 0.1 : 0.05;
+  const finalScore = importanceScore + noveltyBonus + emotionBonus;
   return {
     id: a.id,
-    value: a.label,
+    value: a.unlockedReason ?? a.label,
     importanceScore,
     noveltyBonus,
     emotionBonus,
-    finalScore: importanceScore + noveltyBonus + emotionBonus,
-    rarity: "rare",
+    finalScore,
+    rarity: rarityLabel(finalScore),
     confidence: 1.0,
   };
 }
@@ -184,7 +190,7 @@ export function selectInsights(
 ): SelectedInsights {
   const all = scoreAllInsights(data, metrics).sort((a, b) => b.finalScore - a.finalScore);
 
-  const primaryArchetype = all[0];
+  const topInsight = all[0];
   const rest = all.slice(1);
   const narrativeTop3 = rest.slice(0, 3);
   const mainStoryArc = narrativeTop3.reduce(
@@ -198,5 +204,5 @@ export function selectInsights(
     .sort((a, b) => b.finalScore - a.finalScore)
     .slice(0, 3);
 
-  return { primaryArchetype, narrativeTop3, achievementsTop3, mainStoryArc };
+  return { topInsight, narrativeTop3, achievementsTop3, mainStoryArc };
 }

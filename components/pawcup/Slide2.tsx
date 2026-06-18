@@ -1,15 +1,13 @@
 ﻿"use client";
 
-import { useMemo } from "react";
+import Image from "next/image";
+import { useState } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import catFans from "@/components/pawcup/assets/cat-fans.png.asset.json";
 import catMascot from "@/components/pawcup/assets/cat-mascot.asset.json";
 
 function Slide2() {
-  const stars = useMemo(
-    () => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })),
-    [],
-  );
+  const [stars] = useState(() => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })));
 
   return (
     <div
@@ -153,10 +151,13 @@ function Slide2() {
 
           {/* fans · centered in the left panel */}
           <div className="absolute right-[-2%] bottom-[6%] flex items-end justify-end animate-fans-cheer origin-bottom">
-            <img
+            <Image
               src={catFans.url}
               alt="Cat fans cheering in the stands"
+              width={1024}
+              height={1024}
               className="block w-[86%] h-auto drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]"
+              unoptimized
             />
           </div>
 
@@ -186,20 +187,26 @@ function Slide2() {
 
         {/* goalkeeper diving · inside the goal */}
         <div className="absolute left-1/2 -translate-x-1/2 top-[29%] w-[28%] z-10">
-          <img
+          <Image
             src="/cat-goalkeeper.png"
             alt="Cat goalkeeper diving"
+            width={1024}
+            height={1024}
             className="block w-full h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.7)]"
+            unoptimized
           />
         </div>
 
 
         {/* celebrating cat · same mascot as the homepage */}
         <div className="absolute right-[0%] bottom-[4%] w-[60%] origin-bottom z-20">
-          <img
+          <Image
             src={catMascot.url}
             alt="Purple Paws mascot celebrating a goal"
+            width={1024}
+            height={1024}
             className="block w-full h-auto drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]"
+            unoptimized
           />
         </div>
 
@@ -222,7 +229,7 @@ function Slide2() {
           </div>
 
           <p className="mt-5 text-white/80 text-sm leading-relaxed">
-            Purple Paws FC strikes late · 87' winner from <span className="text-amber-300">@whiskermessi</span> · The stadium goes wild <span className="text-yellow-400">{"\u{1F525}"}</span>
+            Purple Paws FC strikes late · 87&apos; winner from <span className="text-amber-300">@whiskermessi</span> · The stadium goes wild <span className="text-yellow-400">{"\u{1F525}"}</span>
           </p>
 
           {/* scoreboard */}
@@ -359,54 +366,6 @@ function Goal() {
   );
 }
 
-function Ball() {
-  const wave = "M48 52 C 54 38 37 33 39 20 C 40 13 33 10 23 13";
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-auto drop-shadow-[0_6px_16px_rgba(0,0,0,0.7)]">
-      <defs>
-        <radialGradient id="s2BallSphere" cx="38%" cy="30%" r="72%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="62%" stopColor="#eef1f5" />
-          <stop offset="100%" stopColor="#bcc2cc" />
-        </radialGradient>
-        <radialGradient id="s2BallGloss" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-        </radialGradient>
-        <clipPath id="s2BallClip"><circle cx="50" cy="50" r="44" /></clipPath>
-      </defs>
-
-      <circle cx="50" cy="50" r="44" fill="url(#s2BallSphere)" />
-
-      {/* three wavy colour ribbons · same as landing ball */}
-      <g clipPath="url(#s2BallClip)" fill="none" strokeLinecap="round">
-        <path d={wave} stroke="#c8163d" strokeWidth="14" />
-        <path d={wave} stroke="#1f9d4d" strokeWidth="14" transform="rotate(120 50 50)" />
-        <path d={wave} stroke="#1d7fe0" strokeWidth="14" transform="rotate(240 50 50)" />
-      </g>
-
-      {/* curved panel seams */}
-      <g clipPath="url(#s2BallClip)" fill="none" stroke="#2a2e38" strokeLinecap="round" opacity="0.7">
-        <path d="M8 39 Q 50 23 92 39" strokeWidth="2.8" />
-        <path d="M8 61 Q 50 77 92 61" strokeWidth="2.8" />
-        <path d="M36 6 Q 20 50 36 94" strokeWidth="2.5" />
-        <path d="M64 6 Q 80 50 64 94" strokeWidth="2.5" />
-      </g>
-
-      {/* central emblem */}
-      <g clipPath="url(#s2BallClip)">
-        <circle cx="50" cy="50" r="10.6" fill="#1d7fe0" />
-        <circle cx="50" cy="50" r="10.6" fill="none" stroke="#ffffff" strokeWidth="2.5" />
-        <circle cx="50" cy="50" r="4.2" fill="#ffffff" opacity="0.9" />
-      </g>
-
-      {/* glossy highlight */}
-      <ellipse cx="36" cy="31" rx="19" ry="12.5" fill="url(#s2BallGloss)" transform="rotate(-28 36 31)" clipPath="url(#s2BallClip)" />
-      <circle cx="50" cy="50" r="44" fill="none" stroke="#000000" strokeOpacity="0.16" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
 function Bar({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="mb-2">
@@ -422,4 +381,3 @@ function Bar({ label, value, color }: { label: string; value: number; color: str
 }
 
 export default Slide2;
-

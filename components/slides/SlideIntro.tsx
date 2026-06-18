@@ -77,8 +77,9 @@ type Flat = {
   currentStreak: number;
   longestStreak: number;
   topRepos: { name: string; commits: number }[];
-  prsOpened: number;
+  ownedRepos: number;
   prsMerged: number;
+  githubAgeYears: number;
 };
 
 function Counter({ to, duration = 2 }: { to: number; duration?: number }) {
@@ -133,7 +134,7 @@ function ProfileCard({ flat }: { flat: Flat }) {
         <motion.div variants={cardItem} className="flex items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={flat.avatarUrl}
+            src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`}
             alt={flat.username}
             className="h-10 w-10 rounded-full border-2 shadow-[0_0_20px_rgba(139,92,246,0.4)]"
             style={{ borderColor: `${ACCENT}80` }}
@@ -143,6 +144,11 @@ function ProfileCard({ flat }: { flat: Flat }) {
               Commander
             </div>
             <div className="text-base font-bold">@{flat.username}</div>
+            {flat.githubAgeYears > 0 && (
+              <div className="text-[10px] text-white/35">
+                {flat.githubAgeYears === 1 ? "1 year on GitHub" : `${flat.githubAgeYears} years on GitHub`}
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -225,7 +231,7 @@ function ProfileCard({ flat }: { flat: Flat }) {
         </motion.div>
 
         <motion.div variants={cardItem} className="mt-2 grid grid-cols-2 gap-2">
-          <StatBox label="PRs opened" value={flat.prsOpened} accent="#22d3ee" />
+          <StatBox label="Repos" value={flat.ownedRepos} accent="#22d3ee" />
           <StatBox label="PRs merged" value={flat.prsMerged} accent="#4ade80" />
         </motion.div>
       </SlideCard>
@@ -245,8 +251,9 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
     currentStreak: flat.currentStreak,
     longestStreak: flat.longestStreak,
     topRepos: flat.topRepos,
-    prsOpened: flat.pullRequests.opened,
+    ownedRepos: flat.ownedRepoCount,
     prsMerged: flat.pullRequests.merged,
+    githubAgeYears: flat.githubAgeYears,
   };
 
   return (

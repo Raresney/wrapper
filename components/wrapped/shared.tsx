@@ -1,22 +1,20 @@
 "use client";
 
 import { motion, useAnimation } from "framer-motion";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 // ── Stars ─────────────────────────────────────────────────────────────────
 export function Stars({ count = 120 }: { count?: number }) {
-  const stars = useMemo(
-    () =>
-      Array.from({ length: count }).map((_, i) => ({
-        id: i,
-        top: Math.random() * 100,
-        left: Math.random() * 100,
-        size: Math.random() * 1.8 + 0.4,
-        delay: Math.random() * 4,
-        duration: 2 + Math.random() * 3,
-        opacity: 0.3 + Math.random() * 0.7,
-      })),
-    [count],
+  const [stars] = useState(() =>
+    Array.from({ length: count }).map((_, i) => ({
+      id: i,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      size: Math.random() * 1.8 + 0.4,
+      delay: Math.random() * 4,
+      duration: 2 + Math.random() * 3,
+      opacity: 0.3 + Math.random() * 0.7,
+    }))
   );
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -59,7 +57,14 @@ function CatRocketImg() {
 export function Rocket() {
   const controls = useAnimation();
   const [launched, setLaunched] = useState(false);
-  const trail = useMemo(() => Array.from({ length: 14 }).map((_, i) => i), []);
+  const trail = Array.from({ length: 14 }).map((_, i) => i);
+  const [trailDots] = useState(() =>
+    Array.from({ length: 14 }).map(() => ({
+      w: 6 + Math.random() * 6,
+      h: 6 + Math.random() * 6,
+      x: (Math.random() - 0.5) * 30,
+    }))
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -125,9 +130,9 @@ export function Rocket() {
                 key={i}
                 className="absolute block rounded-full bg-green-400"
                 style={{
-                  width: 6 + Math.random() * 6,
-                  height: 6 + Math.random() * 6,
-                  left: (Math.random() - 0.5) * 30,
+                  width: trailDots[i].w,
+                  height: trailDots[i].h,
+                  left: trailDots[i].x,
                   boxShadow: "0 0 12px #22c55e,0 0 24px #16a34a",
                 }}
                 initial={{ y: 0, opacity: 0 }}

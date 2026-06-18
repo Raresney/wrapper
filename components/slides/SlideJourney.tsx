@@ -122,12 +122,13 @@ function GasPlanet() {
 
 function Heatmap({ values, hotMonth }: { values: number[]; hotMonth: string }) {
   const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  const fullMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const max = Math.max(...values, 1);
   return (
     <div className="flex items-end gap-1">
       {values.map((v, i) => {
         const intensity = v / max;
-        const isHot = months[i] === hotMonth[0] && hotMonth.length > 0;
+        const isHot = hotMonth.length > 0 && fullMonths[i] === hotMonth;
         return (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
             <motion.div initial={{ height: 2, opacity: 0.3 }} animate={{ height: 4 + intensity * 22, opacity: 0.4 + intensity * 0.6 }}
@@ -141,13 +142,24 @@ function Heatmap({ values, hotMonth }: { values: number[]; hotMonth: string }) {
   );
 }
 
+const DAY_KEYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] as const;
+
+function formatShortDate(dateStr: string): string {
+  if (!dateStr) return "—";
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const parts = dateStr.split("-");
+  const m = Number(parts[1]);
+  const d = Number(parts[2]);
+  return `${months[m - 1]} ${d}`;
+}
+
 export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
   const heatmap = flat.commitsByMonth;
   const loc = flat.totalLinesOfCode;
-  const totalDayCommits = flat.weekdayCommits + flat.weekendCommits;
-  const weekendPct = totalDayCommits > 0 ? Math.round((flat.weekendCommits / totalDayCommits) * 100) : 0;
   const trendLabel = flat.growth.trend === "up" ? `▲ +${flat.growth.deltaPercent}%` : flat.growth.trend === "down" ? `▼ ${flat.growth.deltaPercent}%` : "▬ steady";
+  const dayMax = Math.max(...DAY_KEYS.map(d => flat.commitsByWeekday[d] ?? 0), 1);
+  const peakDay = DAY_KEYS.reduce((a, b) => (flat.commitsByWeekday[a] ?? 0) >= (flat.commitsByWeekday[b] ?? 0) ? a : b);
 
   return (
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ background: "#080612" }}>
@@ -191,7 +203,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
               <div className="s5h">
                 <CountUp value={loc > 0 ? loc : flat.totalCommits} className="block bg-gradient-to-br from-amber-300 via-yellow-200 to-orange-400 bg-clip-text text-transparent tabular-nums" />
               </div>
-              <div className="mt-1 text-[11px] uppercase tracking-wider text-white/40">{loc > 0 ? "lines of code" : "commits"}</div>
+              <div className="mt-1 text-[11px] uppercase tracking-wider text-white/40">{loc > 0 ? "lines of code · all repos" : "commits"}</div>
               <div className="mt-1 text-sm font-semibold tabular-nums" style={{ color: flat.growth.trend === "down" ? "#f87171" : "#34d399" }}>
                 {trendLabel} <span className="text-[10px] font-normal text-white/40">vs first half</span>
               </div>
@@ -215,13 +227,25 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
               </div>
             </div>
             <div className="mt-3">
-              <div className="flex justify-between text-[10px] text-white/40">
-                <span>Weekdays {flat.weekdayCommits.toLocaleString()}</span>
-                <span>Weekends {flat.weekendCommits.toLocaleString()}</span>
+              <div className="mb-1 flex items-baseline justify-between text-[11px]">
+                <span className="uppercase tracking-wider text-white/45">By day of week</span>
+                <span className="text-yellow-200/70">{peakDay} is peak</span>
               </div>
-              <div className="mt-1 flex h-2 w-full overflow-hidden rounded-full bg-white/10">
-                <motion.div initial={{ width: 0 }} animate={{ width: `${100 - weekendPct}%` }} transition={{ delay: 1, duration: 1.2, ease: "easeOut" }} className="h-full" style={{ background: "linear-gradient(90deg,#ffd84d,#ff9a1f)" }} />
-                <motion.div initial={{ width: 0 }} animate={{ width: `${weekendPct}%` }} transition={{ delay: 1.1, duration: 1.2, ease: "easeOut" }} className="h-full" style={{ background: "rgba(255,255,255,0.22)" }} />
+              <div className="flex h-10 items-end gap-[3px]">
+                {DAY_KEYS.map((day) => {
+                  const v = flat.commitsByWeekday[day] ?? 0;
+                  const isPeak = day === peakDay;
+                  const isWeekend = day === "Sat" || day === "Sun";
+                  return (
+                    <div key={day} className="flex flex-1 flex-col items-center gap-0.5">
+                      <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(8, (v / dayMax) * 100)}%` }}
+                        transition={{ delay: 0.9 + DAY_KEYS.indexOf(day) * 0.04, duration: 0.5 }}
+                        className="w-full rounded-sm"
+                        style={{ background: isPeak ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : isWeekend ? "rgba(255,200,80,0.35)" : "rgba(255,200,80,0.20)", boxShadow: isPeak ? "0 0 6px rgba(255,180,30,0.5)" : "none" }} />
+                      <span className="text-[7px] text-white/35">{day[0]}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className="mt-3 flex items-stretch rounded-xl border border-white/5 bg-white/[0.02] py-3">
@@ -244,6 +268,14 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
               <div className="mt-2">
                 <Heatmap values={heatmap} hotMonth={flat.mostActiveMonth} />
               </div>
+              {flat.mostProductiveDay.date && flat.mostProductiveDay.commits > 0 && (
+                <div className="mt-2 flex items-center justify-between border-t border-yellow-400/10 pt-2">
+                  <span className="text-[10px] text-yellow-200/50">Best day</span>
+                  <span className="text-xs font-semibold text-yellow-200">
+                    {formatShortDate(flat.mostProductiveDay.date)} · {flat.mostProductiveDay.commits} commits
+                  </span>
+                </div>
+              )}
             </div>
             </SlideCard>
           </motion.div>

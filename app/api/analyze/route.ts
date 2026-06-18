@@ -7,13 +7,31 @@ import type { GitHubRawData, AiTone, WrappedProfile } from "@/types/wrapped";
 
 const VALID_TONES: AiTone[] = ["funny", "brutal", "motivational"];
 
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function isGitHubRawData(body: unknown): body is GitHubRawData {
+  if (!isObjectRecord(body)) return false;
+
+  const user = body.user;
+  const period = body.period;
+  const contributions = body.contributions;
+  const repos = body.repos;
+  const languages = body.languages;
+  const pullRequests = body.pullRequests;
+
   return (
-    typeof body === "object" &&
-    body !== null &&
-    "user" in body &&
-    "contributions" in body &&
-    "period" in body
+    isObjectRecord(user) &&
+    typeof user.login === "string" &&
+    typeof user.accountCreatedAt === "string" &&
+    isObjectRecord(period) &&
+    typeof period.startDate === "string" &&
+    typeof period.endDate === "string" &&
+    Array.isArray(contributions) &&
+    Array.isArray(repos) &&
+    Array.isArray(languages) &&
+    Array.isArray(pullRequests)
   );
 }
 
@@ -34,8 +52,9 @@ export async function POST(request: Request) {
   }
 
   const rawData = body;
+  const rawDataWithTone = rawData as GitHubRawData & { tone?: unknown };
   const { searchParams } = new URL(request.url);
-  const tone = parseTone(searchParams.get("tone") ?? (rawData as Record<string, unknown>).tone);
+  const tone = parseTone(searchParams.get("tone") ?? rawDataWithTone.tone);
 
   try {
     const metrics = calculateMetrics(rawData);
@@ -56,7 +75,6 @@ export async function POST(request: Request) {
       tone,
       narrative: null,
       generatedAt: new Date().toISOString(),
-      cacheKey: "",
     };
 
     return NextResponse.json(profile, { status: 200 });

@@ -1,4 +1,4 @@
-import type { AiTone } from "@/types/wrapped";
+import type { AiTone, ArchetypeId } from "@/types/wrapped";
 
 // ── Profile-driven, per-run-diverse fallback narrative ──────────────────────
 // Produces the same four fields the LLM would, but assembled procedurally from
@@ -7,7 +7,9 @@ import type { AiTone } from "@/types/wrapped";
 
 export type FallbackInput = {
   username: string;
-  archetype: string;        // human label, e.g. "Night Owl"
+  archetype: string;        // human label, e.g. "Foundry"
+  archetypeId: ArchetypeId;
+  primaryWeight: number;    // 0–100
   totalCommits: number;
   longestStreak: number;
   currentStreak: number;
@@ -81,7 +83,9 @@ const ROAST: Record<AiTone, ((t: T) => string)[]> = {
     (t) => `${t.nightPct}% of your commits happen before sunrise. The owls have started taking notes.`,
     (t) => `${t.prs} merged PRs and a ${t.peak} bedtime. Somewhere a deadline is very, very happy.`,
     (t) => `${t.commits} commits across ${t.repos} repos. Hobbies? This is the hobby.`,
-    (t) => `Your longest streak hit ${t.streak} days. Your current one is ${t.curStreak}. We won't ask what happened.`,
+    (t) => t.curStreak < t.streak
+      ? `Your longest streak hit ${t.streak} days. Your current one is ${t.curStreak}. We won't ask what happened.`
+      : `Your longest streak is ${t.streak} days — and it's still going. Whatever you're doing, don't stop.`,
     (t) => `${t.repo} got the deluxe treatment while the rest of your repos waited politely in line.`,
     (t) => `${t.peak} is not a peak hour, it's a cry for curtains and a stronger coffee.`,
     (t) => `${t.commits} commits later, the only thing more committed than you is your browser session.`,
@@ -94,17 +98,23 @@ const ROAST: Record<AiTone, ((t: T) => string)[]> = {
   brutal: [
     (t) => `${t.commits} commits and your peak is ${t.peak}. That's not dedication, that's a sleep schedule held together with tape.`,
     (t) => `${t.nightPct}% of your work happens before 5am. The code isn't the only thing crashing.`,
-    (t) => `A ${t.streak}-day streak that's now down to ${t.curStreak}. Consistency was a phase, apparently.`,
+    (t) => t.curStreak < t.streak
+      ? `A ${t.streak}-day streak that's now down to ${t.curStreak}. Consistency was a phase, apparently.`
+      : `A ${t.streak}-day streak, still active. The calendar is genuinely afraid of you.`,
     (t) => `${t.repos} repos, and ${t.repo} ate most of your year. Spreading thin or just stuck?`,
     (t) => `${t.prs} PRs merged. Impressive — until you realize how many ${t.peak} nights it cost you.`,
     (t) => `All that ${t.lang} and nothing to show but ${t.commits} commits. The numbers don't lie, and they're not kind.`,
     (t) => `You call it ${t.arch}. The data calls it a cry for a calendar.`,
     (t) => `${t.repo} became your whole personality and somehow still demanded overtime.`,
-    (t) => `${t.nightPct}% after dark, ${t.curStreak} right now, and ${t.streak} in the past. The plot wrote itself.`,
+    (t) => t.curStreak < t.streak
+      ? `${t.nightPct}% after dark, ${t.curStreak} right now, and ${t.streak} in the past. The plot wrote itself.`
+      : `${t.nightPct}% after dark, ${t.curStreak} days and still counting. The plot has no ending yet.`,
     (t) => `${t.prs} merged PRs doesn't erase the fact that ${t.peak} became a lifestyle mistake.`,
     (t) => `${t.commits} commits over ${t.period}. Busy, yes. Balanced, absolutely not.`,
     (t) => `${t.repo} got fed, your schedule got wrecked, and ${t.commits} commits are all the evidence anyone needs.`,
-    (t) => `${t.streak} days once, ${t.curStreak} now. Even your momentum got tired of your habits.`,
+    (t) => t.curStreak < t.streak
+      ? `${t.streak} days once, ${t.curStreak} now. Even your momentum got tired of your habits.`
+      : `${t.streak} days and still running. The streak has outlived most people's good intentions.`,
     (t) => `${t.lang} may be your top language, but exhaustion was clearly the second one.`,
     (t) => `${t.repos} repos and still the same story: ${t.peak}, ${t.repo}, and a year with no brakes.`,
   ],
@@ -143,7 +153,9 @@ const DESC: Record<AiTone, ((t: T) => string)[]> = {
   ],
   brutal: [
     (t) => `${t.arch}, sure. The receipts say ${t.commits} commits, mostly funneled into ${t.repo}, mostly at ${t.peak}. That's not range — that's a rut with good lighting. ${t.lang} can only carry you so far.`,
-    (t) => `A ${t.streak}-day streak that collapsed to ${t.curStreak}. ${t.nightPct}% of your output bleeds past midnight. ${t.commits} commits and you still treat sleep like an optional dependency.`,
+    (t) => t.curStreak < t.streak
+      ? `A ${t.streak}-day streak that collapsed to ${t.curStreak}. ${t.nightPct}% of your output bleeds past midnight. ${t.commits} commits and you still treat sleep like an optional dependency.`
+      : `A ${t.streak}-day streak, still running. ${t.nightPct}% of your output bleeds past midnight. ${t.commits} commits and you still treat sleep like an optional dependency.`,
     (t) => `${t.repos} repos, one real obsession: ${t.repo}. ${t.prs} PRs merged, the rest of GitHub barely knows you exist. The ${t.peak} grind is loud; the results are quieter than you'd like.`,
     (t) => `You wear ${t.arch} like a badge. The data reads more like a warning label: ${t.commits} commits, a dying streak, and a ${t.peak} habit that's running the show.`,
     (t) => `${t.arch} sounds cool until you read the fine print: ${t.repo}, ${t.peak}, and enough commits to confuse output with direction.`,
@@ -218,7 +230,9 @@ const CAPTION: Record<AiTone, ((t: T) => string)[]> = {
     (t) => `${t.arch} season: loud stats, late nights, and absolutely no chill.`,
   ],
   brutal: [
-    (t) => `@${t.name} — ${t.commits} commits, a streak down to ${t.curStreak}. The grind is real, the sleep is not.`,
+    (t) => t.curStreak < t.streak
+      ? `@${t.name} — ${t.commits} commits, a streak down to ${t.curStreak}. The grind is real, the sleep is not.`
+      : `@${t.name} — ${t.commits} commits, ${t.curStreak}-day streak active. The grind is real, the sleep is not.`,
     (t) => `${t.arch} on paper. ${t.commits} commits in reality. You decide.`,
     (t) => `${t.nightPct}% nocturnal. ${t.commits} commits. This is fine.`,
     (t) => `@${t.name}: ${t.repo} got the best years of your life and still wanted more.`,
@@ -241,13 +255,301 @@ const CAPTION: Record<AiTone, ((t: T) => string)[]> = {
   ],
 };
 
+// ── Archetype-specific roast lines (3 per archetype, stat-interpolated) ─────
+// Selected instead of the generic ROAST pool when archetypeId is known.
+const ARCH_ROAST: Record<ArchetypeId, ((t: T) => string)[]> = {
+  foundry: [
+    (t) => `${t.commits} commits across ${t.repos} repos — that's not a sprint, that's a conveyor belt. ${t.lang} was the fuel; the pace was the point.`,
+    (t) => `You didn't build one thing. You built ${t.repos} things, shipped ${t.commits} commits, and somehow kept it moving.`,
+    (t) => `${t.repos} repos and ${t.commits} commits says scope is something that happens to other people.`,
+  ],
+  afterglow: [
+    (t) => `${t.nightPct}% of your commits land after dark. The moon has seen more of your work than your coworkers have.`,
+    (t) => `${t.peak} is your golden hour. ${t.commits} commits later, circadian rhythms are clearly optional.`,
+    (t) => `${t.commits} commits, mostly shipped when the rest of the world was asleep. Classic ${t.arch} behavior.`,
+  ],
+  trail_mapper: [
+    (t) => `${t.repos} repos, ${t.lang} on top — and still you kept looking for the next one.`,
+    (t) => `Wide reach, variable depth. ${t.repos} repos and ${t.commits} commits is impressive until you count the directions it went.`,
+    (t) => `You sampled ${t.lang}, started ${t.repos} repos, and called it a strategy. Somehow it worked.`,
+  ],
+  cartographer: [
+    (t) => `${t.repo} got everything. The other ${t.repos} repos got whatever was left.`,
+    (t) => `${t.commits} commits and most of them point back to ${t.repo}. Focused or stuck — only you know which.`,
+    (t) => `You went deep on ${t.lang} and ${t.repo}, and the data couldn't be more obvious about it.`,
+  ],
+  silent_current: [
+    (t) => `${t.commits} commits spread across a very quiet year. The gaps did most of the communicating.`,
+    (t) => `${t.curStreak} days current streak. The silence has been doing most of the talking.`,
+    (t) => `Sparse, considered, and occasionally explosive. ${t.commits} commits on your own schedule.`,
+  ],
+  signal_booster: [
+    (t) => `${t.prs} PRs merged and people actually noticed. That's rarer than the number makes it sound.`,
+    (t) => `${t.commits} commits with enough reach that the follower count kept moving. The signal traveled.`,
+    (t) => `The work escaped your local machine. ${t.prs} PRs later, other people care about your repos.`,
+  ],
+  anvil: [
+    (t) => `${t.streak} days in a row. That's not a streak — that's a documented personality trait.`,
+    (t) => `${t.commits} commits, ${t.streak}-day best streak. Somewhere a productivity coach is taking notes.`,
+    (t) => `You showed up ${t.streak} days in a row and the codebase didn't even leave a thank-you note.`,
+  ],
+  chaos_pilot: [
+    (t) => `${t.repos} repos and at least some of them remember you fondly.`,
+    (t) => `${t.commits} commits spread across ${t.repos} repos. Focus was optional. Coverage was not.`,
+    (t) => `You started ${t.repos} things. The ones that mattered got finished. Probably.`,
+  ],
+  flashpoint: [
+    (t) => `The momentum is new and it's real. ${t.commits} commits later, the trajectory is hard to argue with.`,
+    (t) => `${t.streak}-day streak and still accelerating. Something clicked and the data is very loud about it.`,
+    () => `You went from background noise to trajectory faster than the git log expected.`,
+  ],
+  constellation_weaver: [
+    (t) => `${t.prs} PRs merged. You didn't just contribute — you kept coming back until it landed.`,
+    (t) => `${t.commits} commits and ${t.prs} PRs. You build things with people, not despite them.`,
+    (t) => `${t.prs} merged PRs and a collaboration footprint that doesn't stay contained to your own repos.`,
+  ],
+  caretaker: [
+    (t) => `${t.repo} didn't get new features. It got better. That's a different kind of discipline.`,
+    (t) => `${t.commits} commits and most of them cleaned something up that needed it. Rare.`,
+    (t) => `You refactored what needed it and fixed what nobody else would touch. ${t.repo} owes you.`,
+  ],
+  deep_diver: [
+    (t) => `${t.lang} got everything. The other languages got polite consideration and nothing else.`,
+    (t) => `${t.commits} commits and ${t.lang} runs through most of them. That's not preference — that's identity.`,
+    (t) => `You went deep on ${t.lang} and the distribution is not subtle about it.`,
+  ],
+  archive_keeper: [
+    (t) => `${t.repos} repos, a ${t.streak}-day best streak, and an account old enough to have strong opinions.`,
+    (t) => `The account depth shows. ${t.commits} commits across a timeline that newer accounts haven't had time to build.`,
+    (t) => `${t.streak} days at your best, ${t.repos} repos in the catalog. That's a body of work with actual mass.`,
+  ],
+  lone_orbit: [
+    (t) => `${t.prs} PRs merged. Apparently you prefer building alone and ${t.commits} commits of data agrees.`,
+    (t) => `${t.commits} commits, ${t.repos} repos, ${t.prs} PRs. The team size is one, by design.`,
+    (t) => `You shipped ${t.commits} commits without much need for review. That's one way to stay unblocked.`,
+  ],
+};
+
+// ── Archetype-specific description pools ─────────────────────────────────────
+// hi  → weight ≥ 55%  |  mid → 38–54%  |  lo → < 38%
+// Each tier has 2 stat-interpolated options for randomness across runs.
+type DescPool = { hi: ((t: T) => string)[]; mid: ((t: T) => string)[]; lo: ((t: T) => string)[] };
+
+const ARCH_DESC: Record<ArchetypeId, DescPool> = {
+  foundry: {
+    hi: [
+      (t) => `You didn't build one thing — you built ${t.repos} of them. ${t.commits} commits and the forge never cooled down. ${t.lang} was the fuel; the pace was the point.`,
+      (t) => `${t.commits} commits across ${t.repos} repos isn't output — it's infrastructure. The foundry doesn't stop for anyone, and yours didn't either.`,
+    ],
+    mid: [
+      (t) => `High output, wide spread: ${t.commits} commits across ${t.repos} repos shows a builder who doesn't stop to ask permission.`,
+      (t) => `${t.repos} repos and ${t.commits} commits is a body of work that outgrew a single direction. The production line ran long.`,
+    ],
+    lo: [
+      (t) => `A foundry tendency shows in the numbers — ${t.commits} commits and ${t.repos} repos, more spread than the average run.`,
+      () => `The output volume and repo count hint at a builder mindset, even if it doesn't dominate the whole picture yet.`,
+    ],
+  },
+  afterglow: {
+    hi: [
+      (t) => `${t.nightPct}% of your commits land after dark. The peak at ${t.peak} isn't a coincidence — it's the rhythm. The world sleeps; you build.`,
+      (t) => `Late-night is your default. ${t.nightPct}% nocturnal, ${t.commits} commits, and a ${t.peak} peak that's become a signature.`,
+    ],
+    mid: [
+      (t) => `The late hours show up clearly — ${t.nightPct}% of commits happening after dark, with ${t.peak} as the regular slot.`,
+      (t) => `Night skews the numbers. ${t.nightPct}% of ${t.commits} commits happened when most people were already offline.`,
+    ],
+    lo: [
+      (t) => `A nocturnal lean shows in the data — ${t.nightPct}% commits after dark, ${t.peak} as a recurring timestamp.`,
+      (t) => `The late-night pull is real, if not the dominant story — ${t.nightPct}% of output lands in the quiet hours.`,
+    ],
+  },
+  trail_mapper: {
+    hi: [
+      (t) => `${t.repos} repos, ${t.lang} on top but never the whole story. You don't stay in one place long enough for the map to feel finished.`,
+      (t) => `Wide coverage is the signature: ${t.lang}, ${t.repos} repos, and a restlessness that shows in every direction the work went.`,
+    ],
+    mid: [
+      (t) => `The breadth is real — ${t.repos} repos and ${t.lang} at the front of a spread that kept expanding.`,
+      (t) => `Explorer patterns in the data: ${t.repos} repos, ${t.lang} leading, ${t.commits} commits spread across a moving target.`,
+    ],
+    lo: [
+      (t) => `Some crosswind tendencies in the numbers — ${t.repos} repos and ${t.lang} leading a spread that's wider than most.`,
+      (t) => `A bit more range than average: ${t.repos} repos, ${t.lang} on top, and a pattern that kept wandering.`,
+    ],
+  },
+  cartographer: {
+    hi: [
+      (t) => `${t.repo} got the full weight of it. ${t.commits} commits, ${t.lang} all the way through, and a focus that the data makes impossible to miss.`,
+      (t) => `You mapped ${t.repo} in depth. ${t.commits} commits, ${t.lang} as the tool, and a clarity of direction that shows in every line of the log.`,
+    ],
+    mid: [
+      (t) => `The center of gravity is clear: ${t.repo}, ${t.lang}, ${t.commits} commits going mostly the same direction.`,
+      (t) => `Deliberate and focused — ${t.repo} pulled the most attention and ${t.lang} carried most of the load.`,
+    ],
+    lo: [
+      (t) => `A focus tendency shows — ${t.repo} stands out, ${t.lang} dominates, even if the pattern isn't total.`,
+      (t) => `Some bedrock traits in the data: ${t.repo} getting more attention than average, ${t.lang} at the front.`,
+    ],
+  },
+  silent_current: {
+    hi: [
+      (t) => `${t.commits} commits across a run where the gaps did as much work as the sprints. Quiet isn't absence — it's a different kind of output.`,
+      (t) => `The activity log reads in waves: ${t.commits} commits, ${t.curStreak} days current, stretches of silence between that are just as deliberate.`,
+    ],
+    mid: [
+      (t) => `The pattern is irregular but intentional — ${t.commits} commits arriving in clusters, with space between that the data doesn't fully explain.`,
+      (t) => `Sporadic and real: ${t.commits} commits spread unevenly, a ${t.curStreak}-day current streak, and a cadence nobody scheduled.`,
+    ],
+    lo: [
+      (t) => `Some quiet stretches in the log, with ${t.commits} commits arriving in uneven bursts rather than steady rhythm.`,
+      (t) => `The activity pattern has gaps — ${t.commits} commits across a period that didn't commit to any particular pace.`,
+    ],
+  },
+  signal_booster: {
+    hi: [
+      (t) => `${t.prs} PRs merged and the reach goes past the local machine. Your work attracted attention because it deserved to — ${t.commits} commits that left a real signal.`,
+      (t) => `The feedback loop is real: ${t.commits} commits, ${t.prs} PRs, and a presence that reached past your own repos and stuck.`,
+    ],
+    mid: [
+      (t) => `More external traction than most — ${t.prs} PRs merged, and ${t.commits} commits that didn't stay contained.`,
+      (t) => `The signal traveled: ${t.prs} merged PRs and a body of work that picked up momentum outside its source.`,
+    ],
+    lo: [
+      (t) => `Some catalyst markers in the data — ${t.prs} PRs and ${t.commits} commits with more reach than average.`,
+      (t) => `A few data points suggest the work landed beyond the immediate repo — ${t.prs} PRs, some traction worth watching.`,
+    ],
+  },
+  anvil: {
+    hi: [
+      (t) => `${t.streak} days in a row is the headline, but the real story is what that took. ${t.commits} commits built one decision at a time, and none of them optional.`,
+      (t) => `Consistent doesn't mean slow. ${t.streak} days, ${t.commits} commits, and an activity pattern that doesn't have a skip day.`,
+    ],
+    mid: [
+      (t) => `The streak and the commit count tell the same story: ${t.streak} days at the longest, ${t.commits} total, with a rhythm that held.`,
+      (t) => `Steady above all else — ${t.commits} commits across a run where ${t.streak} days in a row left a visible mark.`,
+    ],
+    lo: [
+      (t) => `Steadier than average: ${t.streak}-day best streak, ${t.commits} commits with a consistency that shows through the noise.`,
+      (t) => `The anvil tendency is there in the data — ${t.streak} days at best, ${t.commits} commits, a pattern that tried to hold and mostly did.`,
+    ],
+  },
+  chaos_pilot: {
+    hi: [
+      (t) => `${t.repos} repos, ${t.commits} commits, and not all of it going the same direction. That's not a failure — that's what maximum coverage looks like in practice.`,
+      (t) => `${t.commits} commits across ${t.repos} repos, ${t.lang} technically on top, but the real story is how many directions this went simultaneously.`,
+    ],
+    mid: [
+      (t) => `The breadth is real and so is the scatter — ${t.repos} repos, ${t.commits} commits, and a spread that doesn't resolve into one clear thing.`,
+      (t) => `A restless pattern: ${t.repos} repos, ${t.lang} at the front, and ${t.commits} commits distributed across a moving target.`,
+    ],
+    lo: [
+      (t) => `Some pilot energy in the data — ${t.repos} repos, ${t.lang} leading, but the spread is wider than the focus.`,
+      (t) => `A bit of chaos in the spread: ${t.repos} repos, ${t.commits} commits across directions that didn't all converge.`,
+    ],
+  },
+  flashpoint: {
+    hi: [
+      (t) => `The momentum is recent and it's real. ${t.commits} commits with a ${t.streak}-day streak that suggests something shifted — and it's still moving.`,
+      (t) => `You went from quiet to trajectory. The recent output has a velocity the earlier numbers didn't have, and the ${t.streak}-day mark proves it locked in.`,
+    ],
+    mid: [
+      (t) => `Growth is visible in the data: ${t.commits} commits with a recent acceleration and a ${t.streak}-day streak that showed up late and hit hard.`,
+      (t) => `The trend is up — ${t.commits} commits, more recent than the average, and a momentum pattern that didn't exist at the start of the period.`,
+    ],
+    lo: [
+      (t) => `An uptick shows in the data — ${t.commits} commits trending more recent, ${t.streak} days at the best, something building.`,
+      (t) => `Some flashpoint signals: recent output running hotter, ${t.streak}-day streak as evidence, ${t.commits} commits with a forward lean.`,
+    ],
+  },
+  constellation_weaver: {
+    hi: [
+      (t) => `${t.prs} PRs merged is the number that defines this run. You built things collaboratively, and ${t.commits} commits later, the network is clearly visible.`,
+      (t) => `The collaboration signature is unmistakable: ${t.prs} PRs, ${t.commits} commits, and a presence that other people actually engaged with and kept coming back to.`,
+    ],
+    mid: [
+      (t) => `${t.prs} PRs merged puts you above most in collaboration — ${t.commits} commits, and a pattern that didn't stay self-contained.`,
+      (t) => `More collaborative than the median: ${t.prs} PRs and ${t.commits} commits that kept reaching outward.`,
+    ],
+    lo: [
+      (t) => `Some weaver traits in the data — ${t.prs} PRs and ${t.commits} commits with more collaborative pull than average.`,
+      (t) => `A few collaboration markers: ${t.prs} PRs merged, ${t.commits} commits, and a pattern that occasionally needed other people.`,
+    ],
+  },
+  caretaker: {
+    hi: [
+      (t) => `${t.repo} didn't just grow — it got better. ${t.commits} commits weighted toward fixes and cleanup say more about craft than volume ever could.`,
+      (t) => `The commit history reads like maintenance done with intent: ${t.repo}, ${t.commits} commits, ${t.lang}, and a bias toward making things right over making them new.`,
+    ],
+    mid: [
+      (t) => `More cleanup than creation: ${t.commits} commits across ${t.repo}, with a pattern that favors precision over velocity.`,
+      (t) => `The maintainer instinct shows — ${t.commits} commits and a log that leans toward fixes, refactors, and the work nobody else wanted to do.`,
+    ],
+    lo: [
+      (t) => `Some ironsmith traits in the data — ${t.commits} commits with a higher-than-average lean toward fixes and polished work on ${t.repo}.`,
+      (t) => `A few caretaker signals: ${t.repo} getting careful treatment, ${t.commits} commits with more craft than sprint energy.`,
+    ],
+  },
+  deep_diver: {
+    hi: [
+      (t) => `${t.lang} ran the whole show. ${t.commits} commits deep, one stack, one direction — you didn't need a map because you knew exactly where you were going.`,
+      (t) => `${t.commits} commits in ${t.lang} and the language distribution makes everything else look like a guest appearance. That's depth, not limitation.`,
+    ],
+    mid: [
+      (t) => `${t.lang} dominates the distribution by a margin that isn't subtle. ${t.commits} commits and the stack stayed consistent.`,
+      (t) => `A clear bias toward ${t.lang}: ${t.commits} commits and a spread that didn't leave much room for alternatives.`,
+    ],
+    lo: [
+      (t) => `${t.lang} shows up disproportionately in ${t.commits} commits — not a monolith yet, but the lean is real and consistent.`,
+      (t) => `One language pulling ahead: ${t.lang} in most of the ${t.commits} commits, with the others trailing noticeably.`,
+    ],
+  },
+  archive_keeper: {
+    hi: [
+      (t) => `This isn't a snapshot — it's a record. ${t.repos} repos, a ${t.streak}-day best streak, and an account depth that newer ones simply haven't had time to build.`,
+      (t) => `Years of work leave a different kind of weight. ${t.commits} commits, ${t.repos} repos, and a ${t.streak}-day streak that didn't happen this year alone.`,
+    ],
+    mid: [
+      (t) => `The longer arc shows in the numbers — ${t.repos} repos, ${t.streak} days at best, ${t.commits} commits across a run with real history behind it.`,
+      (t) => `Account depth is visible: ${t.repos} repos, ${t.commits} commits, and a streak record that took time to build.`,
+    ],
+    lo: [
+      (t) => `Some veteran markers: ${t.repos} repos, ${t.streak}-day record, ${t.commits} commits across a timeline longer than most.`,
+      (t) => `The history is there in the data — ${t.repos} repos, ${t.streak} days at the longest, a body of work that's been accumulating.`,
+    ],
+  },
+  lone_orbit: {
+    hi: [
+      (t) => `${t.prs} PRs merged is intentionally low. ${t.commits} commits, ${t.repos} repos, and almost none of it needed another person to review. That's not isolation — that's self-sufficiency.`,
+      (t) => `Solo by design: ${t.commits} commits, ${t.prs} PRs, and a log that reads like one person decided exactly what to build and built it without waiting for consensus.`,
+    ],
+    mid: [
+      (t) => `Mostly self-directed: ${t.commits} commits, ${t.prs} PRs, and a pattern that preferred ownership over collaboration.`,
+      (t) => `Low PRs, high focus: ${t.commits} commits across ${t.repos} repos with ${t.prs} merged PRs says the work stayed in-house by choice.`,
+    ],
+    lo: [
+      (t) => `A lone-orbit lean in the data — ${t.prs} PRs and ${t.commits} commits with less collaborative engagement than average.`,
+      (t) => `Some solo signals: ${t.prs} PRs merged, ${t.commits} commits, and a tendency to keep the work self-contained.`,
+    ],
+  },
+};
+
+function archetypeDescTier(weight: number): keyof DescPool {
+  if (weight >= 55) return "hi";
+  if (weight >= 38) return "mid";
+  return "lo";
+}
+
 export function buildFallbackNarrative(input: FallbackInput, tone: AiTone): FallbackNarrative {
   const safeTone: AiTone = (["funny", "brutal", "motivational"] as AiTone[]).includes(tone) ? tone : "funny";
   const t = tokens(input);
+  const archRoast = ARCH_ROAST[input.archetypeId];
+  const archDesc  = ARCH_DESC[input.archetypeId];
+  const tier      = archetypeDescTier(input.primaryWeight);
   return {
-    roastLine: rand(ROAST[safeTone])(t),
-    archetypeDescription: rand(DESC[safeTone])(t),
+    roastLine:            archRoast ? rand(archRoast)(t)          : rand(ROAST[safeTone])(t),
+    archetypeDescription: archDesc  ? rand(archDesc[tier])(t)     : rand(DESC[safeTone])(t),
     introVibeLine: rand(INTRO[safeTone])(t),
-    shareCaption: rand(CAPTION[safeTone])(t),
+    shareCaption:  rand(CAPTION[safeTone])(t),
   };
 }

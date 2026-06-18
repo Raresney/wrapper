@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useCallback } from "react";
+import Image from "next/image";
+import { useMemo, useState, useRef, useCallback } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 import catMascot from "@/components/pawcup/assets/cat-mascot.asset.json";
@@ -198,7 +199,6 @@ function BallTelevision() {
           <ellipse cx="78" cy="66" rx="38" ry="24" fill="#ffffff" opacity="0.42" transform="rotate(-26 78 66)" />
         </svg>
         <div className="absolute left-1/2 top-1/2 h-[112px] w-[144px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[32px] border-[5px] border-zinc-950 bg-black shadow-[0_0_0_2px_rgba(255,255,255,0.22),inset_0_0_18px_rgba(0,0,0,0.9)]">
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             ref={videoRef}
             src="/1.mp4"
@@ -238,24 +238,19 @@ function BallTelevision() {
 }
 
 function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
-  const confetti = useMemo(
-    () =>
-      Array.from({ length: 70 }).map((_, i) => ({
-        left: Math.random() * 100,
-        delay: Math.random() * 5,
-        duration: 4 + Math.random() * 5,
-        size: 6 + Math.random() * 8,
-        rot: Math.random() * 360,
-        color: ["#a855f7", "#facc15", "#22d3ee", "#f472b6", "#ffffff", "#34d399"][i % 6],
-        shape: i % 3,
-      })),
-    [],
+  const [confetti] = useState(() =>
+    Array.from({ length: 70 }).map((_, i) => ({
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: 4 + Math.random() * 5,
+      size: 6 + Math.random() * 8,
+      rot: Math.random() * 360,
+      color: ["#a855f7", "#facc15", "#22d3ee", "#f472b6", "#ffffff", "#34d399"][i % 6],
+      shape: i % 3,
+    }))
   );
 
-  const stars = useMemo(
-    () => Array.from({ length: 30 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 40, d: Math.random() * 3 })),
-    [],
-  );
+  const [stars] = useState(() => Array.from({ length: 30 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 40, d: Math.random() * 3 })));
 
   return (
     <div
@@ -280,7 +275,7 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
 
       {/* Top header */}
       <header className="absolute top-0 left-0 right-0 z-20 flex items-center px-8 py-6">
-        <img src={logo.url} alt="logo" className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1 ring-2 ring-purple-400/60" />
+        <Image src={logo.url} alt="logo" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1 ring-2 ring-purple-400/60" unoptimized />
       </header>
 
       <div className="pointer-events-none absolute left-[6vw] top-[58%] z-20 hidden -translate-y-1/2 xl:block">
@@ -293,10 +288,13 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
 
       {/* Mascot - Black Cat */}
       <div className="absolute left-1/2 bottom-[6%] -translate-x-1/2 z-10">
-        <img
+        <Image
           src={catMascot.url}
           alt="Purple Paws mascot"
+          width={1024}
+          height={1024}
           className="h-[70vh] w-auto drop-shadow-[0_30px_40px_rgba(168,85,247,0.5)]"
+          unoptimized
         />
       </div>
 
@@ -371,118 +369,6 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
         .animate-ear { animation: ear-twitch 5s infinite; transform-origin: bottom center; }
       `}</style>
     </div>
-  );
-}
-
-function Cat() {
-  return (
-    <svg width="340" height="380" viewBox="0 0 340 380" className="drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)]">
-      <defs>
-        <radialGradient id="furGrad" cx="50%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#3a3a3a" />
-          <stop offset="60%" stopColor="#141414" />
-          <stop offset="100%" stopColor="#000000" />
-        </radialGradient>
-        <radialGradient id="ballGrad" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#c0c0c0" />
-        </radialGradient>
-        <linearGradient id="jersey" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#a855f7" />
-          <stop offset="100%" stopColor="#6b21a8" />
-        </linearGradient>
-      </defs>
-
-      {/* shadow under */}
-      <ellipse cx="170" cy="370" rx="110" ry="10" fill="#000" opacity="0.5" />
-
-      {/* Tail */}
-      <g className="animate-tail" style={{ transformOrigin: "245px 285px" }}>
-        <path d="M245 285 Q 295 250 300 200 Q 302 175 285 170" stroke="url(#furGrad)" strokeWidth="22" fill="none" strokeLinecap="round" />
-      </g>
-
-      {/* Back legs */}
-      <ellipse cx="135" cy="335" rx="22" ry="28" fill="url(#furGrad)" />
-      <ellipse cx="215" cy="335" rx="22" ry="28" fill="url(#furGrad)" />
-
-      {/* Body with jersey */}
-      <ellipse cx="170" cy="270" rx="78" ry="70" fill="url(#furGrad)" />
-      <path d="M105 245 Q 170 215 235 245 L 232 310 Q 170 330 108 310 Z" fill="url(#jersey)" />
-      {/* jersey collar */}
-      <path d="M150 222 Q 170 235 190 222 L 188 232 Q 170 242 152 232 Z" fill="#facc15" />
-      {/* jersey logo */}
-      <circle cx="200" cy="270" r="16" fill="white" />
-      <image href={logo.url} x="186" y="256" width="28" height="28" />
-      {/* jersey number */}
-      <text x="140" y="285" fontSize="28" fontWeight="900" fill="#facc15" fontFamily="Arial Black">10</text>
-
-      {/* Front right leg standing */}
-      <rect x="195" y="305" width="20" height="45" rx="10" fill="url(#furGrad)" />
-
-      {/* Front left leg ON THE BALL */}
-      <rect x="125" y="295" width="20" height="35" rx="10" fill="url(#furGrad)" />
-
-      {/* Soccer Ball */}
-      <g className="animate-ball" style={{ transformOrigin: "115px 345px" }}>
-        <circle cx="115" cy="345" r="32" fill="url(#ballGrad)" stroke="#000" strokeWidth="2" />
-        <polygon points="115,325 128,335 123,350 107,350 102,335" fill="#000" />
-        <line x1="115" y1="313" x2="115" y2="325" stroke="#000" strokeWidth="2" />
-        <line x1="128" y1="335" x2="143" y2="330" stroke="#000" strokeWidth="2" />
-        <line x1="123" y1="350" x2="135" y2="365" stroke="#000" strokeWidth="2" />
-        <line x1="107" y1="350" x2="95" y2="365" stroke="#000" strokeWidth="2" />
-        <line x1="102" y1="335" x2="87" y2="330" stroke="#000" strokeWidth="2" />
-      </g>
-
-      {/* Head */}
-      <g>
-        {/* Ears */}
-        <g className="animate-ear" style={{ transformOrigin: "120px 155px" }}>
-          <polygon points="100,160 120,110 140,160" fill="url(#furGrad)" />
-          <polygon points="110,155 122,128 132,155" fill="#a855f7" />
-        </g>
-        <g className="animate-ear" style={{ transformOrigin: "220px 155px", animationDelay: "0.5s" }}>
-          <polygon points="200,160 220,110 240,160" fill="url(#furGrad)" />
-          <polygon points="208,155 220,128 230,155" fill="#a855f7" />
-        </g>
-
-        {/* Face */}
-        <ellipse cx="170" cy="180" rx="75" ry="68" fill="url(#furGrad)" />
-
-        {/* Cheeks highlights */}
-        <ellipse cx="125" cy="200" rx="15" ry="10" fill="#fff" opacity="0.05" />
-        <ellipse cx="215" cy="200" rx="15" ry="10" fill="#fff" opacity="0.05" />
-
-        {/* Eyes */}
-        <g className="animate-blink" style={{ transformOrigin: "145px 175px" }}>
-          <ellipse cx="145" cy="175" rx="14" ry="16" fill="#fff" />
-          <ellipse cx="145" cy="178" rx="8" ry="12" fill="#22c55e" />
-          <ellipse cx="145" cy="178" rx="3" ry="10" fill="#000" />
-          <circle cx="148" cy="172" r="3" fill="#fff" />
-        </g>
-        <g className="animate-blink" style={{ transformOrigin: "195px 175px" }}>
-          <ellipse cx="195" cy="175" rx="14" ry="16" fill="#fff" />
-          <ellipse cx="195" cy="178" rx="8" ry="12" fill="#22c55e" />
-          <ellipse cx="195" cy="178" rx="3" ry="10" fill="#000" />
-          <circle cx="198" cy="172" r="3" fill="#fff" />
-        </g>
-
-        {/* Nose */}
-        <path d="M163 205 L 177 205 L 170 215 Z" fill="#f472b6" />
-        {/* Mouth */}
-        <path d="M170 215 Q 165 225 158 222" stroke="#000" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M170 215 Q 175 225 182 222" stroke="#000" strokeWidth="2" fill="none" strokeLinecap="round" />
-
-        {/* Whiskers */}
-        <line x1="115" y1="210" x2="80" y2="205" stroke="#fff" strokeWidth="1.2" opacity="0.7" />
-        <line x1="115" y1="215" x2="80" y2="218" stroke="#fff" strokeWidth="1.2" opacity="0.7" />
-        <line x1="225" y1="210" x2="260" y2="205" stroke="#fff" strokeWidth="1.2" opacity="0.7" />
-        <line x1="225" y1="215" x2="260" y2="218" stroke="#fff" strokeWidth="1.2" opacity="0.7" />
-
-        {/* Captain headband */}
-        <rect x="100" y="145" width="140" height="14" fill="#facc15" />
-        <text x="170" y="156" textAnchor="middle" fontSize="10" fontWeight="900" fill="#6b21a8" fontFamily="Arial Black">CAPITAN · WORLD CUP 2026</text>
-      </g>
-    </svg>
   );
 }
 

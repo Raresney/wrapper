@@ -12,7 +12,7 @@ export type GlyphName =
   | "infinity" | "mountain" | "atom" | "satellite" | "hourglass" | "bug"
   | "snowflake" | "flask" | "merge" | "coffee"
   | "pulse" | "bridge" | "beacon" | "quill" | "prism" | "orbit"
-  | "anchor" | "firework" | "lantern" | "key" | "kite";
+  | "anchor" | "firework" | "lantern" | "key" | "kite" | "comet";
 
 function inner(name: GlyphName): ReactNode {
   switch (name) {
@@ -465,6 +465,27 @@ function inner(name: GlyphName): ReactNode {
           <path d="M12 3 18 10 12 17 6 10 12 3Z" />
           <path d="M12 17v4M12 21c1-1.2 2.2-1.2 3.2 0M12 19.2c-.9-1.1-2-1.1-2.9 0" />
           <path d="M9.2 9.8h5.6" strokeOpacity="0.42" />
+        </>
+      );
+    case "comet":
+      return (
+        <>
+          {/* nucleus glow halo */}
+          <circle cx="17.5" cy="6.5" r="4.2" fill="currentColor" fillOpacity="0.12" />
+          {/* nucleus core */}
+          <circle cx="17.5" cy="6.5" r="2.8" fill="currentColor" fillOpacity="0.88" />
+          {/* bright inner spark */}
+          <circle cx="16.6" cy="5.6" r="0.9" fill="white" fillOpacity="0.65" />
+          {/* primary tail — widest, most opaque */}
+          <path d="M15.2 8.8 C11.8 12.2 8.2 15.6 4.2 20" strokeWidth="2.5" strokeLinecap="round" />
+          {/* secondary tail */}
+          <path d="M14 10.4 C11.2 13.2 8.4 16 5.8 19.4" strokeWidth="1.4" strokeLinecap="round" strokeOpacity="0.48" />
+          {/* faint outer tail */}
+          <path d="M12.8 12.2 C10.6 14.6 8.4 16.8 6.2 19.8" strokeWidth="0.85" strokeLinecap="round" strokeOpacity="0.22" />
+          {/* debris particles along tail */}
+          <circle cx="10" cy="14.6" r="0.85" fill="currentColor" fillOpacity="0.52" />
+          <circle cx="7.4" cy="17.2" r="0.62" fill="currentColor" fillOpacity="0.35" />
+          <circle cx="20.2" cy="4.8" r="0.55" fill="currentColor" fillOpacity="0.5" />
         </>
       );
   }

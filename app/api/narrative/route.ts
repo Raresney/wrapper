@@ -1,22 +1,45 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { generateNarrative, buildCacheKey } from "@/lib/groq";
+import { generateNarrative } from "@/lib/groq";
+import { getClientIp, isRateLimited } from "@/lib/rate-limit";
 import type { WrappedProfile, AiTone } from "@/types/wrapped";
 
 const VALID_TONES: AiTone[] = ["funny", "brutal", "motivational"];
 
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function isWrappedProfile(body: unknown): body is WrappedProfile {
+  if (!isObjectRecord(body)) return false;
+
+  const user = body.user;
+  const metrics = body.metrics;
+  const raw = body.raw;
+  const period = body.period;
+
   return (
-    typeof body === "object" &&
-    body !== null &&
-    "user" in body &&
-    "metrics" in body &&
-    "raw" in body
+    isObjectRecord(user) &&
+    typeof user.login === "string" &&
+    isObjectRecord(metrics) &&
+    typeof metrics.totalCommits === "number" &&
+    isObjectRecord(raw) &&
+    Array.isArray(raw.contributions) &&
+    Array.isArray(raw.repos) &&
+    Array.isArray(raw.languages) &&
+    Array.isArray(raw.pullRequests) &&
+    isObjectRecord(period) &&
+    typeof period.label === "string"
   );
 }
 
 export async function POST(request: Request) {
+  const clientIp = getClientIp(request);
+  if (isRateLimited(`narrative:${clientIp}`, 12, 60_000)) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -38,9 +61,8 @@ export async function POST(request: Request) {
   const profile: WrappedProfile = { ...rawProfile, tone };
 
   try {
-    const profileWithKey: WrappedProfile = { ...profile, cacheKey: buildCacheKey(profile) };
-    const narrative = await generateNarrative(profileWithKey);
-    return NextResponse.json({ ...profileWithKey, narrative }, {
+    const narrative = await generateNarrative(profile);
+    return NextResponse.json({ ...profile, narrative }, {
       status: 200,
       headers: { "Cache-Control": "no-store, max-age=0" },
     });

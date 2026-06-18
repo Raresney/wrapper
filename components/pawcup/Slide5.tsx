@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Image from "next/image";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 
 function seeded(seed: number) {
@@ -35,19 +36,25 @@ function Slide5() {
       <div className="absolute left-0 top-0 bottom-0 w-[30%] z-10 pointer-events-none">
         {/* referee cat */}
         <div className="absolute left-[2%] bottom-[8%] w-[52%]">
-          <img
+          <Image
             src="/cat-referee.png"
             alt="Cat referee showing yellow card"
+            width={1024}
+            height={1024}
             className="block w-full h-auto drop-shadow-[0_20px_30px_rgba(0,0,0,0.7)]"
+            unoptimized
           />
         </div>
 
         {/* angry player cat */}
         <div className="absolute right-[0%] bottom-[8%] w-[50%] scale-x-[-1]">
-          <img
+          <Image
             src="/cat-angry-player.png"
             alt="Angry cat player protesting"
+            width={1024}
+            height={1024}
             className="block w-full h-auto drop-shadow-[0_20px_30px_rgba(0,0,0,0.7)]"
+            unoptimized
           />
         </div>
 
@@ -177,7 +184,7 @@ function Slide5() {
               {"\u{1F7E8}"}
             </div>
             <div>
-              <div className="text-purple-300/70 text-[10px] tracking-[0.35em] font-semibold">MATCH · 54'</div>
+              <div className="text-purple-300/70 text-[10px] tracking-[0.35em] font-semibold">MATCH · 54&apos;</div>
               <div className="text-white text-2xl font-bold">VAR Review</div>
             </div>
           </div>
@@ -189,7 +196,7 @@ function Slide5() {
           <div className="mt-5 grid grid-cols-3 gap-3 text-center">
             <div className="rounded-xl bg-white/5 border border-white/10 p-3">
               <div className="text-purple-300/60 text-[9px] tracking-[0.3em]">MINUTE</div>
-              <div className="text-white text-2xl font-black mt-1">54'</div>
+              <div className="text-white text-2xl font-black mt-1">54&apos;</div>
             </div>
             <div className="rounded-xl bg-yellow-400/10 border border-yellow-400/30 p-3">
               <div className="text-yellow-300/70 text-[9px] tracking-[0.3em]">CARD</div>
@@ -235,7 +242,6 @@ function Slide5() {
 }
 
 export default Slide5;
-
 
 
 

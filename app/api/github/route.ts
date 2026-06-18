@@ -6,13 +6,43 @@ import type { Period } from "@/types/wrapped";
 const VALID_PERIOD_TYPES = ["week", "month", "year", "alltime", "custom"] as const;
 type PeriodValue = (typeof VALID_PERIOD_TYPES)[number];
 
+function isIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.toISOString().slice(0, 10) === value;
+}
+
+function validateDates(periodType: PeriodValue, startDate?: string, endDate?: string): string | null {
+  const todayStr = today();
+
+  if (startDate && !isIsoDate(startDate)) return "invalid_start_date";
+  if (endDate && !isIsoDate(endDate)) return "invalid_end_date";
+
+  if (periodType === "custom") {
+    const effectiveEnd = endDate ?? todayStr;
+    const effectiveStart = startDate ?? daysBefore(effectiveEnd, 30);
+
+    if (effectiveStart > effectiveEnd) return "invalid_date_range";
+    if (effectiveEnd > todayStr) return "future_end_date";
+  }
+
+  return null;
+}
+
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 function daysAgo(n: number): string {
   const d = new Date();
-  d.setDate(d.getDate() - n);
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+function daysBefore(date: string, n: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - n);
   return d.toISOString().slice(0, 10);
 }
 
@@ -38,11 +68,12 @@ function derivePeriod(
         label: "All time",
       };
     case "custom":
+      const customStart = startDate ?? daysBefore(end, 30);
       return {
         type: "custom",
-        startDate: startDate ?? daysAgo(30),
+        startDate: customStart,
         endDate: end,
-        label: `${startDate ?? daysAgo(30)} - ${end}`,
+        label: `${customStart} - ${end}`,
       };
   }
 }
@@ -68,6 +99,11 @@ export async function GET(request: Request) {
     ? envToken : undefined;
   const token = userToken ?? serverToken ?? undefined;
   const validPeriod = periodType as PeriodValue;
+  const dateValidationError = validateDates(validPeriod, startDate, endDate);
+
+  if (dateValidationError) {
+    return NextResponse.json({ error: dateValidationError }, { status: 400 });
+  }
 
   let accountCreatedAt: string | undefined;
   if (validPeriod === "alltime") {

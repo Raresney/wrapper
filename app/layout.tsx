@@ -10,6 +10,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://githubwrapped.dev"),
   title: "GitHub Wrapped",
   description: "Turn your GitHub activity into a shareable developer recap.",
   applicationName: "GitHub Wrapped",

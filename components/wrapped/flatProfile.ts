@@ -28,7 +28,7 @@ export type FlatProfile = {
   isNocturnal: boolean;
   topLanguages: { name: string; percentage: number; color: string; linesOfCode: number; repoCount: number }[];
   topRepos: { name: string; commits: number }[];
-  pullRequests: { opened: number; merged: number; reviewed: number };
+  pullRequests: { merged: number };
   totalRepos: number;
   nightCommits: number;
   weekendCommits: number;
@@ -75,10 +75,11 @@ export type FlatProfile = {
   accountCreatedYear: number;
   activeDayCount: number;
   reposTouched: number;
-  // pull requests
+  // pull requests & issues
   prTitles: string[];
   prRepos: string[];
-  prMergeRatePct: number;
+  prsOpened: number;
+  issuesOpened: number;
   // achievements / trophies (sorted by importance, desc)
   achievementsUnlocked: TrophyEntry[];
   achievementsLocked: TrophyEntry[];
@@ -131,7 +132,6 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
   const mostProdEntry = Object.entries(byDate).sort((a, b) => b[1] - a[1])[0] ?? ["", 0];
   const hotMonthIdx = byMonth.indexOf(Math.max(...byMonth));
   const merged = p.raw.pullRequests.filter(pr => pr.state === "merged").length;
-  const opened = p.raw.pullRequests.length;
 
   // ── repos ──
   const ownRepos = p.raw.repos.filter(r => !r.isFork);
@@ -166,7 +166,7 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     ? { name: mostStarred.name, stars: mostStarred.stargazersCount, forks: mostStarred.forksCount, language: mostStarred.language, description: mostStarred.description }
     : null;
 
-  const cutoff = new Date(endDate); cutoff.setFullYear(cutoff.getFullYear() - 1);
+  const cutoff = new Date(`${endDate}T00:00:00Z`); cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
   const grave = ownRepos.find(r => r.stargazersCount === 0 && r.pushedAt && new Date(r.pushedAt) < cutoff);
   const graveyardRepo = grave ? { name: grave.name, year: new Date(grave.pushedAt).getFullYear() } : null;
 
@@ -188,7 +188,6 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
   const mergedPRs = p.raw.pullRequests.filter(pr => pr.state === "merged");
   const prTitles = mergedPRs.map(pr => pr.title).filter(Boolean).slice(0, 3);
   const prRepos = [...new Set(p.raw.pullRequests.map(pr => pr.repoName).filter(Boolean))];
-  const prMergeRatePct = opened > 0 ? Math.round((merged / opened) * 100) : 0;
 
   // ── achievements / trophies ──
   const toTrophy = (a: WrappedProfile["achievements"][number]): TrophyEntry => ({
@@ -207,6 +206,13 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
   const hourDistribution = useSampleHours ? sampleHours! : p.metrics.hourBias.distributionByHour;
   const peakHour = useSampleHours ? hourDistribution.indexOf(Math.max(...hourDistribution)) : p.metrics.hourBias.peakHour;
   const peakHourLabel = useSampleHours ? formatHour(peakHour) : p.metrics.hourBias.peakHourLabel;
+  const isNocturnal = useSampleHours
+    ? (() => {
+        const total = hourDistribution.reduce((a, b) => a + b, 0);
+        const night = hourDistribution.slice(0, 5).reduce((a, b) => a + b, 0);
+        return total > 0 && night / total >= 0.25;
+      })()
+    : p.metrics.hourBias.isNocturnal;
 
   const scoresShort = {
     intensity: p.metrics.scores.intensityScore,
@@ -257,11 +263,11 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     currentStreak: p.metrics.streak.currentStreak,
     peakHour,
     peakHourLabel,
-    isNocturnal: p.metrics.hourBias.isNocturnal,
+    isNocturnal,
     topLanguages: p.raw.languages.map(l => ({ name: l.language, percentage: l.percentage, color: l.color, linesOfCode: l.linesOfCode, repoCount: l.repoCount })),
     topRepos,
-    pullRequests: { opened, merged, reviewed: opened - merged },
-    totalRepos: p.user.publicReposCount,
+    pullRequests: { merged },
+    totalRepos: ownRepos.length,
     nightCommits,
     weekendCommits,
     weekdayCommits,
@@ -305,7 +311,8 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     reposTouched: p.metrics.repoSpread,
     prTitles,
     prRepos,
-    prMergeRatePct,
+    prsOpened: p.raw.prsOpened ?? 0,
+    issuesOpened: p.raw.issueContributions?.opened ?? 0,
     achievementsUnlocked,
     achievementsLocked,
     achievementsTotal: p.achievements.length,

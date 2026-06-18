@@ -79,12 +79,13 @@ function DiscoBall() {
   );
 }
 
+const DANCE_COLORS = ["#ff3ea5", "#a855f7", "#22d3ee", "#facc15", "#f472b6", "#34d399"];
+
 function DanceFloor({ sparse = false }: { sparse?: boolean }) {
   const cols = sparse ? 6 : 8;
   const rows = sparse ? 3 : 5;
-  const colors = ["#ff3ea5", "#a855f7", "#22d3ee", "#facc15", "#f472b6", "#34d399"];
   const tiles = useMemo(() => Array.from({ length: cols * rows }, (_, i) => ({
-    i, delay: ((i * 137) % 100) / 100 * (sparse ? 3 : 2), color: colors[i % colors.length],
+    i, delay: ((i * 137) % 100) / 100 * (sparse ? 3 : 2), color: DANCE_COLORS[i % DANCE_COLORS.length],
   })), [cols, rows, sparse]);
   return (
     <div className="mx-auto mt-6"

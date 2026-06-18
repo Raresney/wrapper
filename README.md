@@ -9,7 +9,6 @@ GitHub Wrapped turns a GitHub profile into a shareable developer recap. It pulls
 - Tailwind CSS 4
 - NextAuth with GitHub OAuth
 - Groq for optional narrative generation
-- Supabase for optional narrative caching
 
 ## Local Setup
 
@@ -25,7 +24,7 @@ npm install
 cp .env.local.example .env.local
 ```
 
-3. Fill in the required GitHub OAuth values. Groq and Supabase are optional, but narrative generation and caching need them.
+3. Fill in the required GitHub OAuth values. Groq is optional and only needed for AI narrative generation.
 
 4. Start the development server:
 
@@ -41,10 +40,10 @@ Open `http://localhost:3000`.
 2. `/api/github` fetches raw GitHub data.
 3. `/api/analyze` calculates metrics, achievements, insights, archetypes, and visual theme.
 4. `/wrapped/[username]` renders the slide experience from `sessionStorage`.
-5. `/api/narrative` optionally generates and caches AI copy.
+5. `/api/narrative` optionally generates AI copy.
 
 ## Notes
 
 - Public GitHub data works without OAuth, but contribution history and private repos need GitHub login.
 - The app uses local system font stacks so production builds do not need to fetch Google Fonts.
-- Supabase cache setup is documented in `supabase/README.md`.
+- Supabase was removed from the runtime flow. `supabase/schema.sql` remains only as historical reference.

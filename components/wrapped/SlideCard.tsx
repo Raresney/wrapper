@@ -18,7 +18,7 @@ type SlideCardProps = {
  * Content scrolls inside the card; the header stays fixed at the top.
  */
 export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
-  function SlideCard({ accentColor, chapter, title, className = "", children }, ref) {
+  function SlideCard({ accentColor, className = "", children }, ref) {
     return (
       <div
         ref={ref}

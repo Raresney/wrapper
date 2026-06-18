@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import type { AiTone } from "@/types/wrapped";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
@@ -260,7 +261,7 @@ function Nav() {
         <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
-          <a href="/" className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+          <Link href="/" className="relative z-10 flex items-center gap-1.5 sm:gap-2">
             <div className="relative h-11 w-11 shrink-0 sm:h-[72px] sm:w-[72px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo1.png" alt="GitHub Wrapped" width={72} height={72}
@@ -273,7 +274,7 @@ function Nav() {
             <span className="text-[13px] font-semibold tracking-[-0.01em] text-white/90">
               wrapped<span style={{ color: "var(--violet-glow)" }}>.dev</span>
             </span>
-          </a>
+          </Link>
           {/* center: tagline — absolutely positioned so it's truly centered */}
           <div className="pointer-events-none absolute inset-x-0 flex justify-center">
             <div className="hidden flex-col items-center gap-1 md:flex">
@@ -320,7 +321,6 @@ function Nav() {
 function TVSignal() {
   return (
     <div className="relative overflow-hidden rounded-[0.55rem]">
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video src="/vid2.mp4" autoPlay loop muted playsInline className="block w-full" />
 
       {/* CRT scanlines */}

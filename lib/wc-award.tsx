@@ -32,6 +32,10 @@ export type WcAward = {
   speech_hint: string;
 };
 
+function ownedRepoCount(p: WrappedProfile): number {
+  return p.raw.repos.filter((repo) => !repo.isFork).length;
+}
+
 // ── SVG Icons ─────────────────────────────────────────────────────────────────
 
 export function GoldenBootIcon({ className }: { className?: string }) {
@@ -549,7 +553,7 @@ export const AWARDS: Record<WcAwardId, WcAward> = {
     color: "#f472b6",
     glow: "rgba(244,114,182,0.55)",
     border: "rgba(244,114,182,0.35)",
-    keyStat: (p) => `+${Math.round(p.metrics.growthDelta.deltaPercent)}% growth vs previous period`,
+    keyStat: (p) => `+${Math.min(Math.round(p.metrics.growthDelta.deltaPercent), 9999)}% growth vs previous period`,
     speech_hint:
       "most dramatic improvement — came back from behind and dominated the second half of the season",
   },
@@ -586,10 +590,7 @@ export const AWARDS: Record<WcAwardId, WcAward> = {
     glow: "rgba(251,191,36,0.55)",
     border: "rgba(251,191,36,0.35)",
     keyStat: (p) => {
-      const maxDay =
-        p.raw.contributions.length > 0
-          ? Math.max(...p.raw.contributions.map((c) => c.count))
-          : 0;
+      const maxDay = p.raw.contributions.reduce((max, c) => Math.max(max, c.count), 0);
       return `${maxDay} contributions in a single day`;
     },
     speech_hint:
@@ -618,13 +619,13 @@ export const AWARDS: Record<WcAwardId, WcAward> = {
     glow: "rgba(226,232,240,0.4)",
     border: "rgba(226,232,240,0.25)",
     keyStat: (p) => {
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - 90);
-      const cutStr = cutoff.toISOString().split("T")[0];
+      const cutoff = new Date(`${p.period.endDate}T00:00:00Z`);
+      cutoff.setUTCDate(cutoff.getUTCDate() - 90);
+      const cutStr = cutoff.toISOString().slice(0, 10);
       const recent = p.raw.contributions
         .filter((c) => c.date >= cutStr)
         .reduce((s, c) => s + c.count, 0);
-      return `${recent.toLocaleString()} contributions in the last 90 days`;
+      return `${recent.toLocaleString()} contributions in the final 90 days`;
     },
     speech_hint:
       "most contributions in the last 90 days — saved their best performance for when it mattered most",
@@ -636,9 +637,9 @@ export const AWARDS: Record<WcAwardId, WcAward> = {
     color: "#a3e635",
     glow: "rgba(163,230,53,0.55)",
     border: "rgba(163,230,53,0.35)",
-    keyStat: (p) => `${p.user.publicReposCount} public repositories`,
+    keyStat: (p) => `${ownedRepoCount(p)} owned repositories`,
     speech_hint:
-      "most public repositories — built the largest squad, dominating every group they entered",
+      "most owned repositories — built the largest squad, dominating every group they entered",
   },
 };
 
@@ -659,7 +660,7 @@ const SCORERS: [WcAwardId, Scorer][] = [
     const c = Math.min(p.metrics.totalCommits / 400, 4);
     const s = Math.min(p.raw.totalStarsReceived / 60, 4);
     const str = Math.min(p.metrics.streak.longestStreak / 20, 4);
-    if (c < 0.5 || s < 0.5 || str < 0.5) return 0;
+    if (c < 0.3 || s < 0.3 || str < 0.3) return 0;
     return Math.pow(c * s * str, 1 / 3) * 0.88; // slight penalty to avoid it dominating
   }],
 
@@ -693,10 +694,10 @@ const SCORERS: [WcAwardId, Scorer][] = [
   // Top Assist — forks received (20 forks = 1.0)
   ["top_assist", (p) => p.raw.totalForksReceived / 20],
 
-  // Comeback — positive growth delta only; must be > 15% to activate (50% = 1.0)
+  // Comeback — positive growth delta only; must be > 15% to activate (150% = 1.0, capped at 3.0)
   ["comeback_award", (p) => {
     const d = p.metrics.growthDelta.deltaPercent;
-    return d > 15 ? d / 50 : 0;
+    return d > 15 ? Math.min(d / 50, 3.0) : 0;
   }],
 
   // Free Kick Specialist — feature commit ratio (requires ≥10 sample; 15% feat = 1.0)
@@ -712,7 +713,7 @@ const SCORERS: [WcAwardId, Scorer][] = [
   // Hat-trick Hero — peak single-day commits (15 in one day = 1.0)
   ["hat_trick_hero", (p) => {
     if (p.raw.contributions.length === 0) return 0;
-    return Math.max(...p.raw.contributions.map((c) => c.count)) / 15;
+    return p.raw.contributions.reduce((max, c) => Math.max(max, c.count), 0) / 15;
   }],
 
   // World Cup Champion — epic + legendary achievements (3 = 1.0)
@@ -723,19 +724,19 @@ const SCORERS: [WcAwardId, Scorer][] = [
     return count / 3;
   }],
 
-  // Finals Performer — recent 90-day contributions (100 recent = 1.0)
+  // Finals Performer — last 90 days of the analyzed period (200 contributions = 1.0)
   ["finals_performer", (p) => {
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 90);
-    const cutStr = cutoff.toISOString().split("T")[0];
+    const cutoff = new Date(`${p.period.endDate}T00:00:00Z`);
+    cutoff.setUTCDate(cutoff.getUTCDate() - 90);
+    const cutStr = cutoff.toISOString().slice(0, 10);
     const recent = p.raw.contributions
       .filter((c) => c.date >= cutStr)
       .reduce((s, c) => s + c.count, 0);
-    return recent / 100;
+    return recent / 200;
   }],
 
-  // Group Stage Winner — repo count (12 repos = 1.0)
-  ["group_stage_winner", (p) => p.user.publicReposCount / 12],
+  // Group Stage Winner — repo count (20 repos = 1.0)
+  ["group_stage_winner", (p) => ownedRepoCount(p) / 20],
 ];
 
 export function determineAward(profile: WrappedProfile): WcAward {

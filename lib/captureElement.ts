@@ -1,140 +1,47 @@
 // Screenshot helper built on modern-screenshot (SVG foreignObject — supports oklch/oklab).
 //
-// CARD mode:  full slide render → crop to card → composite on themed background
-//             (dark #080612 + stars + radial glow in card's accent color)
-// SLIDE mode: desktop-width iframe render → full screenshot, pixel-accurate
-
-// ── canvas helpers ────────────────────────────────────────────────────────────
-
-function hexToRgb(hex: string): [number, number, number] {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(hex.trim());
-  return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [124, 58, 237];
-}
-
-function seededRand(seed: number): () => number {
-  let s = (seed ^ 0xdeadbeef) >>> 0;
-  return () => {
-    s = (Math.imul(s ^ (s >>> 16), 0x45d9f3b) ^ ((Math.imul(s ^ (s >>> 16), 0x45d9f3b)) >>> 16)) >>> 0;
-    return s / 0xffffffff;
-  };
-}
+// CARD mode:  render full slide (perfect quality) → crop around card + padding →
+//             apply radial vignette so edges fade to dark. No CSS manipulation.
+// SLIDE mode: full screenshot, pixel-accurate.
 
 /**
- * Composite a card canvas onto a themed background.
- * The `card` canvas contains a BLEED of Math.round(3*scale) pixels on all sides.
- * We account for this to position the border stroke at the actual card edge.
+ * Crop a region around the card from the full-slide canvas and apply a dark
+ * radial vignette that fades the outer slide context to near-black.
+ * The card itself is untouched — pixels come directly from the full-slide render.
  */
-type CardFrameMetrics = {
-  bleed: number;
-  radius: number;
-  borderWidth: number;
-};
-
-function compositeCardOnBg(
-  card: HTMLCanvasElement,
-  accent: string,
-  paddingPx: number,
+function cropWithVignette(
+  canvas: HTMLCanvasElement,
+  cardX: number, cardY: number, cardW: number, cardH: number,
   scale: number,
-  frame: CardFrameMetrics,
 ): HTMLCanvasElement {
-  const [r, g, b] = hexToRgb(accent);
-  const pad = Math.round(paddingPx * scale);
-  const W = card.width + pad * 2;
-  const H = card.height + pad * 2;
-  const lineWidth = Math.max(1, frame.borderWidth);
-  const inset = lineWidth / 2;
+  const PAD = Math.round(60 * scale);
+  const x0 = Math.max(0, cardX - PAD);
+  const y0 = Math.max(0, cardY - PAD);
+  const x1 = Math.min(canvas.width,  cardX + cardW + PAD);
+  const y1 = Math.min(canvas.height, cardY + cardH + PAD);
+  const W = x1 - x0, H = y1 - y0;
 
   const out = document.createElement("canvas");
-  out.width = W;
-  out.height = H;
+  out.width = W; out.height = H;
   const ctx = out.getContext("2d");
-  if (!ctx) return card;
+  if (!ctx) return canvas;
 
-  // 1 ── dark base
-  ctx.fillStyle = "#080612";
-  ctx.fillRect(0, 0, W, H);
+  // Draw the cropped region exactly as rendered
+  ctx.drawImage(canvas, x0, y0, W, H, 0, 0, W, H);
 
-  // 2 ── procedural stars (deterministic from accent colour)
-  const rand = seededRand(r * 657 + g * 311 + b * 197);
-  const starCount = Math.round((W * H) / 2200);
-  for (let i = 0; i < starCount; i++) {
-    const x = rand() * W;
-    const y = rand() * H;
-    const big = rand() < 0.09;
-    const alpha = big ? 0.5 + rand() * 0.4 : 0.12 + rand() * 0.45;
-    const sz = (big ? 1.3 : 0.6) * scale;
-    ctx.beginPath();
-    ctx.arc(x, y, sz, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
-    ctx.fill();
-  }
-
-  // 3 ── wide ambient accent glow
-  const cx = W / 2, cy = H / 2;
-  const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.72);
-  g1.addColorStop(0, `rgba(${r},${g},${b},0.30)`);
-  g1.addColorStop(0.5, `rgba(${r},${g},${b},0.10)`);
-  g1.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g1;
-  ctx.fillRect(0, 0, W, H);
-
-  // 4 ── tight core glow (directly behind the card)
-  const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W, H) * 0.52);
-  g2.addColorStop(0, `rgba(${r},${g},${b},0.18)`);
-  g2.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g2;
-  ctx.fillRect(0, 0, W, H);
-
-  // 5 ── corner vignette
-  const vig = ctx.createRadialGradient(cx, cy, Math.min(W, H) * 0.28, cx, cy, Math.max(W, H) * 0.88);
-  vig.addColorStop(0, "rgba(0,0,0,0)");
-  vig.addColorStop(1, "rgba(0,0,0,0.58)");
+  // Radial vignette: transparent over the card, fades to near-black at edges
+  const cx = cardX + cardW / 2 - x0;
+  const cy = cardY + cardH / 2 - y0;
+  const inner = Math.max(cardW, cardH) * 0.48;
+  const outer = Math.hypot(W, H) * 0.68;
+  const vig = ctx.createRadialGradient(cx, cy, inner, cx, cy, outer);
+  vig.addColorStop(0,   "rgba(0,0,0,0)");
+  vig.addColorStop(0.4, "rgba(0,0,0,0.20)");
+  vig.addColorStop(1,   "rgba(0,0,0,0.90)");
   ctx.fillStyle = vig;
   ctx.fillRect(0, 0, W, H);
 
-  // 6 ── card image (the cropped canvas includes BLEED pixels on all sides)
-  ctx.drawImage(card, pad, pad);
-
-  // 7 ── explicit card border at actual card position (skipping the bleed margin)
-  // The CSS `border: 1px solid accentColor+2e` (18% opacity) may be too faint in
-  // foreignObject. Redraw it explicitly so all four sides are always visible.
-  // The CSS top accent bar is already rendered in the foreignObject image — we do NOT
-  // redraw it here to avoid doubling.
-  const cardX = pad + frame.bleed + inset;
-  const cardY = pad + frame.bleed + inset;
-  const cardW = card.width - frame.bleed * 2 - lineWidth;
-  const cardH = card.height - frame.bleed * 2 - lineWidth;
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.roundRect(cardX, cardY, cardW, cardH, Math.max(0, frame.radius - inset));
-  ctx.strokeStyle = `rgba(${r},${g},${b},0.28)`;
-  ctx.lineWidth = lineWidth;
-  ctx.stroke();
-  ctx.restore();
-
   return out;
-}
-
-function resolveCardFrameMetrics(cardEl: HTMLElement | null, scale: number): CardFrameMetrics {
-  const bleed = Math.round(3 * scale);
-  if (!cardEl) {
-    return {
-      bleed,
-      radius: Math.round(24 * scale),
-      borderWidth: Math.max(1, Math.ceil(scale)),
-    };
-  }
-
-  const cs = getComputedStyle(cardEl);
-  const radiusPx = parseFloat(cs.borderTopLeftRadius) || 24;
-  const borderWidthPx = parseFloat(cs.borderTopWidth) || 1;
-
-  return {
-    bleed,
-    radius: radiusPx * scale,
-    borderWidth: Math.max(1, borderWidthPx * scale),
-  };
 }
 
 /**
@@ -197,6 +104,7 @@ function applyNodeFixes(
   cs: CSSStyleDeclaration,
   setStyle: (el: HTMLElement, props: Record<string, string>) => void,
   onTextReplace: (el: HTMLElement, orig: string) => void,
+  addRestore?: (fn: () => void) => void,
 ) {
   // 1. Backdrop-filter
   if (cs.backdropFilter !== "none" || cs.getPropertyValue("-webkit-backdrop-filter") !== "none") {
@@ -214,19 +122,31 @@ function applyNodeFixes(
     }
   }
 
-  // 3. inline-flex (pills, chips): also prevent text reflow
+  // 3. inline-flex (pills, chips): prevent text reflow.
+  // width:max-content forces the pill to be exactly as wide as its content needs —
+  // foreignObject font metrics can be slightly wider than the live DOM so a fixed
+  // or min-width is not enough; max-content is self-adaptive and never wraps.
   if (d === "inline-flex" || d === "inline-grid") {
-    const props: Record<string, string> = {
+    setStyle(el, {
       "white-space": "nowrap",
       "flex-wrap": "nowrap",
       "flex-shrink": "0",
-    };
-    if (widthPx) {
-      props.width = widthPx;
-      props["max-width"] = widthPx;
+      "width": "max-content",
+    });
+    // Text nodes are NOT iterated by querySelectorAll and white-space:nowrap is not
+    // reliably inherited to anonymous flex text boxes in SVG foreignObject.
+    // Replace spaces with   (non-breaking space) directly on each text node —
+    //   cannot break in any renderer, including foreignObject.
+    for (const child of Array.from(el.childNodes)) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const origText = child.textContent ?? "";
+        if (origText.includes(" ")) {
+          child.textContent = origText.replace(/ /g, " ");
+          if (addRestore) addRestore(() => { child.textContent = origText; });
+        }
+      }
     }
-    setStyle(el, props);
-    return; // children will be handled individually
+    return;
   }
 
   // 4. Skip block flex/grid containers — only handle text-bearing elements below
@@ -298,7 +218,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     const cs = getComputedStyle(el);
     applyNodeFixes(el, cs, setStyle, (elem, orig) => {
       restores.push(() => { elem.textContent = orig; });
-    });
+    }, (fn) => restores.push(fn));
   }
 
   try {
@@ -314,34 +234,15 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
       return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
     }
 
-    // Card mode — crop then composite
-    // 3px bleed so the card border/accent bar are never clipped by sub-pixel rounding
-    const BLEED = Math.round(3 * scale);
+    // Card mode — crop from perfect full-slide render + vignette
     const r0 = root.getBoundingClientRect();
     const rc = cropTo.getBoundingClientRect();
-    const sx = Math.round(Math.max(0, rc.left - r0.left) * scale) - BLEED;
-    const sy = Math.round(Math.max(0, rc.top - r0.top) * scale) - BLEED;
-    const sw = Math.round(rc.width * scale) + BLEED * 2;
-    const sh = Math.round(rc.height * scale) + BLEED * 2;
+    const cLeft = Math.round((rc.left - r0.left) * scale);
+    const cTop  = Math.round((rc.top  - r0.top)  * scale);
+    const cW    = Math.round(rc.width  * scale);
+    const cH    = Math.round(rc.height * scale);
 
-    const cropped = document.createElement("canvas");
-    cropped.width = sw;
-    cropped.height = sh;
-    const cCtx = cropped.getContext("2d");
-    if (cCtx) {
-      cCtx.fillStyle = background;
-      cCtx.fillRect(0, 0, sw, sh);
-      cCtx.drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
-    }
-
-    const accent = cropTo.getAttribute("data-accent") ?? "#7c3aed";
-    const final = compositeCardOnBg(
-      cropped,
-      accent,
-      68,
-      scale,
-      resolveCardFrameMetrics(cropTo, scale),
-    );
+    const final = cropWithVignette(canvas, cLeft, cTop, cW, cH, scale);
     return await new Promise<Blob | null>((res) => final.toBlob((b) => res(b), "image/png"));
   } finally {
     restores.forEach((fn) => fn());
@@ -478,33 +379,15 @@ export async function captureDesktopElement(
       return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
     }
 
-    // Card mode — crop then composite (3px bleed for border safety)
-    const BLEED = Math.round(3 * scale);
+    // Card mode — composite full slide onto custom background via roundRect clip
     const r0 = clone.getBoundingClientRect();
     const rc = cropEl.getBoundingClientRect();
-    const sx = Math.round(Math.max(0, rc.left - r0.left) * scale) - BLEED;
-    const sy = Math.round(Math.max(0, rc.top - r0.top) * scale) - BLEED;
-    const sw = Math.round(rc.width * scale) + BLEED * 2;
-    const sh = Math.round(rc.height * scale) + BLEED * 2;
+    const cLeft = Math.round((rc.left - r0.left) * scale);
+    const cTop  = Math.round((rc.top  - r0.top)  * scale);
+    const cW    = Math.round(rc.width  * scale);
+    const cH    = Math.round(rc.height * scale);
 
-    const cropped = document.createElement("canvas");
-    cropped.width = sw;
-    cropped.height = sh;
-    const cCtx = cropped.getContext("2d");
-    if (cCtx) {
-      cCtx.fillStyle = background;
-      cCtx.fillRect(0, 0, sw, sh);
-      cCtx.drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
-    }
-
-    const accent = cropEl.getAttribute("data-accent") ?? "#7c3aed";
-    const final = compositeCardOnBg(
-      cropped,
-      accent,
-      68,
-      scale,
-      resolveCardFrameMetrics(cropEl, scale),
-    );
+    const final = cropWithVignette(canvas, cLeft, cTop, cW, cH, scale);
     return await new Promise<Blob | null>((res) => final.toBlob((b) => res(b), "image/png"));
   } finally {
     iframe.remove();

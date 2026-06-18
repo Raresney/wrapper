@@ -40,6 +40,12 @@ const LANGUAGE_COLORS: Record<string, string> = {
 
 const DEFAULT_COLOR = "#8b8b8b";
 const GH_API = "https://api.github.com";
+const SEARCH_PAGE_SIZE = 100;
+const MAX_SEARCH_PAGES = 10;
+const LANGUAGE_STATS_CONCURRENCY = 6;
+// GitHub's public events endpoint only exposes the latest ~300 events.
+// Scanning past 3 pages does not increase historical coverage.
+const MAX_UNAUTH_EVENT_PAGES = 3;
 
 function buildHeaders(token?: string): HeadersInit {
   const headers: Record<string, string> = {
@@ -120,11 +126,27 @@ const CONTRIBUTIONS_QUERY = `
   }
 `;
 
-const PULL_REQUESTS_QUERY = `
-  query($owner: String!, $name: String!) {
-    repository(owner: $owner, name: $name) {
-      pullRequests(first: 50, states: [MERGED]) {
-        nodes { title mergedAt }
+// Combined query: fetches PRs opened + issues opened in a contribution window.
+// Using contributionsCollection avoids the unreliable merged:/created: search qualifiers
+// and correctly includes private repos when using the user's own token.
+const CONTRIB_EXTRAS_QUERY = `
+  query($username: String!, $from: DateTime!, $to: DateTime!) {
+    user(login: $username) {
+      contributionsCollection(from: $from, to: $to) {
+        pullRequestContributions(first: 100) {
+          totalCount
+          nodes {
+            pullRequest {
+              title
+              mergedAt
+              state
+              repository { name }
+            }
+          }
+        }
+        issueContributions(first: 1) {
+          totalCount
+        }
       }
     }
   }
@@ -182,9 +204,18 @@ async function fetchGitHubRepos(username: string, token?: string): Promise<GitHu
 
   const all: GitHubRepo[] = [];
   let page = 1;
-  const base = token
-    ? `${GH_API}/user/repos?affiliation=owner&sort=pushed&per_page=100`
-    : `${GH_API}/users/${username}/repos?sort=pushed&per_page=100`;
+  let base = `${GH_API}/users/${username}/repos?sort=pushed&per_page=100&type=owner`;
+
+  if (token) {
+    try {
+      const viewer = await apiFetch<{ login: string }>(`${GH_API}/user`, token);
+      if (viewer.login.toLowerCase() === username.toLowerCase()) {
+        base = `${GH_API}/user/repos?affiliation=owner&sort=pushed&per_page=100`;
+      }
+    } catch (e) {
+      console.error("fetchGitHubRepos: viewer lookup failed", e);
+    }
+  }
 
   while (true) {
     const batch = await apiFetch<RawRepo[]>(`${base}&page=${page}`, token);
@@ -209,6 +240,49 @@ async function fetchGitHubRepos(username: string, token?: string): Promise<GitHu
   return all;
 }
 
+function isDateInPeriod(date: string, period: Period): boolean {
+  return date >= period.startDate && date <= period.endDate;
+}
+
+type CommitSearchItem = {
+  commit: { message: string; author: { date: string } };
+  repository: { name: string };
+};
+
+async function searchCommits(
+  username: string,
+  period: Period,
+  token: string,
+  maxPages = MAX_SEARCH_PAGES
+): Promise<CommitSearchItem[]> {
+  type SearchResult = { items: CommitSearchItem[] };
+  const query = encodeURIComponent(`author:${username} author-date:${period.startDate}..${period.endDate}`);
+  const items: CommitSearchItem[] = [];
+  const seen = new Set<string>();
+
+  for (let page = 1; page <= maxPages; page++) {
+    const data = await apiFetch<SearchResult>(
+      `${GH_API}/search/commits?q=${query}&sort=author-date&order=desc&per_page=${SEARCH_PAGE_SIZE}&page=${page}`,
+      token
+    );
+    if (!data.items.length) break;
+
+    for (const item of data.items) {
+      const date = item.commit.author.date.slice(0, 10);
+      if (!isDateInPeriod(date, period)) continue;
+
+      const dedupeKey = `${item.repository.name}:${item.commit.author.date}:${item.commit.message}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+      items.push(item);
+    }
+
+    if (data.items.length < SEARCH_PAGE_SIZE) break;
+  }
+
+  return items;
+}
+
 // Classify a commit message by conventional-commit type (with keyword fallback).
 type CommitType = "fix" | "feat" | "refactor" | "docs" | "test" | "chore" | "other";
 function classifyCommit(message: string): CommitType {
@@ -231,27 +305,72 @@ function classifyCommit(message: string): CommitType {
   return "other";
 }
 
+// Fetch commit messages from private owned repos. Search API doesn't index private repos,
+// so we call the Commits REST endpoint per repo. One call per repo (per_page=100).
+async function fetchPrivateRepoCommits(
+  username: string,
+  repos: GitHubRepo[],
+  period: Period,
+  token: string
+): Promise<{ message: string }[]> {
+  const privateOwned = repos.filter((r) => r.isPrivate && !r.isFork);
+  const results: { message: string }[] = [];
+
+  await Promise.allSettled(
+    privateOwned.map(async (repo) => {
+      try {
+        type RawCommit = { commit: { message: string } };
+        const commits = await apiFetch<RawCommit[]>(
+          `${GH_API}/repos/${username}/${repo.name}/commits?author=${username}&since=${period.startDate}T00:00:00Z&until=${period.endDate}T23:59:59Z&per_page=100`,
+          token
+        );
+        for (const c of commits) results.push({ message: c.commit.message });
+      } catch {
+        // repo may be empty or inaccessible — skip silently
+      }
+    })
+  );
+
+  return results;
+}
+
 // Best-effort: sample the user's recent commits and break them down by type.
 // search/commits effectively requires auth, so this returns null when unauthenticated.
-async function fetchCommitStats(username: string, token?: string): Promise<CommitStats | null> {
+// When repos are provided, private repo commits are also classified (Search API misses them).
+async function fetchCommitStats(
+  username: string,
+  period: Period,
+  token?: string,
+  cachedItems?: CommitSearchItem[],
+  repos?: GitHubRepo[]
+): Promise<CommitStats | null> {
   if (!token) return null;
   try {
-    type SearchResult = { items: Array<{ commit: { message: string; author: { date: string } } }> };
-    const { items } = await apiFetch<SearchResult>(
-      `${GH_API}/search/commits?q=author:${username}&sort=author-date&per_page=100`,
-      token
-    );
-    if (!items.length) return null;
+    const publicItems = cachedItems ?? await searchCommits(username, period, token);
+
+    const privateItems = repos
+      ? await fetchPrivateRepoCommits(username, repos, period, token)
+      : [];
+
+    const totalSample = publicItems.length + privateItems.length;
+    if (!totalSample) return null;
+
     const stats: CommitStats = {
-      sampleSize: items.length,
+      sampleSize: totalSample,
       fix: 0, feat: 0, refactor: 0, docs: 0, test: 0, chore: 0, other: 0,
       hourHistogram: Array(24).fill(0),
     };
-    for (const it of items) {
+
+    for (const it of publicItems) {
       stats[classifyCommit(it.commit.message)]++;
       const h = new Date(it.commit.author.date).getUTCHours();
       if (h >= 0 && h <= 23) stats.hourHistogram[h]++;
     }
+
+    for (const pm of privateItems) {
+      stats[classifyCommit(pm.message)]++;
+    }
+
     return stats;
   } catch (e) {
     console.error("fetchCommitStats failed", e);
@@ -266,12 +385,12 @@ async function fetchLanguageStats(
 ): Promise<LanguageStats[]> {
   const bytes: Record<string, number> = {};
   const counts: Record<string, number> = {};
+  const ownedRepos = repos.filter((r) => !r.isFork);
 
-  await Promise.allSettled(
-    repos
-      .filter((r) => !r.isFork)
-      .slice(0, 30)
-      .map(async (r) => {
+  for (let i = 0; i < ownedRepos.length; i += LANGUAGE_STATS_CONCURRENCY) {
+    const batch = ownedRepos.slice(i, i + LANGUAGE_STATS_CONCURRENCY);
+    await Promise.allSettled(
+      batch.map(async (r) => {
         try {
           const data = await apiFetch<Record<string, number>>(
             `${GH_API}/repos/${username}/${r.name}/languages`,
@@ -285,7 +404,8 @@ async function fetchLanguageStats(
           console.error(`fetchLanguageStats: ${r.name} failed`, e);
         }
       })
-  );
+    );
+  }
 
   const total = Object.values(bytes).reduce((a, b) => a + b, 0);
   if (!total) return [];
@@ -312,9 +432,12 @@ async function fetchContributionsUnauthed(
     repo: { name: string };
   };
 
-  const byDate = new Map<string, { count: number; hour: number; repoName: string }>();
+  const byDate = new Map<
+    string,
+    { count: number; weightedHour: number; repoCounts: Map<string, number> }
+  >();
 
-  outer: for (let page = 1; page <= 3; page++) {
+  outer: for (let page = 1; page <= MAX_UNAUTH_EVENT_PAGES; page++) {
     let events: GHEvent[];
     try {
       events = await apiFetch<GHEvent[]>(
@@ -335,15 +458,30 @@ async function fetchContributionsUnauthed(
       const existing = byDate.get(evDate);
       if (existing) {
         existing.count += commitCount;
+        existing.weightedHour += hour * commitCount;
+        existing.repoCounts.set(repoName, (existing.repoCounts.get(repoName) ?? 0) + commitCount);
       } else {
-        byDate.set(evDate, { count: commitCount, hour, repoName });
+        byDate.set(evDate, {
+          count: commitCount,
+          weightedHour: hour * commitCount,
+          repoCounts: new Map([[repoName, commitCount]]),
+        });
       }
     }
     if (events.length < 100) break;
   }
 
   return Array.from(byDate.entries())
-    .map(([date, d]) => ({ date, count: d.count, hour: d.hour, repoName: d.repoName }))
+    .map(([date, d]) => {
+      const repoName =
+        Array.from(d.repoCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+      return {
+        date,
+        count: d.count,
+        hour: Math.round(d.weightedHour / d.count),
+        repoName,
+      };
+    })
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -386,7 +524,8 @@ function buildYearChunks(startDate: string, endDate: string): Array<{ from: stri
 async function fetchContributions(
   username: string,
   period: Period,
-  token?: string
+  token?: string,
+  cachedItems?: CommitSearchItem[]
 ): Promise<Contribution[]> {
   if (!token) return fetchContributionsUnauthed(username, period);
 
@@ -408,20 +547,33 @@ async function fetchContributions(
 
   const hourMap: Record<string, { hour: number; repo: string }> = {};
   try {
-    type SearchResult = {
-      items: Array<{
-        commit: { author: { date: string } };
-        repository: { name: string };
-      }>;
-    };
-    const { items } = await apiFetch<SearchResult>(
-      `${GH_API}/search/commits?q=author:${username}&sort=author-date&per_page=100`,
-      token
-    );
+    const items = cachedItems ?? await searchCommits(username, period, token);
+    const byDate = new Map<string, { count: number; weightedHour: number; repoCounts: Map<string, number> }>();
     for (const c of items) {
       const d = new Date(c.commit.author.date);
       const key = d.toISOString().slice(0, 10);
-      if (!hourMap[key]) hourMap[key] = { hour: d.getHours(), repo: c.repository.name };
+      const existing = byDate.get(key);
+      const repoName = c.repository.name;
+      const hour = d.getUTCHours();
+      if (existing) {
+        existing.count += 1;
+        existing.weightedHour += hour;
+        existing.repoCounts.set(repoName, (existing.repoCounts.get(repoName) ?? 0) + 1);
+      } else {
+        byDate.set(key, {
+          count: 1,
+          weightedHour: hour,
+          repoCounts: new Map([[repoName, 1]]),
+        });
+      }
+    }
+    for (const [date, stats] of byDate.entries()) {
+      const repo =
+        Array.from(stats.repoCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+      hourMap[date] = {
+        hour: Math.round(stats.weightedHour / stats.count),
+        repo,
+      };
     }
   } catch (e) {
     console.error("fetchContributions: commit hours failed", e);
@@ -437,53 +589,120 @@ async function fetchContributions(
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-async function fetchPullRequests(
-  repos: GitHubRepo[],
+type ContribExtras = {
+  pullRequests: PullRequest[];
+  prsOpened: number;
+  issuesOpened: number;
+};
+
+type ContribExtrasData = {
+  user: {
+    contributionsCollection: {
+      pullRequestContributions: {
+        totalCount: number;
+        nodes: Array<{
+          pullRequest: {
+            title: string;
+            mergedAt: string | null;
+            state: string;
+            repository: { name: string };
+          };
+        }>;
+      };
+      issueContributions: { totalCount: number };
+    };
+  };
+};
+
+async function fetchContribExtras(
   username: string,
+  period: Period,
   token?: string
-): Promise<PullRequest[]> {
-  if (!token) {
-    // Without OAuth, use REST search API (public repos only, max 100 results)
+): Promise<ContribExtras> {
+  // ── Authenticated: GraphQL contributionsCollection ──────────────────────
+  // Correctly filters by period, includes private repos, avoids Search API quirks.
+  if (token) {
     try {
-      type SearchResult = { items: Array<{ title: string; merged_at: string | null; repository_url: string }> };
-      const data = await apiFetch<SearchResult>(
-        `${GH_API}/search/issues?q=author:${username}+type:pr+is:merged&sort=updated&per_page=50`
+      const chunks = buildYearChunks(period.startDate, period.endDate);
+      const chunkResults = await Promise.allSettled(
+        chunks.map(({ from, to }) =>
+          gql<ContribExtrasData>(CONTRIB_EXTRAS_QUERY, { username, from, to }, token)
+        )
       );
-      return data.items.map((pr) => ({
-        repoName: pr.repository_url.split("/").pop() ?? "",
-        title: pr.title,
-        mergedAt: pr.merged_at,
-        state: "merged" as const,
-      }));
-    } catch {
-      return [];
+      const seen = new Set<string>();
+      const pullRequests: PullRequest[] = [];
+      let prsOpened = 0;
+      let issuesOpened = 0;
+
+      for (const r of chunkResults) {
+        if (r.status !== "fulfilled") continue;
+        const col = r.value.user.contributionsCollection;
+
+        prsOpened += col.pullRequestContributions.totalCount;
+        issuesOpened += col.issueContributions.totalCount;
+
+        for (const n of col.pullRequestContributions.nodes) {
+          const pr = n.pullRequest;
+          if (pr.state !== "MERGED" || !pr.mergedAt) continue;
+          if (!isDateInPeriod(pr.mergedAt.slice(0, 10), period)) continue;
+          const key = `${pr.repository.name}:${pr.title}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          pullRequests.push({
+            repoName: pr.repository.name,
+            title: pr.title,
+            mergedAt: pr.mergedAt,
+            state: "merged" as const,
+          });
+        }
+      }
+
+      return { pullRequests, prsOpened, issuesOpened };
+    } catch (e) {
+      console.error("[fetchContribExtras graphql] failed:", e);
+      // fall through to Search API
     }
   }
 
-  type PRData = {
-    repository: {
-      pullRequests: { nodes: Array<{ title: string; mergedAt: string | null }> };
-    } | null;
-  };
+  // ── Unauthenticated (or GraphQL fallback): Search API ───────────────────
+  // Single request sorted by created:desc — mirrors the original working approach.
+  // Avoids paginating through old PRs (rate-limit risk) and puts recent PRs first.
+  const pullRequests: PullRequest[] = [];
+  let issuesOpened = 0;
 
-  const top = repos
-    .filter((r) => !r.isFork)
-    .sort((a, b) => new Date(b.pushedAt).getTime() - new Date(a.pushedAt).getTime())
-    .slice(0, 10);
+  try {
+    type PRSearch = { items: Array<{ title: string; merged_at: string | null; repository_url: string }> };
+    const data = await apiFetch<PRSearch>(
+      `${GH_API}/search/issues?q=author:${username}+type:pr+is:merged&sort=updated&per_page=50`,
+      token
+    );
+    for (const pr of data.items) {
+      pullRequests.push({
+        repoName: pr.repository_url.split("/").pop() ?? "",
+        title: pr.title,
+        mergedAt: pr.merged_at ?? "",
+        state: "merged" as const,
+      });
+    }
+  } catch (e) {
+    console.error("[fetchContribExtras PRs] failed:", e);
+  }
 
-  const results = await Promise.allSettled(
-    top.map((r) => gql<PRData>(PULL_REQUESTS_QUERY, { owner: username, name: r.name }, token))
-  );
+  try {
+    type IssueSearch = { total_count: number };
+    const issueQuery = encodeURIComponent(
+      `author:${username} is:issue created:${period.startDate}..${period.endDate}`
+    );
+    const data = await apiFetch<IssueSearch>(
+      `${GH_API}/search/issues?q=${issueQuery}&per_page=1`,
+      token
+    );
+    issuesOpened = data.total_count;
+  } catch (e) {
+    console.error("[fetchContribExtras issues] failed:", e);
+  }
 
-  return results.flatMap((res, i) => {
-    if (res.status !== "fulfilled" || !res.value.repository) return [];
-    return res.value.repository.pullRequests.nodes.map((pr) => ({
-      repoName: top[i].name,
-      title: pr.title,
-      mergedAt: pr.mergedAt,
-      state: pr.mergedAt ? ("merged" as const) : ("closed" as const),
-    }));
-  });
+  return { pullRequests, prsOpened: pullRequests.length, issuesOpened };
 }
 
 export async function fetchGitHubRawData(
@@ -496,11 +715,22 @@ export async function fetchGitHubRawData(
     fetchGitHubRepos(username, token),
   ]);
 
-  const [languages, contributions, pullRequests, commitStats] = await Promise.all([
+  // When authed, fetch search commits once and share between contributions (hours) and commitStats.
+  // This avoids hitting the Search API twice for the same query.
+  let cachedSearchItems: CommitSearchItem[] | undefined;
+  if (token) {
+    try {
+      cachedSearchItems = await searchCommits(username, period, token);
+    } catch (e) {
+      console.error("fetchGitHubRawData: searchCommits failed", e);
+    }
+  }
+
+  const [languages, contributions, extras, commitStats] = await Promise.all([
     fetchLanguageStats(repos, username, token),
-    fetchContributions(username, period, token),
-    fetchPullRequests(repos, username, token),
-    fetchCommitStats(username, token),
+    fetchContributions(username, period, token, cachedSearchItems),
+    fetchContribExtras(username, period, token),
+    fetchCommitStats(username, period, token, cachedSearchItems, repos),
   ]);
 
   return {
@@ -508,7 +738,9 @@ export async function fetchGitHubRawData(
     repos,
     contributions,
     languages,
-    pullRequests,
+    pullRequests: extras.pullRequests,
+    prsOpened: extras.prsOpened,
+    issueContributions: { opened: extras.issuesOpened },
     totalStarsReceived: repos.reduce((s, r) => s + r.stargazersCount, 0),
     totalForksReceived: repos.reduce((s, r) => s + r.forksCount, 0),
     commitStats,

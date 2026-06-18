@@ -1,21 +1,14 @@
 ﻿"use client";
 
-import { useMemo } from "react";
+import Image from "next/image";
+import { useState } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import catSinger from "@/components/pawcup/assets/cat-singer.png.asset.json";
 import trophy from "@/components/pawcup/assets/trophy-case.png.asset.json";
-import catMascot from "@/components/pawcup/assets/cat-mascot.asset.json";
-
 function Slide0() {
-  const stars = useMemo(
-    () => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })),
-    [],
-  );
-
-  const sparks = useMemo(
-    () => Array.from({ length: 20 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 4 })),
-    [],
-  );
+  const [stars] = useState(() => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })));
+  const [sparks] = useState(() => Array.from({ length: 20 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 4 })));
+  const [goldenSparkles] = useState(() => Array.from({ length: 14 }).map(() => ({ right: 10 + Math.random() * 70, top: 15 + Math.random() * 70, w: 2 + Math.random() * 3, h: 2 + Math.random() * 3, delay: Math.random() * 3 })));
 
   return (
     <div
@@ -94,10 +87,13 @@ function Slide0() {
 
         {/* singing cat · shifted toward the right of the stage */}
         <div className="absolute left-[50%] bottom-[8%] w-[64%] -translate-x-1/2 origin-bottom">
-          <img
+          <Image
             src={catSinger.url}
             alt="Black cat in tuxedo singing on stage"
+            width={1024}
+            height={1024}
             className="block w-full h-auto mx-auto"
+            unoptimized
           />
         </div>
 
@@ -121,10 +117,13 @@ function Slide0() {
           <div className="absolute left-[82%] -translate-x-1/2 top-[28%] flex flex-col items-center w-[82%] animate-float-slow">
             {/* trophy image */}
               <div className="relative z-10 w-full">
-                <img
+                <Image
                   src={trophy.url}
                   alt="World Cup trophy in glass display case"
+                  width={1024}
+                  height={1024}
                   className="w-full h-auto drop-shadow-[0_30px_40px_rgba(250,204,21,0.35)]"
+                  unoptimized
                 />
                 <div
                   className="pointer-events-none absolute left-1/2 top-[66%] h-[7%] w-[18%] -translate-x-1/2 rounded-full"
@@ -155,16 +154,16 @@ function Slide0() {
           </div>
 
           {/* golden sparkles */}
-          {Array.from({ length: 14 }).map((_, i) => (
+          {goldenSparkles.map((sp, i) => (
             <div
               key={i}
               className="absolute rounded-full bg-amber-300 animate-twinkle"
               style={{
-                right: `${10 + Math.random() * 70}%`,
-                top: `${15 + Math.random() * 70}%`,
-                width: 2 + Math.random() * 3,
-                height: 2 + Math.random() * 3,
-                animationDelay: `${Math.random() * 3}s`,
+                right: `${sp.right}%`,
+                top: `${sp.top}%`,
+                width: sp.w,
+                height: sp.h,
+                animationDelay: `${sp.delay}s`,
                 boxShadow: "0 0 8px rgba(250,204,21,0.9)",
               }}
             />
@@ -273,6 +272,5 @@ function Bar({ label, value, color }: { label: string; value: number; color: str
 }
 
 export default Slide0;
-
 
 

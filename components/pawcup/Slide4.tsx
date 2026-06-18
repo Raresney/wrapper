@@ -1,37 +1,20 @@
 ﻿"use client";
 
-import { useMemo, useEffect, useState } from "react";
+import Image from "next/image";
+import { useState } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 
 function Slide4() {
-  const stars = useMemo(
-    () => Array.from({ length: 45 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })),
-    [],
+  const [stars] = useState(() => Array.from({ length: 45 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })));
+  const [confetti] = useState(() =>
+    Array.from({ length: 22 }).map(() => ({
+      x: Math.random() * 100,
+      d: Math.random() * 6,
+      dur: 5 + Math.random() * 5,
+      c: ["#facc15", "#a855f7", "#ec4899", "#22d3ee", "#ffffff"][Math.floor(Math.random() * 5)],
+      r: Math.random() * 360,
+    }))
   );
-  const confetti = useMemo(
-    () =>
-      Array.from({ length: 22 }).map(() => ({
-        x: Math.random() * 100,
-        d: Math.random() * 6,
-        dur: 5 + Math.random() * 5,
-        c: ["#facc15", "#a855f7", "#ec4899", "#22d3ee", "#ffffff"][Math.floor(Math.random() * 5)],
-        r: Math.random() * 360,
-      })),
-    [],
-  );
-
-  // countdown to a fixed match date
-  const target = useMemo(() => new Date("2026-07-19T20:00:00Z").getTime(), []);
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const i = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(i);
-  }, []);
-  const diff = Math.max(0, target - now);
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
 
   return (
     <div
@@ -69,10 +52,13 @@ function Slide4() {
       {/* ====== LEFT: ticket booth ====== */}
       <div className="absolute left-0 top-0 bottom-0 w-[28%] z-10 flex items-end justify-center pb-[4%]">
         <div className="relative w-[90%] translate-y-[2%] flex flex-col items-center">
-          <img
+          <Image
             src="/ticket-booth.png"
             alt="Ticket booth"
+            width={1024}
+            height={1024}
             className="w-full h-auto block drop-shadow-[0_25px_35px_rgba(0,0,0,0.7)]"
+            unoptimized
           />
         </div>
       </div>
@@ -284,76 +270,5 @@ function Slide4() {
   );
 }
 
-function CountBox({ v, l }: { v: number; l: string }) {
-  const s = String(v).padStart(2, "0");
-  return (
-    <div className="relative rounded-md bg-gradient-to-b from-[#1c0f3a] to-[#0a0420] border border-amber-500/40 p-1.5 text-center overflow-hidden">
-      <div className="absolute inset-x-0 top-1/2 h-px bg-black/60" />
-      <div className="text-amber-300 font-black text-2xl leading-none font-mono tabular-nums">{s}</div>
-      <div className="text-purple-300/70 text-[8px] tracking-[0.3em] mt-1">{l}</div>
-    </div>
-  );
-}
-
-function TrophySVG() {
-  return (
-    <svg viewBox="0 0 200 300" className="w-full h-auto drop-shadow-[0_20px_40px_rgba(250,204,21,0.5)]">
-      <defs>
-        <linearGradient id="tg1" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="#92400e" />
-          <stop offset="25%" stopColor="#fbbf24" />
-          <stop offset="50%" stopColor="#fef3c7" />
-          <stop offset="75%" stopColor="#fbbf24" />
-          <stop offset="100%" stopColor="#92400e" />
-        </linearGradient>
-        <linearGradient id="tg2" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="#78350f" />
-          <stop offset="40%" stopColor="#f59e0b" />
-          <stop offset="60%" stopColor="#fde68a" />
-          <stop offset="100%" stopColor="#78350f" />
-        </linearGradient>
-        <radialGradient id="tglow" cx="50%" cy="60%" r="50%">
-          <stop offset="0%" stopColor="#fef3c7" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#d97706" stopOpacity="0" />
-        </radialGradient>
-        <filter id="tshine">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
-      {/* glow aura */}
-      <ellipse cx="100" cy="160" rx="80" ry="100" fill="url(#tglow)" opacity="0.5" />
-      {/* base plate */}
-      <rect x="52" y="276" width="96" height="12" rx="3" fill="url(#tg1)" />
-      <rect x="60" y="268" width="80" height="10" rx="2" fill="url(#tg2)" />
-      {/* stem column */}
-      <rect x="82" y="220" width="36" height="50" rx="4" fill="url(#tg2)" />
-      <rect x="90" y="220" width="8" height="50" fill="#fef3c7" opacity="0.25" />
-      {/* middle knob */}
-      <ellipse cx="100" cy="220" rx="28" ry="10" fill="url(#tg1)" />
-      <ellipse cx="100" cy="218" rx="26" ry="9" fill="url(#tg2)" />
-      {/* cup body */}
-      <path d="M60 80 Q 56 140 68 200 L 132 200 Q 144 140 140 80 Z" fill="url(#tg1)" />
-      <path d="M64 84 Q 60 140 72 196 L 128 196 Q 136 140 136 84 Z" fill="url(#tg2)" />
-      {/* interior shine */}
-      <path d="M72 88 Q 70 130 78 190 L 90 190 Q 84 130 84 88 Z" fill="#fef3c7" opacity="0.3" />
-      {/* handles */}
-      <path d="M60 100 Q 30 120 32 160 Q 34 195 58 190" stroke="url(#tg1)" strokeWidth="10" fill="none" strokeLinecap="round" />
-      <path d="M60 100 Q 34 120 36 160 Q 38 192 62 188" stroke="url(#tg2)" strokeWidth="6" fill="none" strokeLinecap="round" />
-      <path d="M140 100 Q 170 120 168 160 Q 166 195 142 190" stroke="url(#tg1)" strokeWidth="10" fill="none" strokeLinecap="round" />
-      <path d="M140 100 Q 166 120 164 160 Q 162 192 138 188" stroke="url(#tg2)" strokeWidth="6" fill="none" strokeLinecap="round" />
-      {/* rim */}
-      <ellipse cx="100" cy="82" rx="42" ry="12" fill="url(#tg1)" />
-      <ellipse cx="100" cy="80" rx="40" ry="10" fill="url(#tg2)" />
-      <ellipse cx="100" cy="78" rx="36" ry="7" fill="#fef3c7" opacity="0.3" />
-      {/* star on cup */}
-      <text x="100" y="158" textAnchor="middle" fontSize="28" fill="#fef3c7" opacity="0.5" filter="url(#tshine)">{"\u2605"}</text>
-      {/* specular */}
-      <ellipse cx="82" cy="110" rx="10" ry="18" fill="#fff" opacity="0.18" transform="rotate(-15,82,110)" />
-    </svg>
-  );
-}
-
 export default Slide4;
-
 

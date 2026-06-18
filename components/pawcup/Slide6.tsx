@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import commentators from "@/components/pawcup/assets/commentators.png.asset.json";
 
@@ -23,10 +24,13 @@ const STARS = Array.from({ length: 40 }).map(() => ({
 
 function Slide6() {
   // animate the clock client-side only to avoid SSR mismatch
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    setMounted(true);
     const i = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(i);
   }, []);
@@ -159,13 +163,14 @@ function Slide6() {
                 <div className="absolute top-4 right-4 w-10 h-6 rounded-sm bg-amber-400/30 border border-amber-300/50 animate-screen-flicker" />
 
                 {/* commentators */}
-                <img
+                <Image
                   src={commentators.url}
                   alt="Two cat commentators with headsets"
-                  className="absolute bottom-[14%] left-1/2 -translate-x-1/2 w-[92%] drop-shadow-[0_10px_25px_rgba(0,0,0,0.6)]"
-                  loading="lazy"
                   width={1024}
                   height={1024}
+                  className="absolute bottom-[14%] left-1/2 -translate-x-1/2 w-[92%] drop-shadow-[0_10px_25px_rgba(0,0,0,0.6)]"
+                  loading="lazy"
+                  unoptimized
                 />
                 {/* studio desk */}
                 <div className="absolute bottom-0 left-0 right-0 h-[16%] z-20" style={{
@@ -204,11 +209,11 @@ function Slide6() {
                 </div>
 
                 <div className="absolute top-[28%] left-2 bg-white text-purple-900 text-[9px] font-bold px-2 py-1 rounded-lg shadow-lg animate-bubble z-20">
-                  "What a strike!"
+                  &quot;What a strike!&quot;
                   <span className="absolute -bottom-1 left-4 w-2 h-2 bg-white rotate-45" />
                 </div>
                 <div className="absolute top-[24%] right-2 bg-amber-300 text-purple-950 text-[9px] font-bold px-2 py-1 rounded-lg shadow-lg animate-bubble-2 z-20">
-                  "Unbelievable!"
+                  &quot;Unbelievable!&quot;
                   <span className="absolute -bottom-1 right-4 w-2 h-2 bg-amber-300 rotate-45" />
                 </div>
 
@@ -291,7 +296,7 @@ function Slide6() {
           <div className="mt-4 rounded-xl bg-gradient-to-r from-purple-600/30 to-fuchsia-600/30 border border-purple-400/30 p-3 flex items-center justify-between">
             <div>
               <div className="text-purple-200/70 text-[9px] tracking-[0.3em]">LATEST</div>
-              <div className="text-white text-sm font-bold mt-0.5">GOAL · @whiskermessi 67'</div>
+              <div className="text-white text-sm font-bold mt-0.5">GOAL · @whiskermessi 67&apos;</div>
             </div>
             <div className="text-amber-400 font-black text-xl">2-1</div>
           </div>
@@ -411,5 +416,3 @@ function Player({ x, y, kit, num, delay = "0s" }: { x: number; y: number; kit: "
 }
 
 export default Slide6;
-
-

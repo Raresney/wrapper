@@ -25,8 +25,11 @@ const RIGHT = [
 
 export default function Slide8({ profile }: { profile?: WrappedProfile }) {
   const award = useMemo(() => (profile ? determineAward(profile) : null), [profile]);
-  const [speech, setSpeech] = useState<string | null>(null);
-  const [speechLoading, setSpeechLoading] = useState(false);
+  const requestKey = award && profile ? `${profile.user.login}:${award.id}` : null;
+  const [speechState, setSpeechState] = useState<{ key: string | null; speech: string | null }>({
+    key: null,
+    speech: null,
+  });
 
   const stars = useMemo(
     () =>
@@ -41,8 +44,10 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
   );
 
   useEffect(() => {
-    if (!award || !profile) return;
-    setSpeechLoading(true);
+    if (!award || !profile || !requestKey) return;
+
+    const controller = new AbortController();
+
     fetch("/api/wc-prize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -53,12 +58,25 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
         keyStat: award.keyStat(profile),
         speechHint: award.speech_hint,
       }),
+      signal: controller.signal,
     })
       .then((r) => r.json())
-      .then((d: { speech?: string }) => setSpeech(d.speech ?? null))
-      .catch(() => setSpeech(null))
-      .finally(() => setSpeechLoading(false));
-  }, [award, profile]);
+      .then((d: { speech?: string }) => {
+        if (!controller.signal.aborted) {
+          setSpeechState({ key: requestKey, speech: d.speech ?? null });
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setSpeechState({ key: requestKey, speech: null });
+        }
+      });
+
+    return () => controller.abort();
+  }, [award, profile, requestKey]);
+
+  const speechLoading = requestKey !== null && speechState.key !== requestKey;
+  const speech = speechState.key === requestKey ? speechState.speech : null;
 
   const startOver = () => {
     try { sessionStorage.removeItem("wrappedProfile"); } catch {}
@@ -239,7 +257,7 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
         )}
       </div>
 
-      <div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2">
+      <div data-share-ignore className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2">
         <button
           onClick={startOver}
           className="flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm font-medium text-white/70 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white"

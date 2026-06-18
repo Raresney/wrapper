@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
@@ -26,18 +26,23 @@ function CatFace({ size }: { size: number }) {
   );
 }
 
-function MouseFace({ size }: { size: number }) {
+function AstronautMouseRocket({ size }: { size: number }) {
   return (
-    <svg viewBox="0 0 40 40" width={size} height={size}>
-      <circle cx="11" cy="14" r="6" fill="#cfcfd5" />
-      <circle cx="29" cy="14" r="6" fill="#cfcfd5" />
-      <circle cx="11" cy="14" r="3" fill="#f3b5c8" />
-      <circle cx="29" cy="14" r="3" fill="#f3b5c8" />
-      <ellipse cx="20" cy="24" rx="12" ry="10" fill="#dcdce2" />
-      <circle cx="15" cy="22" r="1.8" fill="#0b0b0b" />
-      <circle cx="25" cy="22" r="1.8" fill="#0b0b0b" />
-      <ellipse cx="20" cy="27" rx="2" ry="1.4" fill="#2a0f12" />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/wrapped/soricel-spatial-transparent.png"
+      alt=""
+      width={size}
+      height={size}
+      draggable={false}
+      className="pointer-events-none select-none"
+      style={{
+        width: size,
+        height: size,
+        objectFit: "contain",
+        transformOrigin: "center",
+      }}
+    />
   );
 }
 
@@ -46,21 +51,33 @@ function CardboardRocket({ scale = 1, label, isCat = false, merged = false }: { 
   const h = 110 * scale;
   return (
     <div className="relative" style={{ width: w, height: h }}>
-      <motion.div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: -14 * scale }}
-        animate={{ scaleY: [1, 1.3, 0.9, 1.2, 1], opacity: [0.8, 1, 0.7, 1, 0.8] }}
-        transition={{ duration: 0.3, repeat: Infinity }}>
-        <div style={{ width: 16 * scale, height: 28 * scale, background: "radial-gradient(circle at 50% 20%, #fff2a8 0%, #ffb347 40%, #ff5722 80%, transparent 100%)", borderRadius: "50% 50% 40% 40% / 30% 30% 70% 70%", filter: "blur(1px)" }} />
-      </motion.div>
-      <div className="absolute inset-0 rounded-md"
-        style={{ background: "linear-gradient(180deg, #c98a4b 0%, #a96a2e 60%, #7a4a1c 100%)", boxShadow: "inset 0 -6px 0 rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.15)", border: "1.5px solid #5a3410" }}>
-        <div className="absolute left-0 right-0" style={{ top: "38%", height: 6 * scale, background: "rgba(255,255,255,0.25)" }} />
-        <div className="absolute left-1/2 -translate-x-1/2 rounded-full bg-[#0b1a2b] border-2 border-[#3a2410] overflow-hidden flex items-end justify-center"
-          style={{ top: 12 * scale, width: 44 * scale, height: 44 * scale }}>
-          {isCat ? <CatFace size={36 * scale} /> : <MouseFace size={28 * scale} />}
-        </div>
-        <div className="absolute" style={{ left: -8 * scale, bottom: 0, width: 12 * scale, height: 22 * scale, background: "#7a4a1c", clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }} />
-        <div className="absolute" style={{ right: -8 * scale, bottom: 0, width: 12 * scale, height: 22 * scale, background: "#7a4a1c", clipPath: "polygon(0 0, 100% 100%, 0 100%)" }} />
-      </div>
+      {isCat ? (
+        <>
+          <motion.div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: -14 * scale }}
+            animate={{ scaleY: [1, 1.3, 0.9, 1.2, 1], opacity: [0.8, 1, 0.7, 1, 0.8] }}
+            transition={{ duration: 0.3, repeat: Infinity }}>
+            <div style={{ width: 16 * scale, height: 28 * scale, background: "radial-gradient(circle at 50% 20%, #fff2a8 0%, #ffb347 40%, #ff5722 80%, transparent 100%)", borderRadius: "50% 50% 40% 40% / 30% 30% 70% 70%", filter: "blur(1px)" }} />
+          </motion.div>
+          <div className="absolute inset-0 rounded-md"
+            style={{ background: "linear-gradient(180deg, #c98a4b 0%, #a96a2e 60%, #7a4a1c 100%)", boxShadow: "inset 0 -6px 0 rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.15)", border: "1.5px solid #5a3410" }}>
+            <div className="absolute left-0 right-0" style={{ top: "38%", height: 6 * scale, background: "rgba(255,255,255,0.25)" }} />
+            <div className="absolute left-1/2 -translate-x-1/2 rounded-full bg-[#0b1a2b] border-2 border-[#3a2410] overflow-hidden flex items-end justify-center"
+              style={{ top: 12 * scale, width: 44 * scale, height: 44 * scale }}>
+              <CatFace size={36 * scale} />
+            </div>
+            <div className="absolute" style={{ left: -8 * scale, bottom: 0, width: 12 * scale, height: 22 * scale, background: "#7a4a1c", clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }} />
+            <div className="absolute" style={{ right: -8 * scale, bottom: 0, width: 12 * scale, height: 22 * scale, background: "#7a4a1c", clipPath: "polygon(0 0, 100% 100%, 0 100%)" }} />
+          </div>
+        </>
+      ) : (
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={{ y: [0, -5, 4, -3, 0], rotate: [-3, 2, -2, 3, -3] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <AstronautMouseRocket size={112 * scale} />
+        </motion.div>
+      )}
       {label && (
         <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white/90 backdrop-blur-sm border border-white/10" style={{ top: -16 }}>
           {label}{merged && <span className="ml-1 text-emerald-400">✓</span>}
@@ -180,35 +197,28 @@ function Planet() {
 
 export default function SlideContributions({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
-  const prsOpened = flat.pullRequests.opened;
   const prsMerged = flat.pullRequests.merged;
-  const pct = flat.prMergeRatePct;
-  const hasPRs = prsOpened > 0;
+  const hasPRs = prsMerged > 0;
+  const issuesOpened = flat.issuesOpened;
+  const prsOpened = flat.prsOpened;
   const topRepo = flat.topRepoCard?.name ?? flat.topRepos[0]?.name ?? "—";
   const impactZero = flat.totalStars + flat.totalForks + flat.followers === 0;
   const impactItems = impactZero
     ? [{ label: "Commits", value: flat.totalCommits }, { label: "Repos", value: flat.ownedRepoCount }, { label: "Active days", value: flat.activeDayCount }]
     : [{ label: "Stars", value: flat.totalStars }, { label: "Forks", value: flat.totalForks }, { label: "Followers", value: flat.followers }];
 
-  const mergedSlots = useMemo(() => {
-    const total = 3;
-    const ratio = prsOpened > 0 ? prsMerged / prsOpened : 0;
-    const count = Math.round(ratio * total);
-    return Array.from({ length: total }, (_, i) => i < count);
-  }, [prsOpened, prsMerged]);
-
+  // animate each merged PR dot sequentially (all slots filled — data is merged-only)
   const [showMerged, setShowMerged] = useState<boolean[]>([false, false, false]);
   useEffect(() => {
+    if (!hasPRs) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    mergedSlots.forEach((m, i) => {
-      if (m) {
-        timers.push(setTimeout(() => {
-          setShowMerged((prev) => { const next = [...prev]; next[i] = true; return next; });
-        }, 3500 + i * 2000));
-      }
+    [0, 1, 2].forEach((i) => {
+      timers.push(setTimeout(() => {
+        setShowMerged((prev) => { const next = [...prev]; next[i] = true; return next; });
+      }, 3500 + i * 2000));
     });
     return () => timers.forEach(clearTimeout);
-  }, [mergedSlots]);
+  }, [hasPRs]);
 
   return (
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
@@ -234,7 +244,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
             <SlideCard accentColor={ACCENT} chapter={2} title="The Chase" className="text-white">
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={flat.avatarUrl} alt={flat.username} className="h-10 w-10 rounded-full border"
+                <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border"
                   style={{ borderColor: `${ACCENT}55` }} />
                 <div>
                   <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: `${ACCENT}70` }}>The Mouse Chase</div>
@@ -248,15 +258,19 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
                       <div className="flex items-baseline justify-between">
                         <span className="text-sm text-white/60">Pull requests merged</span>
-                        <span className="text-xl font-bold text-white">{prsMerged}<span className="ml-1 text-sm font-normal text-white/40">/ {prsOpened}</span></span>
+                        <div className="text-right">
+                          <span className="text-xl font-bold text-white">{prsMerged}</span>
+                          {prsOpened > 100 && (
+                            <span className="ml-1.5 text-[11px] text-white/35">of {prsOpened} opened</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                          transition={{ duration: 1.2, delay: 0.9, ease: "easeOut" }}
-                          className="h-full rounded-full"
-                          style={{ background: "linear-gradient(90deg, #34d399 0%, #10b981 60%, #059669 100%)", boxShadow: "0 0 12px rgba(52,211,153,0.6)" }} />
-                      </div>
-                      <div className="mt-1 text-right text-xs text-emerald-300/80">{pct}% merge rate</div>
+                      {issuesOpened > 0 && (
+                        <div className="mt-1 flex items-baseline justify-between">
+                          <span className="text-sm text-white/60">Issues opened</span>
+                          <span className="text-base font-semibold text-white/85">{issuesOpened}</span>
+                        </div>
+                      )}
                     </motion.div>
 
                     {flat.prRepos.length > 0 && (
@@ -286,7 +300,13 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                     className="rounded-xl px-4 py-3" style={{ border: `1px solid ${ACCENT}22`, background: `${ACCENT}08` }}>
                     <div className="text-xs uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Most active repository</div>
                     <div className="mt-1 font-mono text-base" style={{ color: ACCENT }}>{topRepo}</div>
-                    <div className="mt-2 text-[11px] leading-relaxed text-white/45">No pull requests this period — but the work still shipped. Here&apos;s the footprint.</div>
+                    {issuesOpened > 0 ? (
+                      <div className="mt-2 text-[11px] leading-relaxed text-white/60">
+                        {issuesOpened} issue{issuesOpened !== 1 ? "s" : ""} opened — the thinking happens before the PR.
+                      </div>
+                    ) : (
+                      <div className="mt-2 text-[11px] leading-relaxed text-white/45">No pull requests this period — but the work still shipped. Here&apos;s the footprint.</div>
+                    )}
                   </motion.div>
                 )}
 

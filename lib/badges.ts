@@ -102,7 +102,7 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       id: "polyglot", label: "Polyglot", icon: "globe", color: "#2dd4bf", rarity: "common",
       importance: imp("common", 1), detail: `${t.languageCount} languages`,
       explanation: "Multiple programming languages? No problem. You're fluent in code's many dialects.",
-      earned: t.languageCount >= 3,
+      earned: t.languageCount >= 4,
     },
     {
       id: "weekend", label: "Weekend Dev", icon: "swords", color: "#fbbf24", rarity: "epic",
@@ -124,7 +124,7 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
     },
     {
       id: "rising", label: "Rising", icon: "trending", color: "#4ade80", rarity: "uncommon",
-      importance: imp("uncommon"), detail: `+${t.growthDelta}%`,
+      importance: imp("uncommon"), detail: `+${Math.min(Math.round(t.growthDelta), 9999)}%`,
       explanation: "Your output is accelerating — second half of the period blew the first away.",
       earned: t.growthTrend === "up" && t.growthDelta >= 30,
     },
@@ -250,7 +250,7 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       id: "star_earner", label: "Star Earner", icon: "medal", color: "#fbbf24", rarity: "common",
       importance: imp("common", 4), detail: `${t.totalStars ?? 0} stars`,
       explanation: "Your repos light up the night sky. People are starring your work.",
-      earned: (t.totalStars ?? 0) >= 10,
+      earned: (t.totalStars ?? 0) >= 25,
     },
     {
       id: "star_builder", label: "Star Builder", icon: "telescope", color: "#38bdf8", rarity: "rare",
@@ -268,7 +268,7 @@ export function deriveTraitBadges(t: TraitInput): TraitBadge[] {
       id: "known_dev", label: "Known Dev", icon: "users", color: "#22d3ee", rarity: "common",
       importance: imp("common", 2), detail: `${t.followersCount ?? 0} followers`,
       explanation: "People follow you on GitHub. You've made yourself known in the community.",
-      earned: (t.followersCount ?? 0) >= 20,
+      earned: (t.followersCount ?? 0) >= 40,
     },
     {
       id: "thought_leader", label: "Thought Leader", icon: "crown", color: "#c084fc", rarity: "epic",

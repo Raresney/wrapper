@@ -40,9 +40,19 @@ export default function ShareModal({
   const [failed, setFailed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const blobRef = useRef<Blob | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount guard for the portal
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+    };
+  }, []);
 
   const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNavigator).canShare === "function";
   const caption = `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GitHubWrapped`;
@@ -75,12 +85,18 @@ export default function ShareModal({
     const t = setTimeout(async () => {
       if (!alive) return;
       setBusy(true);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
       setPreview(null);
       setFailed(false);
       // Low-res first → fast, pixel-perfect at modal display size
       const prev = await capture(1);
       if (!alive) return;
-      setPreview(prev ? URL.createObjectURL(prev) : null);
+      const nextPreview = prev ? URL.createObjectURL(prev) : null;
+      previewUrlRef.current = nextPreview;
+      setPreview(nextPreview);
       setFailed(!prev);
       setBusy(false);
       // Hi-res in background → used for download/share
@@ -88,7 +104,14 @@ export default function ShareModal({
       if (!alive) return;
       blobRef.current = hi;
     }, 80);
-    return () => { alive = false; clearTimeout(t); };
+    return () => {
+      alive = false;
+      clearTimeout(t);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+    };
   }, [open, scope, capture]);
 
   // Close on Escape.

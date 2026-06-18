@@ -1,15 +1,13 @@
 ﻿"use client";
 
-import { useMemo } from "react";
+import Image from "next/image";
+import { useState } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import catBack from "@/components/pawcup/assets/cat-back.png.asset.json";
 
 
 function Slide1() {
-  const stars = useMemo(
-    () => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })),
-    [],
-  );
+  const [stars] = useState(() => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })));
 
   return (
     <div
@@ -114,10 +112,13 @@ function Slide1() {
 
           {/* Cat seen from back */}
           <div className="absolute right-[6%] bottom-[6%] w-[60%] animate-float-slow">
-            <img
+            <Image
               src={catBack.url}
               alt="Cat coach from behind"
+              width={1024}
+              height={1024}
               className="w-full h-auto drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]"
+              unoptimized
             />
           </div>
 
@@ -379,7 +380,6 @@ function TacticsBoard({ className }: { className?: string }) {
 }
 
 export default Slide1;
-
 
 
 

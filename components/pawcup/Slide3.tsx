@@ -1,18 +1,13 @@
 ﻿"use client";
 
-import { useMemo } from "react";
+import Image from "next/image";
+import { useState } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import catMascot from "@/components/pawcup/assets/cat-mascot.asset.json";
 
 function Slide3() {
-  const stars = useMemo(
-    () => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })),
-    [],
-  );
-  const sparks = useMemo(
-    () => Array.from({ length: 18 }).map(() => ({ x: 5 + Math.random() * 90, y: 5 + Math.random() * 90, d: Math.random() * 4, s: 1 + Math.random() * 2 })),
-    [],
-  );
+  const [stars] = useState(() => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })));
+  const [sparks] = useState(() => Array.from({ length: 18 }).map(() => ({ x: 5 + Math.random() * 90, y: 5 + Math.random() * 90, d: Math.random() * 4, s: 1 + Math.random() * 2 })));
 
   return (
     <div
@@ -48,15 +43,18 @@ function Slide3() {
 
           {/* Coach cat */}
           <div className="absolute left-[-2%] bottom-[4%] w-[56%] origin-bottom">
-            <img src="/cat-coach.png" alt="Coach cat" className="w-full h-auto block drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]" />
+            <Image src="/cat-coach.png" alt="Coach cat" width={1024} height={1024} className="w-full h-auto block drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]" unoptimized />
           </div>
 
           {/* Cat captain listening · same mascot as homepage */}
           <div className="absolute right-[2%] bottom-[4%] w-[44%] origin-bottom">
-            <img
+            <Image
               src={catMascot.url}
               alt="Cat captain listening"
+              width={1024}
+              height={1024}
               className="w-full h-auto block drop-shadow-[0_20px_25px_rgba(0,0,0,0.7)] scale-x-[-1]"
+              unoptimized
             />
           </div>
 
@@ -251,133 +249,7 @@ function HoloPitch() {
   );
 }
 
-function CoachCat() {
-  return (
-    <svg viewBox="0 0 240 400" className="w-full h-auto drop-shadow-[0_25px_30px_rgba(0,0,0,0.7)]">
-      <defs>
-        <radialGradient id="gFur" cx="40%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#d0d0d0" />
-          <stop offset="55%" stopColor="#909090" />
-          <stop offset="100%" stopColor="#555555" />
-        </radialGradient>
-        <radialGradient id="gFurDark" cx="40%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#a0a0a0" />
-          <stop offset="100%" stopColor="#404040" />
-        </radialGradient>
-        <radialGradient id="gMuzzle" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#f0eded" />
-          <stop offset="100%" stopColor="#d8d0d0" />
-        </radialGradient>
-        <linearGradient id="gJacket" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#1a1a1a" />
-          <stop offset="100%" stopColor="#080808" />
-        </linearGradient>
-        <linearGradient id="gClip" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#f0c050" />
-          <stop offset="100%" stopColor="#c08010" />
-        </linearGradient>
-      </defs>
-
-      {/* shadow */}
-      <ellipse cx="116" cy="395" rx="76" ry="6" fill="#000" opacity="0.35" />
-
-      {/* tail */}
-      <path d="M168 318 Q 210 275 214 232 Q 217 208 202 203" stroke="#3a3a3a" strokeWidth="20" fill="none" strokeLinecap="round" />
-      <path d="M168 318 Q 210 275 214 232 Q 217 208 202 203" stroke="#888" strokeWidth="12" fill="none" strokeLinecap="round" />
-
-      {/* legs */}
-      <path d="M84 338 Q 76 363 72 380 Q 82 386 98 380 Q 102 360 100 336 Z" fill="url(#gFur)" />
-      <path d="M148 338 Q 156 363 160 380 Q 146 386 132 380 Q 130 358 134 336 Z" fill="url(#gFur)" />
-      <ellipse cx="85"  cy="380" rx="17" ry="7" fill="#444" />
-      <ellipse cx="146" cy="380" rx="17" ry="7" fill="#444" />
-
-      {/* body */}
-      <ellipse cx="116" cy="284" rx="62" ry="60" fill="url(#gFur)" />
-      {/* belly patch */}
-      <ellipse cx="116" cy="296" rx="30" ry="35" fill="url(#gMuzzle)" opacity="0.6" />
-
-      {/* jacket (black) */}
-      <path d="M62 260 Q 116 236 170 260 L 167 334 Q 116 350 65 334 Z" fill="url(#gJacket)" />
-      {/* lapels */}
-      <path d="M116 238 L 100 258 L 116 254 L 132 258 Z" fill="#222" />
-      {/* collar white shirt */}
-      <path d="M108 240 Q 116 248 124 240 L 122 252 Q 116 256 110 252 Z" fill="#e8e8e8" />
-      {/* jacket buttons */}
-      <circle cx="116" cy="272" r="2.5" fill="#333" stroke="#666" strokeWidth="0.5" />
-      <circle cx="116" cy="284" r="2.5" fill="#333" stroke="#666" strokeWidth="0.5" />
-      <circle cx="116" cy="296" r="2.5" fill="#333" stroke="#666" strokeWidth="0.5" />
-
-      {/* left arm · hanging down */}
-      <path d="M66 270 Q 56 300 58 336 Q 68 340 80 335 Q 82 300 86 270 Z" fill="url(#gJacket)" />
-      <ellipse cx="69" cy="336" rx="13" ry="7" fill="url(#gFur)" />
-      {/* right arm · hanging down, slightly forward holding clipboard low */}
-      <path d="M146 270 Q 156 300 158 336 Q 146 340 134 335 Q 132 300 136 270 Z" fill="url(#gJacket)" />
-      <ellipse cx="148" cy="336" rx="13" ry="7" fill="url(#gFur)" />
-
-      {/* clipboard · held low at side */}
-      <rect x="152" y="296" width="44" height="56" rx="4" fill="url(#gClip)" />
-      <rect x="165" y="291" width="16" height="8" rx="2.5" fill="#888" />
-      <rect x="157" y="308" width="34" height="2" rx="1" fill="#fff" opacity="0.75" />
-      <rect x="157" y="314" width="28" height="2" rx="1" fill="#fff" opacity="0.6"  />
-      <rect x="157" y="320" width="32" height="2" rx="1" fill="#fff" opacity="0.6"  />
-      <rect x="157" y="326" width="24" height="2" rx="1" fill="#fff" opacity="0.5"  />
-      <rect x="157" y="336" width="34" height="10" rx="2" fill="#15803d" opacity="0.8" />
-      <line x1="174" y1="336" x2="174" y2="346" stroke="#fff" strokeWidth="0.8" opacity="0.7" />
-
-      {/* -- HEAD -- */}
-      {/* ears */}
-      <polygon points="74,134 86,86  112,136" fill="url(#gFur)" />
-      <polygon points="120,136 146,86 158,134" fill="url(#gFur)" />
-      <polygon points="81,128 90,102 106,130" fill="#e8a0a8" opacity="0.7" />
-      <polygon points="126,130 144,102 153,128" fill="#e8a0a8" opacity="0.7" />
-
-      {/* head */}
-      <ellipse cx="116" cy="170" rx="64" ry="60" fill="url(#gFur)" />
-
-      {/* muzzle */}
-      <ellipse cx="116" cy="192" rx="25" ry="17" fill="url(#gMuzzle)" opacity="0.8" />
-
-      {/* eyes */}
-      <ellipse cx="96"  cy="163" rx="15" ry="11" fill="#fff" />
-      <ellipse cx="136" cy="163" rx="15" ry="11" fill="#fff" />
-      <ellipse cx="96"  cy="164" rx="9"  ry="10" fill="#4a7a30" />
-      <ellipse cx="136" cy="164" rx="9"  ry="10" fill="#4a7a30" />
-      <ellipse cx="96"  cy="165" rx="3"  ry="9"  fill="#111" />
-      <ellipse cx="136" cy="165" rx="3"  ry="9"  fill="#111" />
-      <ellipse cx="91"  cy="158" rx="3"  ry="2"  fill="#fff" opacity="0.9" />
-      <ellipse cx="131" cy="158" rx="3"  ry="2"  fill="#fff" opacity="0.9" />
-      {/* eyelid */}
-      <path d="M81 158 Q 96 150 111 158" stroke="#555" strokeWidth="1.8" fill="none" />
-      <path d="M121 158 Q 136 150 151 158" stroke="#555" strokeWidth="1.8" fill="none" />
-
-      {/* nose */}
-      <path d="M110 191 Q 116 188 122 191 L 119 198 Q 116 200 113 198 Z" fill="#d46090" />
-      <line x1="116" y1="198" x2="116" y2="203" stroke="#a03060" strokeWidth="1.2" />
-      <path d="M116 203 Q 108 210 102 207" stroke="#7a2040" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <path d="M116 203 Q 124 210 130 207" stroke="#7a2040" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-
-      {/* whiskers */}
-      <line x1="90"  y1="194" x2="52"  y2="187" stroke="#ccc" strokeWidth="1.2" opacity="0.7" />
-      <line x1="90"  y1="200" x2="52"  y2="206" stroke="#ccc" strokeWidth="1.2" opacity="0.7" />
-      <line x1="90"  y1="206" x2="56"  y2="216" stroke="#ccc" strokeWidth="1"   opacity="0.5" />
-      <line x1="142" y1="194" x2="180" y2="187" stroke="#ccc" strokeWidth="1.2" opacity="0.7" />
-      <line x1="142" y1="200" x2="180" y2="206" stroke="#ccc" strokeWidth="1.2" opacity="0.7" />
-      <line x1="142" y1="206" x2="176" y2="216" stroke="#ccc" strokeWidth="1"   opacity="0.5" />
-
-      {/* coach cap · black */}
-      <path d="M64 136 Q 116 114 168 136 L 166 154 Q 116 158 66 154 Z" fill="#111" />
-      <path d="M62 134 Q 116 112 170 134 L 168 144 Q 116 148 64 144 Z" fill="#222" />
-      <path d="M44 144 Q 64 136 66 148 L 44 152 Z" fill="#0a0a0a" />
-      <circle cx="116" cy="116" r="4" fill="#444" />
-      {/* cap badge */}
-      <rect x="104" y="135" width="24" height="14" rx="3" fill="#a855f7" />
-      <text x="116" y="146" textAnchor="middle" fontSize="8" fontWeight="900" fill="#fde68a" fontFamily="Arial">FC</text>
-    </svg>
-  );
-}
-
 export default Slide3;
-
 
 
 

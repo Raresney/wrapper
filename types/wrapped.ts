@@ -71,6 +71,8 @@ export type GitHubRawData = {
   contributions: Contribution[];
   languages: LanguageStats[];
   pullRequests: PullRequest[];
+  prsOpened: number;
+  issueContributions: { opened: number };
   totalStarsReceived: number;
   totalForksReceived: number;
   commitStats: CommitStats | null;
@@ -138,7 +140,7 @@ export type AchievementId =
   | "consistent"
   | "midnight_coder"
   | "open_source_hero"
-  | "graveyard_keeper"
+  | "code_comet"
   | "centurion"
   | "grandmaster"
   | "machine"
@@ -237,7 +239,7 @@ export type Insight = {
 };
 
 export type SelectedInsights = {
-  primaryArchetype: Insight;
+  topInsight: Insight;
   narrativeTop3: Insight[];
   achievementsTop3: Insight[];
   mainStoryArc: Insight;
@@ -262,7 +264,6 @@ export type NarrativeOutput = {
   introVibeLine: string;
   shareCaption: string;
   generatedAt: string;
-  fromCache: boolean;
   isFallback?: boolean;
 };
 
@@ -278,7 +279,6 @@ export type WrappedProfile = {
   tone: AiTone;
   narrative: NarrativeOutput | null;
   generatedAt: string;
-  cacheKey: string;
 };
 
 export type SlideId =

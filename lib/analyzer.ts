@@ -45,7 +45,7 @@ function isoToDay(d: string): string {
 
 // --- Sub-functions ---
 
-function calcStreak(contributions: Contribution[]): StreakData {
+function calcStreak(contributions: Contribution[], periodEndDate: string): StreakData {
   const active = new Set(contributions.filter((c) => c.count > 0).map((c) => c.date));
   if (!active.size) return { currentStreak: 0, longestStreak: 0, lastActiveDate: "" };
 
@@ -53,10 +53,12 @@ function calcStreak(contributions: Contribution[]): StreakData {
   const lastActiveDate = sorted.at(-1)!;
 
   let currentStreak = 0;
-  const cur = new Date(lastActiveDate);
-  while (active.has(cur.toISOString().slice(0, 10))) {
-    currentStreak++;
-    cur.setDate(cur.getDate() - 1);
+  if (active.has(periodEndDate)) {
+    const cur = new Date(`${periodEndDate}T00:00:00Z`);
+    while (active.has(cur.toISOString().slice(0, 10))) {
+      currentStreak++;
+      cur.setUTCDate(cur.getUTCDate() - 1);
+    }
   }
 
   let longestStreak = 0, run = 0;
@@ -169,7 +171,7 @@ function calcScores(
   languageEntropy: number,
   repoSpread: number
 ): Scores {
-  const INTENSITY_NORM = 365, STK_BOOST = 15, DAY_BOOST = 10, DAY_THRESH = 20;
+  const STK_BOOST = 15, DAY_BOOST = 10, DAY_THRESH = 20;
   const CURR_STK_THRESH = 7, CONS_BOOST = 10, CONS_PEN = 10;
   const LANG_THRESH = 5, SPREAD_THRESH = 8, EXP_BOOST = 10;
   const FOCUS_BOOST = 15, FOCUS_THRESH = 0.7, OS_MAX = 200;
@@ -182,7 +184,7 @@ function calcScores(
   );
   const maxDay = Math.max(0, ...Object.values(dateTotals));
 
-  let intensity = (total / INTENSITY_NORM) * 100;
+  let intensity = (total / periodDays) * 100;
   if (streak.longestStreak > 30) intensity += STK_BOOST;
   if (maxDay > DAY_THRESH) intensity += DAY_BOOST;
   const intensityScore = clamp(Math.round(intensity), 0, 100);
@@ -305,7 +307,7 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
   // ── streaks ──
   {
     id: "on_fire", icon: "flame", rarity: "uncommon", label: "On Fire", description: "7+ day streak",
-    check: (_, m) => m.streak.currentStreak >= 7 ? `${m.streak.currentStreak} day streak` : null,
+    check: (_, m) => m.streak.longestStreak >= 7 ? `${m.streak.longestStreak} day streak` : null,
   },
   {
     id: "marathoner", icon: "infinity", rarity: "rare", label: "Marathoner", description: "30+ day streak",
@@ -318,9 +320,16 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
   {
     id: "consistent", icon: "calendar", rarity: "epic", label: "Iron Consistent", description: "Contributions every single week",
     check: (data) => {
-      const weeks = Math.max(1, Math.ceil(daysBetween(data.period.startDate, data.period.endDate) / 7));
       const active = new Set(data.contributions.filter((c) => c.count > 0).map((c) => getWeekNumber(c.date)));
-      return active.size >= weeks ? "Active every week" : null;
+      const allWeeks = new Set<string>();
+      for (
+        let d = new Date(`${data.period.startDate}T00:00:00Z`);
+        d.toISOString().slice(0, 10) <= data.period.endDate;
+        d.setUTCDate(d.getUTCDate() + 1)
+      ) {
+        allWeeks.add(getWeekNumber(d.toISOString().slice(0, 10)));
+      }
+      return active.size >= allWeeks.size ? "Active every week" : null;
     },
   },
   // ── time of day ──
@@ -329,8 +338,11 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (data) => { const n = nightCommitsOf(data); return n >= 50 ? `${n} late-night commits` : null; },
   },
   {
-    id: "midnight_coder", icon: "moon", rarity: "common", label: "Midnight Coder", description: "Coded between 0–4 AM",
-    check: (data) => data.contributions.some((c) => c.count > 0 && c.hour >= 0 && c.hour <= 4) ? "Shipped after midnight" : null,
+    id: "midnight_coder", icon: "moon", rarity: "common", label: "Midnight Coder", description: "Coded after midnight on 10+ nights",
+    check: (data) => {
+      const nights = new Set(data.contributions.filter((c) => c.count > 0 && c.hour >= 0 && c.hour <= 4).map((c) => c.date));
+      return nights.size >= 10 ? `${nights.size} late-night sessions` : null;
+    },
   },
   {
     id: "early_bird", icon: "sunrise", rarity: "uncommon", label: "Early Bird", description: "Productive at dawn",
@@ -416,13 +428,8 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (_, m) => m.growthDelta.trend === "up" && m.growthDelta.deltaPercent >= 50 ? `+${m.growthDelta.deltaPercent}% momentum` : null,
   },
   {
-    id: "graveyard_keeper", icon: "skull", rarity: "common", label: "Graveyard Keeper", description: "Maintaining a forgotten repo",
-    check: (data) => {
-      const cutoff = new Date(data.period.endDate);
-      cutoff.setFullYear(cutoff.getFullYear() - 1);
-      const repo = data.repos.find((r) => !r.isFork && r.stargazersCount === 0 && r.pushedAt && new Date(r.pushedAt) < cutoff);
-      return repo ? `${repo.name} since ${new Date(repo.pushedAt).getFullYear()}` : null;
-    },
+    id: "code_comet", icon: "comet", rarity: "epic", boost: 1, label: "Code Comet", description: "2,500+ commits",
+    check: (_, m) => m.totalCommits >= 2500 ? `${m.totalCommits.toLocaleString()} commits` : null,
   },
   // ── new diverse achievements ──
   {
@@ -434,8 +441,8 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (data) => { const c = data.commitStats; return c && c.sampleSize >= 10 && c.refactor / c.sampleSize >= 0.2 ? `${Math.round((c.refactor / c.sampleSize) * 100)}% refactors` : null; },
   },
   {
-    id: "tester", icon: "flask", rarity: "common", label: "Test Driven", description: "10+ test commits",
-    check: (data) => { const c = data.commitStats; return c && c.test >= 10 ? `${c.test} test commits` : null; },
+    id: "tester", icon: "flask", rarity: "common", label: "Test Driven", description: "20+ test commits",
+    check: (data) => { const c = data.commitStats; return c && c.test >= 20 ? `${c.test} test commits` : null; },
   },
   {
     id: "pr_champion", icon: "merge", rarity: "uncommon", boost: 2, label: "PR Champion", description: "20+ pull requests merged",
@@ -499,8 +506,8 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
   {
     id: "time_capsule", icon: "key", rarity: "rare", boost: 1, label: "Time Capsule", description: "Contributed to a repo created 8+ years ago",
     check: (data) => {
-      const cutoff = new Date(data.period.endDate);
-      cutoff.setFullYear(cutoff.getFullYear() - 8);
+      const cutoff = new Date(`${data.period.endDate}T00:00:00Z`);
+      cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 8);
       const oldRepo = data.repos.find((repo) =>
         data.contributions.some((c) => c.count > 0 && c.repoName === repo.name) &&
         !!repo.createdAt &&
@@ -534,7 +541,7 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (data) => data.languages.length >= 8 ? `${data.languages.length} languages` : null,
   },
   {
-    id: "lighthouse_repo", icon: "beacon", rarity: "legendary", boost: 4, label: "Lighthouse Repo", description: "Top repo reached 500+ stars",
+    id: "lighthouse_repo", icon: "beacon", rarity: "legendary", boost: 4, label: "Lighthouse Repo", description: "Most active repo this period has 500+ stars",
     check: (_, m) => !m.topRepo.isFork && m.topRepo.stargazersCount >= 500 ? `${m.topRepo.name} · ${m.topRepo.stargazersCount} stars` : null,
   },
 ];
@@ -542,7 +549,7 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
 // --- Exported functions ---
 
 export function calculateMetrics(data: GitHubRawData): CalculatedMetrics {
-  const streak = calcStreak(data.contributions);
+  const streak = calcStreak(data.contributions, data.period.endDate);
   const hourBias = calcHourBias(data.contributions);
   const activeDays = calcActiveDays(data.contributions, data.period);
   const growthDelta = calcGrowthDelta(data.contributions, data.period);

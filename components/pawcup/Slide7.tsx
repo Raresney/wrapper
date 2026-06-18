@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Image from "next/image";
 import React from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import champion from "@/components/pawcup/assets/champion-cat.png.asset.json";
@@ -142,11 +143,14 @@ function Slide7() {
           {/* center champion */}
           <div className="absolute z-20"
                style={{ left: "34%", bottom: "22%", width: "33%" }}>
-            <img
+            <Image
               src={champion.url}
               alt="Champion cat lifting the World Cup trophy"
+              width={1024}
+              height={1024}
               className="w-full h-auto drop-shadow-[0_30px_40px_rgba(0,0,0,0.7)]"
               loading="lazy"
+              unoptimized
             />
           </div>
           <Teammate className="absolute z-10"
@@ -192,11 +196,14 @@ function Slide7() {
 
             {/* screen */}
             <div className="relative rounded-[5px] overflow-hidden aspect-[4/5] shadow-[inset_0_0_30px_rgba(0,0,0,0.9)]">
-              <img
+              <Image
                 src={stadiumCelebration.url}
                 alt="Packed stadium celebrating with fireworks and confetti"
+                width={1024}
+                height={1280}
                 className="absolute inset-0 w-full h-full object-cover animate-zoom-slow"
-                loading="lazy" width={1024} height={1280}
+                loading="lazy"
+                unoptimized
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-purple-900/20" />
               {/* subtle scanlines */}
@@ -354,21 +361,22 @@ function Slide7() {
   );
 }
 
-function Teammate({ className, src, delay, style }: { className?: string; src: string; delay: string; style?: React.CSSProperties }) {
+function Teammate({ className, src, style }: { className?: string; src: string; delay: string; style?: React.CSSProperties }) {
   return (
     <div className={className} style={style}>
-      <img
+      <Image
         src={src}
         alt="Teammate cat celebrating"
+        width={1024}
+        height={1024}
         className="w-full h-auto drop-shadow-[0_20px_25px_rgba(0,0,0,0.6)]"
         loading="lazy"
+        unoptimized
       />
     </div>
   );
 }
 
 export default Slide7;
-
-
 
 

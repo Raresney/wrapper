@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import type {
   WrappedProfile,
   NarrativeOutput,
@@ -6,7 +5,7 @@ import type {
 } from "@/types/wrapped";
 import { buildFallbackNarrative, type FallbackInput } from "@/lib/fallbackNarrative";
 
-type NarrativeCore = Omit<NarrativeOutput, "generatedAt" | "fromCache">;
+type NarrativeCore = Omit<NarrativeOutput, "generatedAt" | "isFallback">;
 
 type GroqApiResponse = {
   choices: Array<{ message: { content: string } }>;
@@ -90,6 +89,16 @@ const SYSTEM_PROMPT =
   `4. Each of the four JSON fields must use completely different vocabulary and metaphors.\n` +
   `5. Output ONLY the raw JSON object — nothing before or after.`;
 
+// Stricter prompt for retry — prioritises JSON validity over creativity
+const SYSTEM_PROMPT_RETRY =
+  `You are a JSON generator. Output ONLY this exact JSON structure — nothing else, no markdown:\n` +
+  `{"roastLine":"...","archetypeDescription":"...","introVibeLine":"...","shareCaption":"..."}\n\n` +
+  `Rules:\n` +
+  `1. All four fields must be non-empty strings.\n` +
+  `2. Reference at least one specific number from the developer stats (commits, streak, peak hour, repo name).\n` +
+  `3. Match the tone specified in the user message.\n` +
+  `4. Output ONLY the raw JSON object — nothing before or after.`;
+
 const USER_PROMPTS: Record<AiTone, string> = {
   funny:
     "Write a funny, affectionately sarcastic GitHub Wrapped. " +
@@ -104,42 +113,11 @@ const USER_PROMPTS: Record<AiTone, string> = {
 
 // ── utilities ────────────────────────────────────────────────────────────────
 
-// djb2 hash to base36, 8 chars
-function djb2(str: string): string {
-  let h = 5381;
-  for (let i = 0; i < str.length; i++) {
-    h = (((h << 5) + h) ^ str.charCodeAt(i)) >>> 0;
-  }
-  return h.toString(36).slice(0, 8);
-}
-
-export function buildCacheKey(profile: WrappedProfile): string {
-  const hashInput = [
-    profile.metrics.totalCommits,
-    profile.metrics.topRepo.name,
-    profile.archetypeBlend.primary.id,
-    profile.raw.totalStarsReceived,
-  ].join("|");
-  return [
-    profile.user.login,
-    profile.period.type,
-    profile.period.startDate,
-    djb2(hashInput),
-    profile.tone,
-    "v2",
-  ].join(":");
-}
-
-function getSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key);
-}
 
 function buildPayload(profile: WrappedProfile): Record<string, unknown> {
   const m = profile.metrics;
   const r = profile.raw;
+  const ownedRepoCount = r.repos.filter((repo) => !repo.isFork).length;
   return {
     username: r.user.login,
     bio: r.user.bio ?? null,
@@ -148,8 +126,8 @@ function buildPayload(profile: WrappedProfile): Record<string, unknown> {
     tone: profile.tone,
     archetype: {
       label: profile.archetypeBlend.label,
-      primary: profile.archetypeBlend.primary.id,
-      secondary: profile.archetypeBlend.secondary?.id ?? null,
+      primary: profile.archetypeBlend.primary.label,
+      secondary: profile.archetypeBlend.secondary?.label ?? null,
     },
     stats: {
       totalCommits: m.totalCommits,
@@ -165,14 +143,14 @@ function buildPayload(profile: WrappedProfile): Record<string, unknown> {
       mostActiveDayOfWeek: m.activeDays.mostActiveDayOfWeek,
       topRepo: m.topRepo.name,
       totalStars: r.totalStarsReceived,
-      githubAge: m.githubAge,
+      githubAgeDays: m.githubAge,
       prsMerged: r.pullRequests.filter((p) => p.state === "merged").length,
+      totalRepos: ownedRepoCount,
     },
     languages: r.languages.slice(0, 4).map((l) => ({
       name: l.language,
       percentage: l.percentage,
     })),
-    scores: m.scores,
     topInsights: profile.insights.narrativeTop3.map((i) => ({
       id: i.id,
       value: i.value,
@@ -189,6 +167,7 @@ function buildPayload(profile: WrappedProfile): Record<string, unknown> {
 function toFallbackInput(profile: WrappedProfile): FallbackInput {
   const m = profile.metrics;
   const r = profile.raw;
+  const ownedRepoCount = r.repos.filter((repo) => !repo.isFork).length;
   let total = 0;
   let night = 0;
   for (const c of r.contributions ?? []) {
@@ -199,6 +178,8 @@ function toFallbackInput(profile: WrappedProfile): FallbackInput {
   return {
     username: r.user.login,
     archetype: profile.archetypeBlend.primary.label,
+    archetypeId: profile.archetypeBlend.primary.id,
+    primaryWeight: profile.archetypeBlend.primary.weight,
     totalCommits: m.totalCommits,
     longestStreak: m.streak.longestStreak,
     currentStreak: m.streak.currentStreak,
@@ -207,7 +188,7 @@ function toFallbackInput(profile: WrappedProfile): FallbackInput {
     topRepo: m.topRepo.name,
     nightRatio,
     prsMerged: r.pullRequests.filter((p) => p.state === "merged").length,
-    totalRepos: r.user.publicReposCount,
+    totalRepos: ownedRepoCount,
     periodLabel: profile.period.label,
   };
 }
@@ -216,7 +197,7 @@ function toFallbackInput(profile: WrappedProfile): FallbackInput {
 // so two runs of the same user/tone differ. Used whenever the LLM is unavailable.
 function fallbackOutput(profile: WrappedProfile): NarrativeOutput {
   const core = buildFallbackNarrative(toFallbackInput(profile), profile.tone);
-  return { ...core, generatedAt: new Date().toISOString(), fromCache: false, isFallback: true };
+  return { ...core, generatedAt: new Date().toISOString(), isFallback: true };
 }
 
 function parseLLMResponse(content: string): NarrativeCore | null {
@@ -246,18 +227,62 @@ function parseLLMResponse(content: string): NarrativeCore | null {
   return null;
 }
 
+// ── groq call helper ─────────────────────────────────────────────────────────
+
+async function callGroq(
+  apiKey: string,
+  systemPrompt: string,
+  userPrompt: string,
+  temperature: number,
+): Promise<NarrativeCore | null> {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 520,
+      temperature,
+      top_p: 0.9,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user",   content: userPrompt },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`[groq] HTTP ${res.status}:`, errText);
+    return null;
+  }
+
+  const json = (await res.json()) as GroqApiResponse;
+  const raw = json.choices[0]?.message.content ?? "";
+  console.log("[groq] raw response:", raw.slice(0, 300));
+  return parseLLMResponse(raw);
+}
+
 // ── main export ──────────────────────────────────────────────────────────────
 
 export async function generateNarrative(profile: WrappedProfile): Promise<NarrativeOutput | null> {
-  const supabase = getSupabase();
   const apiKey = process.env.GROQ_API_KEY;
+
+  if (!apiKey) {
+    console.warn("[groq] GROQ_API_KEY is not set — using profile-based fallback");
+    return fallbackOutput(profile);
+  }
 
   // Four independent dice rolls — each call has a unique combinatorial fingerprint
   const voice     = rand(VOICES);
   const element   = rand(MANDATORY_ELEMENTS);
   const focusArea = rand(FOCUS_AREAS);
   const banned    = pickN(FORBIDDEN_POOL, 5).join(", ");
-  const rollId    = Math.random().toString(36).slice(2, 10); // unique per call, breaks any provider cache
+  const rollId    = Math.random().toString(36).slice(2, 10);
 
   let payload: Record<string, unknown>;
   try {
@@ -280,60 +305,28 @@ export async function generateNarrative(profile: WrappedProfile): Promise<Narrat
 
   let narrativeCore: NarrativeCore | null = null;
 
-  if (!apiKey) {
-    console.warn("[groq] GROQ_API_KEY is not set — using profile-based fallback");
-    return fallbackOutput(profile);
+  try {
+    narrativeCore = await callGroq(apiKey, SYSTEM_PROMPT, userPrompt, 0.95);
+    console.log("[groq] attempt 1:", narrativeCore ? "OK" : "FAILED");
+  } catch (e) {
+    console.error("[groq] attempt 1 threw:", e);
   }
 
-  try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 450,
-        temperature: 0.95,
-        top_p: 0.9,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user",   content: userPrompt },
-        ],
-      }),
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error(`[groq] HTTP ${res.status}:`, errText);
-      return fallbackOutput(profile);
+  if (!narrativeCore) {
+    // Retry: stricter prompt, lower temperature — avoids repeating the same structural mistake
+    const retryPrompt =
+      `Tone: ${profile.tone}. ` +
+      USER_PROMPTS[profile.tone] +
+      `\nDeveloper stats: ${JSON.stringify(payload)}`;
+    try {
+      narrativeCore = await callGroq(apiKey, SYSTEM_PROMPT_RETRY, retryPrompt, 0.95);
+      console.log("[groq] attempt 2 (retry):", narrativeCore ? "OK" : "FAILED");
+    } catch (e) {
+      console.error("[groq] attempt 2 threw:", e);
     }
-    const json = (await res.json()) as GroqApiResponse;
-    const raw = json.choices[0]?.message.content ?? "";
-    console.log("[groq] raw response:", raw.slice(0, 300));
-    narrativeCore = parseLLMResponse(raw);
-    console.log("[groq] parsed:", narrativeCore ? "OK" : "FAILED — using fallback");
-  } catch (e) {
-    console.error("[groq] fetch threw:", e);
-    return fallbackOutput(profile);
   }
 
   if (!narrativeCore) return fallbackOutput(profile);
 
-  const generatedAt = new Date().toISOString();
-
-  if (supabase) {
-    const cacheKey = buildCacheKey(profile) + ":" + Date.now().toString(36);
-    try {
-      await supabase.from("narrative_cache").insert({
-        cache_key: cacheKey,
-        username: profile.user.login,
-        narrative: narrativeCore,
-        created_at: generatedAt,
-      });
-    } catch { /* non-fatal */ }
-  }
-
-  return { ...narrativeCore, generatedAt, fromCache: false };
+  return { ...narrativeCore, generatedAt: new Date().toISOString() };
 }

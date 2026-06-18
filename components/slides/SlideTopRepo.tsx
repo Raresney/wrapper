@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
@@ -142,7 +143,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
             <SlideCard accentColor={ACCENT} chapter={4} title="Home Base" className="text-white">
               <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={flat.avatarUrl} alt={flat.username} className="h-10 w-10 rounded-full border border-white/15 bg-white/5 object-cover" />
+                <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border border-white/15 bg-white/5 object-cover" />
                 <div className="min-w-0">
                   <div className="truncate text-base font-bold">@{flat.username}</div>
                   <div className="text-[10px] uppercase tracking-[0.2em] text-white/45">{flat.period.label}</div>
@@ -202,7 +203,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                 </motion.div>
               )}
 
-              {showStarred && starred && (
+              {showStarred && starred ? (
                 <motion.div {...fadeUp} transition={{ delay: 0.65 }} className="mt-3 flex items-center justify-between rounded-xl border bg-white/[0.03] px-3 py-2.5" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase tracking-wider text-white/45">Most starred</div>
@@ -210,7 +211,15 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                   </div>
                   <div className="flex items-center gap-1 text-sm font-bold text-amber-300">★ {starred.stars.toLocaleString()}</div>
                 </motion.div>
-              )}
+              ) : flat.graveyardRepo ? (
+                <motion.div {...fadeUp} transition={{ delay: 0.65 }} className="mt-3 flex items-center justify-between rounded-xl border bg-white/[0.03] px-3 py-2.5" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                  <div className="min-w-0">
+                    <div className="text-[10px] uppercase tracking-wider text-white/45">Abandoned in {flat.graveyardRepo.year}</div>
+                    <div className="truncate font-mono text-sm text-white/60 line-through">{flat.graveyardRepo.name}</div>
+                  </div>
+                  <div className="text-xs text-white/30">RIP</div>
+                </motion.div>
+              ) : null}
 
               <motion.div {...fadeUp} transition={{ delay: 0.75 }} className="mt-3 grid grid-cols-3 divide-x text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                 {[
@@ -233,6 +242,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                   </div>
                 </motion.div>
               )}
+
             </SlideCard>
           </motion.div>
 
@@ -267,11 +277,14 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                 maskImage: "radial-gradient(circle at 50% 50%, black 0 55%, transparent 61%)",
               }}
             >
-              <img
+              <Image
                 src="/wrapped/slide4-planet.png"
                 alt="Alien green planet"
+                fill
+                sizes="520px"
                 className="block h-full w-full select-none object-cover"
                 draggable={false}
+                unoptimized
               />
             </motion.div>
           </div>

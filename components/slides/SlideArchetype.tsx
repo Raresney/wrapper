@@ -156,7 +156,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
             <ChapterHeadingMobile n={7} title="The Reveal" />
             <MobilePlanet color="#a855f7" />
           </div>
-          <SlideCard accentColor={ACCENT} chapter={7} title="The Reveal">
+          <SlideCard accentColor={ACCENT}>
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}

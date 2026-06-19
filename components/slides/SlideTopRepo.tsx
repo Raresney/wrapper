@@ -140,7 +140,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
             <MobilePlanet color="#7cff8a" />
           </div>
           <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full max-w-[380px]">
-            <SlideCard accentColor={ACCENT} chapter={4} title="Home Base" className="text-white">
+            <SlideCard accentColor={ACCENT} className="text-white">
               <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border border-white/15 bg-white/5 object-cover" />

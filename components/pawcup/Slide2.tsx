@@ -287,45 +287,11 @@ function Slide2() {
           75% { transform: translateY(-6px) rotate(1deg); }
         }
         .animate-fans-cheer { animation: fans-cheer 0.9s ease-in-out infinite; }
-        @keyframes cat-jump {
-          0%,100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-cat-jump { animation: cat-jump 1.2s ease-in-out infinite; }
-        @keyframes ball-shot {
-          0% { transform: translate(-160%, 80%) rotate(0deg) scale(0.6); opacity: 0; }
-          15% { opacity: 1; }
-          70% { transform: translate(120%, -10%) rotate(720deg) scale(1); opacity: 1; }
-          85% { transform: translate(140%, 0%) rotate(820deg) scale(0.9); opacity: 1; }
-          100% { transform: translate(140%, 0%) rotate(820deg) scale(0.9); opacity: 0; }
-        }
-        .animate-ball-shot { animation: ball-shot 2.4s cubic-bezier(.4,.1,.6,1) infinite; }
-        @keyframes net-flash {
-          0%,60%,100% { opacity: 0; transform: scale(0.6); }
-          70% { opacity: 1; transform: scale(1.2); }
-          85% { opacity: 0.4; transform: scale(1); }
-        }
-        .animate-net-flash { animation: net-flash 2.4s ease-out infinite; }
-        @keyframes goal-pop {
-          0%,55% { transform: scale(0.6); opacity: 0; }
-          70% { transform: scale(1.15); opacity: 1; }
-          85% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(1); opacity: 0.9; }
-        }
-        .animate-goal-pop { animation: goal-pop 2.4s ease-out infinite; }
         @keyframes camera-flash {
           0%,80%,100% { opacity:0; transform:scale(0.4); }
           85% { opacity:1; transform:scale(2.2); }
           92% { opacity:0.5; transform:scale(1.4); }
         }
-        @keyframes whistle-ring {
-          0%   { transform:scale(0.6); opacity:0.9; }
-          100% { transform:scale(2.8); opacity:0; }
-        }
-        @keyframes whistle-text {
-          0%,100% { opacity:0.6; } 50% { opacity:1; }
-        }
-        .animate-whistle-text { animation: whistle-text 1.6s ease-in-out infinite; }
         @keyframes flag-wave {
           0%,100% { transform: skewY(0deg); }
           30%      { transform: skewY(4deg) scaleX(0.96); }

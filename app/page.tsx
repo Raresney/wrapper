@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, type ComponentType } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -18,10 +18,10 @@ const PERIODS = [
   { label: "All time",   value: "alltime", requiresAuth: true  },
 ] as const;
 
-const TONES: { label: string; value: AiTone }[] = [
-  { label: "Funny 😄",        value: "funny"        },
-  { label: "Brutal 💀",       value: "brutal"       },
-  { label: "Motivational 🔥", value: "motivational" },
+const TONES: { label: string; value: AiTone; icon: ComponentType<{ size?: number }> }[] = [
+  { label: "Funny",        value: "funny",        icon: SmileIcon },
+  { label: "Brutal",       value: "brutal",       icon: SkullIcon },
+  { label: "Motivational", value: "motivational", icon: FlameIcon },
 ];
 
 type PeriodType = (typeof PERIODS)[number]["value"];
@@ -87,6 +87,53 @@ function GithubMark({ size = 15 }: { size?: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden fill="currentColor">
       <path d="M12 .5C5.73.5.99 5.24.99 11.51c0 4.86 3.15 8.98 7.52 10.43.55.1.75-.24.75-.53 0-.26-.01-.95-.02-1.86-3.06.67-3.71-1.47-3.71-1.47-.5-1.28-1.23-1.62-1.23-1.62-1.01-.69.08-.68.08-.68 1.11.08 1.7 1.15 1.7 1.15.99 1.7 2.6 1.21 3.23.92.1-.72.39-1.21.71-1.49-2.44-.28-5.01-1.22-5.01-5.43 0-1.2.43-2.18 1.13-2.95-.11-.28-.49-1.4.11-2.92 0 0 .92-.3 3.02 1.13a10.5 10.5 0 0 1 5.5 0c2.1-1.43 3.02-1.13 3.02-1.13.6 1.52.22 2.64.11 2.92.7.77 1.13 1.75 1.13 2.95 0 4.22-2.58 5.15-5.03 5.42.4.34.76 1.02.76 2.06 0 1.49-.01 2.69-.01 3.05 0 .29.2.64.76.53 4.37-1.45 7.51-5.57 7.51-10.43C23.01 5.24 18.27.5 12 .5Z"/>
+    </svg>
+  );
+}
+
+function LockIcon({ size = 11 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
+function SmileIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 14c1 1.3 2.4 2 4 2s3-.7 4-2" />
+      <path d="M9 9.5h.01M15 9.5h.01" />
+    </svg>
+  );
+}
+
+function SkullIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 11.5C5 7.4 8.1 4 12 4s7 3.4 7 7.5c0 2-1 3.7-2.4 4.8V18a1 1 0 0 1-1 1h-1.2v1.5a.8.8 0 0 1-.8.8h-3.2a.8.8 0 0 1-.8-.8V19H8.4a1 1 0 0 1-1-1v-1.7C6 15.2 5 13.5 5 11.5Z" />
+      <circle cx="9.3" cy="11.5" r="1.3" fill="currentColor" stroke="none" />
+      <circle cx="14.7" cy="11.5" r="1.3" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function FlameIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 21c4 0 6.5-2.6 6.5-6.2 0-2-.9-3.5-2-4.8.2 1.4-.4 2.4-1.2 2.9.3-2.6-.7-5.3-3-6.9.6 2-.1 3.6-1.4 4.9C9.5 12.2 8.7 13.4 8.7 15c0 .7.1 1.3.4 1.9C7.7 16.1 7 14.9 7 13.5 5.7 15 5.5 17 6.4 18.6 5.7 19.7 5.5 20.4 5.5 21" />
+    </svg>
+  );
+}
+
+function SoccerBallTiny({ size = 12 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.4}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7.5l3.2 2.3-1.2 3.8h-4l-1.2-3.8z" fill="currentColor" stroke="none" />
+      <path d="M12 7.5V4.3M15.2 9.8l3-1.8M13.8 13.6l1.9 2.8M10.2 13.6l-1.9 2.8M8.8 9.8l-3-1.8" />
     </svg>
   );
 }
@@ -452,8 +499,8 @@ function StarPixelText({ onConnect, isLoggedIn }: { onConnect: () => void; isLog
 
 // ── main page ──────────────────────────────────────────────────────────────
 function HomePageInner() {
-  const { data: session } = useSession();
-  const { worldCup } = useTheme();
+  const { data: session, status: sessionStatus } = useSession();
+  const { worldCup, ready, animate } = useTheme();
   const isLoggedIn = !!session?.user;
   const sessionUsername = session?.login ?? "";
 
@@ -463,10 +510,17 @@ function HomePageInner() {
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState<string | null>(null);
 
+  const usernameTouched = manualUsername.length > 0;
+  const usernameValid = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(manualUsername);
+
   const username = isLoggedIn ? sessionUsername : manualUsername;
 
   const handleGenerate = useCallback(async () => {
     if (!username.trim() || loading) return;
+    if (!isLoggedIn && !usernameValid) {
+      setError("That doesn't look like a valid GitHub username");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -496,7 +550,7 @@ function HomePageInner() {
     } finally {
       setLoading(false);
     }
-  }, [username, periodType, tone, loading, session]);
+  }, [username, periodType, tone, loading, session, isLoggedIn, usernameValid]);
 
   return (
     <main className="relative overflow-hidden text-white" style={{ background: "var(--space-deep)" }}>
@@ -505,15 +559,15 @@ function HomePageInner() {
       {/* ══ HERO — full-screen scene, content overlaid at bottom ══════════ */}
       <section className="relative flex min-h-[100dvh] flex-col items-center justify-end pb-4 pt-20">
         <div
-          className={`absolute inset-0 z-[1] will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
-            worldCup ? "opacity-100" : "pointer-events-none opacity-0"
+          className={`absolute inset-0 z-[1] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+            ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
             <WorldCupLanding isLoggedIn={isLoggedIn} />
         </div>
         <div
-          className={`absolute inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
-            worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+          className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+            ready && !worldCup ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
           <HeroScene />
@@ -524,16 +578,16 @@ function HomePageInner() {
           style={{ background: "linear-gradient(to bottom,color-mix(in oklab,var(--space-deep) 85%,transparent),transparent)" }} />
         {/* bottom fade — blends scene into content */}
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] transition-colors duration-700"
+          className={`pointer-events-none absolute inset-x-0 bottom-0 h-[58%] ${animate ? "transition-colors duration-700" : ""}`}
           style={{
-            background: worldCup
+            background: ready && worldCup
               ? "linear-gradient(to top, var(--space-deep) 0%, rgba(26,8,45,0.98) 28%, rgba(54,20,86,0.68) 58%, rgba(74,24,112,0.22) 82%, transparent 100%)"
               : "linear-gradient(to top,var(--space-deep) 18%,color-mix(in oklab,var(--space-deep) 62%,transparent) 68%,transparent)",
           }}
         />
 
         {/* ── hero TV — right side, xl screens only ── */}
-        {!worldCup && <motion.div
+        {ready && !worldCup && <motion.div
           className="pointer-events-none absolute right-10 top-[54%] z-[5] hidden -translate-y-1/2 xl:block"
           style={{ width: "min(21vw, 270px)" }}
           animate={{ y: [0, -10, 0] }}
@@ -607,7 +661,7 @@ function HomePageInner() {
         </motion.div>}
 
         {/* ── star callout — left center ── */}
-        {!worldCup && <motion.div
+        {ready && !worldCup && <motion.div
           className="pointer-events-none absolute left-24 z-[6] hidden lg:block"
           style={{ top: "60%", transform: "translateY(-50%)" }}
           initial={{ opacity: 0, x: -18 }}
@@ -627,65 +681,91 @@ function HomePageInner() {
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
               Pick any period — week, month, year or all time. Get a cinematic recap of your commits, repos, languages and streaks.
             </p>
-            {/* username row — shown only when not logged in */}
-            {!isLoggedIn && (
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-600">
-                    <GithubMark size={13} />
-                  </span>
-                  <input
-                    type="text" value={manualUsername}
-                    onChange={e => setManualUsername(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && handleGenerate()}
-                    placeholder="github username"
-                    className="w-full rounded-2xl border border-white/[0.1] bg-black/50 py-2 pl-9 pr-4 text-[13px] text-white placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/70 focus:outline-none transition-all duration-300"
-                    style={{ backdropFilter: "blur(16px)" }}
-                  />
-                </div>
-                <button onClick={handleGenerate} disabled={loading || !manualUsername.trim()}
-                  className="group flex items-center gap-2 rounded-2xl px-5 py-2 text-[13px] font-semibold text-white transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap"
-                  style={{
-                    background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
-                    boxShadow: "0 6px 24px -6px color-mix(in oklab,var(--violet-glow) 55%,transparent),inset 0 1px 0 rgba(255,255,255,0.18)",
-                  }}
-                >
-                  {loading ? (
-                    <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                  ) : <>Generate →</>}
-                </button>
-              </div>
-            )}
+            {/* auth-dependent row — crossfades between loading / signed-out / signed-in
+                instead of popping, since useSession() briefly reports "loading" right
+                after the GitHub OAuth redirect lands back on this page. */}
+            <AnimatePresence mode="wait" initial={false}>
+              {sessionStatus === "loading" && (
+                <motion.div key="auth-loading" layout
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25, ease: EASE }}
+                  className="h-[42px] rounded-2xl border border-white/[0.08] bg-white/[0.03] animate-pulse" />
+              )}
 
-            {/* logged-in: show username + big generate button */}
-            {isLoggedIn && (
-              <div className="flex items-center gap-2">
-                <div className="flex flex-1 items-center gap-2 rounded-2xl border border-white/[0.1] bg-black/30 px-3 py-2">
-                  {session.user?.image && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={session.user.image} alt={sessionUsername} className="h-5 w-5 rounded-full" />
+              {sessionStatus !== "loading" && !isLoggedIn && (
+                <motion.div key="auth-out" layout
+                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.3, ease: EASE }}
+                  className="flex flex-col gap-1">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-300 ${usernameTouched && !usernameValid ? "text-red-400/70" : "text-zinc-600"}`}>
+                        <GithubMark size={13} />
+                      </span>
+                      <input
+                        type="text" value={manualUsername}
+                        onChange={e => setManualUsername(e.target.value)}
+                        onKeyDown={e => e.key === "Enter" && handleGenerate()}
+                        placeholder="github username"
+                        aria-invalid={usernameTouched && !usernameValid}
+                        className={`w-full rounded-2xl border bg-black/50 py-2 pl-9 pr-4 text-[13px] text-white placeholder:text-zinc-600 focus:bg-black/70 focus:outline-none transition-all duration-300 ${
+                          usernameTouched && !usernameValid
+                            ? "border-red-500/40 focus:border-red-500/60"
+                            : "border-white/[0.1] focus:border-violet-500/40"
+                        }`}
+                        style={{ backdropFilter: "blur(16px)" }}
+                      />
+                    </div>
+                    <button onClick={handleGenerate} disabled={loading || !manualUsername.trim() || !usernameValid}
+                      className="group flex items-center gap-2 rounded-2xl px-5 py-2 text-[13px] font-semibold text-white transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap"
+                      style={{
+                        background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
+                        boxShadow: "0 6px 24px -6px color-mix(in oklab,var(--violet-glow) 55%,transparent),inset 0 1px 0 rgba(255,255,255,0.18)",
+                      }}
+                    >
+                      {loading ? (
+                        <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                      ) : <>Generate →</>}
+                    </button>
+                  </div>
+                  {usernameTouched && !usernameValid && (
+                    <span className="pl-1 text-[10px] text-red-400/80">Only letters, numbers and hyphens — no spaces</span>
                   )}
-                  <span className="text-[13px] text-white/70">@{sessionUsername}</span>
-                </div>
-                <button onClick={handleGenerate} disabled={loading || !sessionUsername}
-                  className="flex items-center gap-2 rounded-2xl px-5 py-2 text-[13px] font-semibold text-white transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap"
-                  style={{
-                    background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
-                    boxShadow: "0 6px 24px -6px color-mix(in oklab,var(--violet-glow) 55%,transparent),inset 0 1px 0 rgba(255,255,255,0.18)",
-                  }}
-                >
-                  {loading ? (
-                    <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                  ) : <>Generate →</>}
-                </button>
-              </div>
-            )}
+                </motion.div>
+              )}
+
+              {sessionStatus !== "loading" && isLoggedIn && (
+                <motion.div key="auth-in" layout
+                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.3, ease: EASE }}
+                  className="flex items-center gap-2">
+                  <div className="flex flex-1 items-center gap-2 rounded-2xl border border-white/[0.1] bg-black/30 px-3 py-2">
+                    {session?.user?.image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={session.user.image} alt={sessionUsername} className="h-5 w-5 rounded-full" />
+                    )}
+                    <span className="text-[13px] text-white/70">@{sessionUsername}</span>
+                  </div>
+                  <button onClick={handleGenerate} disabled={loading || !sessionUsername}
+                    className="flex items-center gap-2 rounded-2xl px-5 py-2 text-[13px] font-semibold text-white transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap"
+                    style={{
+                      background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
+                      boxShadow: "0 6px 24px -6px color-mix(in oklab,var(--violet-glow) 55%,transparent),inset 0 1px 0 rgba(255,255,255,0.18)",
+                    }}
+                  >
+                    {loading ? (
+                      <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      </svg>
+                    ) : <>Generate →</>}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* period row */}
             <div className="flex items-center justify-center gap-1.5">
@@ -695,8 +775,8 @@ function HomePageInner() {
                   <button key={value}
                     onClick={() => !locked && setPeriodType(value as PeriodType)}
                     title={locked ? "Connect GitHub to unlock All time" : undefined}
-                    className={`${pillBase} ${!locked && periodType === value ? pillOn : ""} ${locked ? "opacity-35 cursor-not-allowed" : !locked && periodType !== value ? pillOff : ""}`}>
-                    {label}{locked && " 🔒"}
+                    className={`${pillBase} inline-flex items-center gap-1 ${!locked && periodType === value ? pillOn : ""} ${locked ? "opacity-35 cursor-not-allowed" : !locked && periodType !== value ? pillOff : ""}`}>
+                    {label}{locked && <LockIcon size={10} />}
                   </button>
                 );
               })}
@@ -704,9 +784,10 @@ function HomePageInner() {
             {/* tone row */}
             <div className="flex items-center justify-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">AI tone</span>
-              {TONES.map(({ label, value }) => (
+              {TONES.map(({ label, value, icon: Icon }) => (
                 <button key={value} onClick={() => setTone(value)}
-                  className={`${pillBase} ${tone === value ? pillOn : pillOff}`}>
+                  className={`${pillBase} inline-flex items-center gap-1.5 ${tone === value ? pillOn : pillOff}`}>
+                  <Icon size={12} />
                   {label}
                 </button>
               ))}
@@ -772,7 +853,8 @@ function HomePageInner() {
                 <p className="relative mt-3 text-[13px] leading-relaxed text-zinc-500">
                   Every month we ship a fresh <span className="font-semibold text-zinc-300">visual theme</span>{" "}to keep
                   things diverse — and this month&apos;s theme is{" "}
-                  <span className="font-semibold" style={{ color: "var(--commit-green)" }}>World Cup</span> ⚽
+                  <span className="font-semibold" style={{ color: "var(--commit-green)" }}>World Cup</span>{" "}
+                  <span className="inline-flex translate-y-[1px]"><SoccerBallTiny size={13} /></span>
                 </p>
                   </div>
 
@@ -802,7 +884,7 @@ function HomePageInner() {
       {/* ══ FOOTER ════════════════════════════════════════════════════════ */}
       <footer className="py-10 text-center">
         <div className="mx-auto max-w-xs border-t border-white/[0.06] pt-8">
-          <p className="text-[11px] text-zinc-700">
+          <p className="text-[11px] text-zinc-500">
             Made with GitHub API · No data stored · Open source
           </p>
         </div>

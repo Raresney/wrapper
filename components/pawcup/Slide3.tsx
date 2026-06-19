@@ -128,12 +128,6 @@ function Slide3() {
       <style>{`
         @keyframes twinkle { 0%,100%{opacity:.15} 50%{opacity:1} }
         .animate-twinkle { animation: twinkle 2.5s ease-in-out infinite; }
-        @keyframes bubble {
-          0%,100% { transform: translateY(0) scale(1); opacity: 1; }
-          50% { transform: translateY(-4px) scale(1.03); opacity: .95; }
-        }
-        .animate-bubble { animation: bubble 3s ease-in-out infinite; }
-        .animate-bubble-2 { animation: bubble 3s ease-in-out infinite; animation-delay: 1.2s; }
         @keyframes holo-flicker {
           0%,100% { opacity: 0.9; filter: drop-shadow(0 0 10px rgba(217,70,239,0.6)); }
           50% { opacity: 1; filter: drop-shadow(0 0 24px rgba(217,70,239,0.95)); }

@@ -1,13 +1,26 @@
 "use client";
 
-import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "gh-wrapped-theme";
 const THEME_EVENT = "gh-wrapped-theme-change";
 
-type ThemeCtx = { worldCup: boolean; toggleWorldCup: () => void };
+type ThemeCtx = {
+  worldCup: boolean;
+  toggleWorldCup: () => void;
+  /** True once the real client-side value (from localStorage) is known. */
+  ready: boolean;
+  /** True one frame after `ready` — gates opacity transitions so the very first
+   * correct reveal is instant, never a fade from the wrong (SSR-default) theme. */
+  animate: boolean;
+};
 
-const ThemeContext = createContext<ThemeCtx>({ worldCup: false, toggleWorldCup: () => {} });
+const ThemeContext = createContext<ThemeCtx>({
+  worldCup: false,
+  toggleWorldCup: () => {},
+  ready: true,
+  animate: true,
+});
 
 export const useTheme = () => useContext(ThemeContext);
 
@@ -33,6 +46,23 @@ function subscribe(callback: () => void) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const worldCup = useSyncExternalStore(subscribe, getStoredWorldCup, () => false);
+  const [ready, setReady] = useState(false);
+  const [animate, setAnimate] = useState(false);
+
+  // Flip to the real client value as soon as hydration completes — before this,
+  // consumers should render the theme-neutral state, never the SSR-default guess.
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  // Enable opacity transitions only one frame after `ready`, so the first correct
+  // reveal is an instant swap (no fade-in from the wrong theme). Later, user-initiated
+  // toggles happen well after this and animate normally.
+  useEffect(() => {
+    if (!ready) return;
+    const id = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(id);
+  }, [ready]);
 
   useEffect(() => {
     if (worldCup) {
@@ -55,7 +85,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ worldCup, toggleWorldCup }}>
+    <ThemeContext.Provider value={{ worldCup, toggleWorldCup, ready, animate }}>
       {children}
     </ThemeContext.Provider>
   );

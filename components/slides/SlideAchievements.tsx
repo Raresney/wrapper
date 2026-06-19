@@ -93,7 +93,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
             <ChapterHeadingMobile n={6} title="Trophy Haul" />
             <MobilePlanet color="#ec4899" />
           </div>
-          <SlideCard accentColor={ACCENT} chapter={6} title="Trophy Haul">
+          <SlideCard accentColor={ACCENT}>
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || avatarUrl(flat.username)} alt={`@${flat.username}`} className="size-10 rounded-full border border-white/10 bg-white/5" width={40} height={40} />

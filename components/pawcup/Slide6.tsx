@@ -134,130 +134,126 @@ function Slide6() {
         </div>
       </div>
 
-      {/* ====== RIGHT: TV broadcasting commentary ====== */}
-      <div className="absolute right-0 top-0 bottom-0 w-[30%] z-10 flex items-center justify-center pt-10">
-        <div className="relative w-[75%]">
-          {/* TV outer housing */}
-          <div className="relative rounded-2xl bg-gradient-to-b from-zinc-300 via-zinc-400 to-zinc-500 p-[10px] shadow-[0_20px_60px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.5)]"
-               style={{ border: "2px solid #6b7280" }}>
-            {/* power LED */}
-            <div className="absolute top-2 right-4 w-2 h-2 rounded-full bg-green-400 animate-blink shadow-[0_0_6px_rgba(74,222,128,0.8)]" />
-            {/* brand */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 text-zinc-600 text-[7px] font-black tracking-[0.3em]">PAW·VISION</div>
-            {/* color accent strip */}
-            <div className="absolute top-0 left-6 right-6 h-1 rounded-full bg-gradient-to-r from-purple-500 via-amber-400 to-purple-500 opacity-80" />
+      {/* ====== RIGHT: stadium jumbotron broadcasting commentary ====== */}
+      <div className="absolute right-[6%] top-0 bottom-0 w-[26%] z-10 flex flex-col items-center gap-1.5 pt-32 pb-0">
 
-            {/* inner bezel */}
-            <div className="rounded-xl bg-black p-[5px] shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)]">
-              {/* screen */}
-              <div className="relative rounded-lg overflow-hidden bg-gradient-to-b from-[#1a0f3a] via-[#160a30] to-[#0a0420] border border-purple-400/20 aspect-[5/6]">
-                {/* scanlines */}
-                <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.04)_0,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_4px)] pointer-events-none z-10" />
-                {/* studio backlight */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(168,85,247,0.45),transparent_60%)]" />
-                {/* flicker */}
-                <div className="absolute inset-0 bg-white/0 animate-screen-flicker pointer-events-none z-10" />
+        {/* floodlight rig above the screen */}
+        <div className="relative flex items-end justify-center gap-[7%] w-[88%]">
+          <div className="absolute left-0 right-0 top-[7px] h-[3px] bg-gradient-to-r from-zinc-700 via-zinc-500 to-zinc-700 rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.6)]" />
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="relative z-10 flex flex-col items-center">
+              <div className="w-2.5 h-3.5 rounded-sm bg-gradient-to-b from-zinc-500 to-zinc-700 border border-zinc-800 shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+              <div className="absolute top-[14px] h-16 w-10 origin-top animate-flood-flicker"
+                style={{ background: "conic-gradient(from 180deg at 50% 0%, transparent 0deg, rgba(253,224,71,0.22) 35deg, rgba(253,224,71,0.05) 70deg, transparent 80deg)" }} />
+            </div>
+          ))}
+        </div>
 
-                {/* tiny back wall monitors */}
-                <div className="absolute top-4 left-4 w-10 h-6 rounded-sm bg-emerald-400/30 border border-emerald-300/50 animate-screen-flicker" />
-                <div className="absolute top-4 right-4 w-10 h-6 rounded-sm bg-amber-400/30 border border-amber-300/50 animate-screen-flicker" />
+        {/* main screen — wide-format jumbotron panel */}
+        <div className="relative w-[94%] rounded-md bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 p-[7px] shadow-[0_26px_70px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.18)]"
+             style={{ border: "2.5px solid #1c1c20" }}>
+          {/* corner bolts */}
+          {[["top-1","left-1"],["top-1","right-1"],["bottom-1","left-1"],["bottom-1","right-1"]].map(([v,h],i)=>(
+            <div key={i} className={`absolute ${v} ${h} w-[5px] h-[5px] rounded-full bg-zinc-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_1px_1px_rgba(0,0,0,0.8)]`} />
+          ))}
+          {/* power LED */}
+          <div className="absolute -top-1.5 right-4 w-1.5 h-1.5 rounded-full bg-green-400 animate-blink shadow-[0_0_6px_rgba(74,222,128,0.8)] z-20" />
 
-                {/* commentators */}
-                <Image
-                  src={commentators.url}
-                  alt="Two cat commentators with headsets"
-                  width={1024}
-                  height={1024}
-                  className="absolute bottom-[14%] left-1/2 -translate-x-1/2 w-[92%] drop-shadow-[0_10px_25px_rgba(0,0,0,0.6)]"
-                  loading="lazy"
-                  unoptimized
-                />
-                {/* studio desk */}
-                <div className="absolute bottom-0 left-0 right-0 h-[16%] z-20" style={{
-                  background: "linear-gradient(180deg, #2d1b69 0%, #1a0f3a 100%)",
-                  borderTop: "1.5px solid rgba(168,85,247,0.6)",
-                  boxShadow: "inset 0 2px 12px rgba(168,85,247,0.15)",
-                }}>
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-400/60 to-transparent" />
-                  {/* desk logo */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-purple-300/50 text-[8px] tracking-[0.4em] font-black">PAW·VISION</div>
-                </div>
-                {/* commentator name banners */}
-                <div className="absolute bottom-[15%] left-[4%] z-20 flex flex-col" style={{ borderLeft: "2px solid #a855f7" }}>
-                  <div className="bg-purple-900/95 px-1.5 py-0.5">
-                    <div className="text-purple-300 text-[5.5px] tracking-[0.3em] font-semibold">ANALYST</div>
-                    <div className="text-white text-[7px] font-black leading-tight">Whisker McPaws</div>
-                  </div>
-                </div>
-                <div className="absolute bottom-[15%] right-[4%] z-20 flex flex-col items-end" style={{ borderRight: "2px solid #f59e0b" }}>
-                  <div className="bg-amber-900/95 px-1.5 py-0.5 text-right">
-                    <div className="text-amber-300 text-[5.5px] tracking-[0.3em] font-semibold">COMMENTATOR</div>
-                    <div className="text-white text-[7px] font-black leading-tight">Furball Jones</div>
-                  </div>
-                </div>
-                <div className="absolute bottom-[5%] left-[8%] right-[8%] h-2 rounded-[50%] bg-black/60 blur-md" />
+          {/* LED panel screen */}
+          <div className="relative rounded-[3px] overflow-hidden bg-gradient-to-b from-[#1a0f3a] via-[#160a30] to-[#0a0420] aspect-video">
+            {/* studio backlight */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_26%,rgba(168,85,247,0.5),transparent_62%)]" />
 
-                {/* glass reflections */}
-                <div className="pointer-events-none absolute inset-0 z-20">
-                  <div className="absolute -top-6 -left-10 w-[60%] h-20 bg-white/8 blur-2xl rotate-[18deg]" />
-                </div>
+            {/* tiny back wall monitors */}
+            <div className="absolute top-[6%] left-[4%] w-[9%] h-[14%] rounded-sm bg-emerald-400/30 border border-emerald-300/50 animate-screen-flicker" />
+            <div className="absolute top-[6%] right-[4%] w-[9%] h-[14%] rounded-sm bg-amber-400/30 border border-amber-300/50 animate-screen-flicker" />
 
-                {/* ON AIR */}
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-red-600 text-white text-[9px] font-black tracking-[0.3em] px-2 py-1 rounded shadow-lg z-20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-blink" />
-                  ON AIR
-                </div>
+            {/* commentators — cover-cropped so heads sit near the top, paws meet the desk */}
+            <div className="absolute inset-0">
+              <Image
+                src={commentators.url}
+                alt="Two cat commentators with headsets"
+                fill
+                sizes="40vw"
+                style={{ objectFit: "cover", objectPosition: "50% 57%" }}
+                className="drop-shadow-[0_12px_20px_rgba(0,0,0,0.5)]"
+                loading="lazy"
+                unoptimized
+              />
+            </div>
 
-                <div className="absolute top-[28%] left-2 bg-white text-purple-900 text-[9px] font-bold px-2 py-1 rounded-lg shadow-lg animate-bubble z-20">
-                  &quot;What a strike!&quot;
-                  <span className="absolute -bottom-1 left-4 w-2 h-2 bg-white rotate-45" />
-                </div>
-                <div className="absolute top-[24%] right-2 bg-amber-300 text-purple-950 text-[9px] font-bold px-2 py-1 rounded-lg shadow-lg animate-bubble-2 z-20">
-                  &quot;Unbelievable!&quot;
-                  <span className="absolute -bottom-1 right-4 w-2 h-2 bg-amber-300 rotate-45" />
-                </div>
+            {/* studio desk */}
+            <div className="absolute bottom-0 left-0 right-0 h-[15%] z-20" style={{
+              background: "linear-gradient(180deg, #2d1b69 0%, #1a0f3a 100%)",
+              borderTop: "1.5px solid rgba(168,85,247,0.6)",
+              boxShadow: "inset 0 2px 12px rgba(168,85,247,0.15)",
+            }}>
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-400/60 to-transparent" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-purple-300/50 text-[6.5px] tracking-[0.35em] font-black">PAW·VISION</div>
+            </div>
 
-                {/* channel ticker */}
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60 border-t border-amber-500/30 py-1 z-20 overflow-hidden">
-                  <div className="ticker-track text-amber-300 text-[8px] tracking-widest font-mono">
-                    <span className="ticker-segment">CH26 · LIVE · GTH 2-1 WRP · 67&apos; · CAT FC BROADCASTS · </span>
-                    <span className="ticker-segment" aria-hidden="true">CH26 · LIVE · GTH 2-1 WRP · 67&apos; · CAT FC BROADCASTS · </span>
-                  </div>
-                </div>
+            {/* LED pixel-pitch grid — sells the "big screen" look instead of a CRT scanline */}
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(0,0,0,0.16)_0,rgba(0,0,0,0.16)_1px,transparent_1px,transparent_3px),repeating-linear-gradient(0deg,rgba(0,0,0,0.16)_0,rgba(0,0,0,0.16)_1px,transparent_1px,transparent_3px)] pointer-events-none z-30 opacity-60" />
+            <div className="absolute inset-0 bg-white/0 animate-screen-flicker pointer-events-none z-30" />
+
+            {/* commentator name banners */}
+            <div className="absolute bottom-[16%] left-[4%] z-20 flex flex-col" style={{ borderLeft: "2px solid #a855f7" }}>
+              <div className="bg-purple-900/95 px-1.5 py-0.5">
+                <div className="text-purple-300 text-[5.5px] tracking-[0.3em] font-semibold">ANALYST</div>
+                <div className="text-white text-[7px] font-black leading-tight">Whisker McPaws</div>
+              </div>
+            </div>
+            <div className="absolute bottom-[16%] right-[4%] z-20 flex flex-col items-end" style={{ borderRight: "2px solid #f59e0b" }}>
+              <div className="bg-amber-900/95 px-1.5 py-0.5 text-right">
+                <div className="text-amber-300 text-[5.5px] tracking-[0.3em] font-semibold">COMMENTATOR</div>
+                <div className="text-white text-[7px] font-black leading-tight">Furball Jones</div>
               </div>
             </div>
 
-            {/* control panel */}
-            <div className="mt-2 flex items-center justify-between px-3">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-b from-zinc-200 to-zinc-400 border border-zinc-500 shadow-inner grid place-items-center">
-                  <div className="w-2 h-2 rounded-full bg-zinc-600" />
-                </div>
-                <div className="w-6 h-6 rounded-full bg-gradient-to-b from-zinc-200 to-zinc-400 border border-zinc-500 shadow-inner grid place-items-center">
-                  <div className="w-2 h-2 rounded-full bg-zinc-600" />
-                </div>
-              </div>
-              <div className="flex gap-1">
-                {["▶","◀","▲","▼"].map(b => (
-                  <div key={b} className="w-4 h-4 rounded bg-zinc-500 text-zinc-200 text-[8px] grid place-items-center">{b}</div>
-                ))}
+            {/* glass / LED sheen */}
+            <div className="pointer-events-none absolute inset-0 z-30">
+              <div className="absolute -top-6 -left-10 w-[60%] h-20 bg-white/8 blur-2xl rotate-[18deg]" />
+            </div>
+
+            {/* ON AIR */}
+            <div className="absolute top-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-red-600 text-white text-[8px] font-black tracking-[0.25em] px-1.5 py-[3px] rounded shadow-lg z-30">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-blink" />
+              ON AIR
+            </div>
+
+            <div className="absolute top-[10%] left-1 bg-white text-purple-900 text-[8px] font-bold px-1.5 py-1 rounded-lg shadow-lg animate-bubble z-30">
+              &quot;What a strike!&quot;
+              <span className="absolute -bottom-1 left-3 w-1.5 h-1.5 bg-white rotate-45" />
+            </div>
+            <div className="absolute top-[7%] right-1 bg-amber-300 text-purple-950 text-[8px] font-bold px-1.5 py-1 rounded-lg shadow-lg animate-bubble-2 z-30">
+              &quot;Unbelievable!&quot;
+              <span className="absolute -bottom-1 right-3 w-1.5 h-1.5 bg-amber-300 rotate-45" />
+            </div>
+
+            {/* channel ticker */}
+            <div className="absolute bottom-0 left-0 right-0 bg-black/65 border-t border-amber-500/30 py-[3px] z-30 overflow-hidden">
+              <div className="ticker-track text-amber-300 text-[6.5px] tracking-widest font-mono">
+                <span className="ticker-segment">CH26 · LIVE · GTH 2-1 WRP · 67&apos; · CAT FC BROADCASTS · CH26 · LIVE · GTH 2-1 WRP · 67&apos; · CAT FC BROADCASTS · </span>
+                <span className="ticker-segment" aria-hidden="true">CH26 · LIVE · GTH 2-1 WRP · 67&apos; · CAT FC BROADCASTS · CH26 · LIVE · GTH 2-1 WRP · 67&apos; · CAT FC BROADCASTS · </span>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* TV neck + base */}
-          <div className="mx-auto mt-0 w-[16%] h-5 bg-gradient-to-b from-zinc-400 to-zinc-600 rounded-b-sm" />
-          <div className="mx-auto w-[58%] h-4 bg-gradient-to-b from-zinc-400 to-zinc-700 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.5)]" />
-          <div className="mx-auto mt-1 w-[62%] h-2 rounded-[50%] bg-black/35 blur-md" />
-
-          {/* antennas */}
-          <div className="absolute -top-9 left-[30%]">
-            <div className="w-[2px] h-10 bg-gradient-to-t from-zinc-500 to-zinc-300 rotate-[-15deg] origin-bottom" />
+        {/* sponsor LED ribbon under the main screen */}
+        <div className="w-[94%] rounded-sm bg-black/85 border border-amber-500/30 py-[3px] overflow-hidden shadow-[0_6px_16px_rgba(0,0,0,0.5)]">
+          <div className="ticker-track text-amber-200/90 text-[6.5px] tracking-[0.25em] font-mono">
+            <span className="ticker-segment">★ PAW·VISION · OFFICIAL BROADCAST PARTNER · WORLD CUP 2026 · ★ PAW·VISION · OFFICIAL BROADCAST PARTNER · WORLD CUP 2026 · </span>
+            <span className="ticker-segment" aria-hidden="true">★ PAW·VISION · OFFICIAL BROADCAST PARTNER · WORLD CUP 2026 · ★ PAW·VISION · OFFICIAL BROADCAST PARTNER · WORLD CUP 2026 · </span>
           </div>
-          <div className="absolute -top-9 right-[30%]">
-            <div className="w-[2px] h-10 bg-gradient-to-t from-zinc-500 to-zinc-300 rotate-[15deg] origin-bottom" />
-          </div>
+        </div>
 
+        {/* gantry tower supporting the screen above the pitch — runs all the way down */}
+        <div className="relative flex-1 w-[16%] min-h-[40px]" aria-hidden>
+          <div className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-zinc-500 to-zinc-700" />
+          <div className="absolute inset-y-0 right-0 w-[3px] bg-gradient-to-b from-zinc-500 to-zinc-700" />
+          <div className="absolute inset-0 opacity-80"
+            style={{ backgroundImage: "repeating-linear-gradient(60deg, transparent 0 10px, rgba(113,113,122,0.85) 10px 11.5px, transparent 11.5px 22px), repeating-linear-gradient(-60deg, transparent 0 10px, rgba(113,113,122,0.85) 10px 11.5px, transparent 11.5px 22px)" }} />
         </div>
       </div>
 
@@ -335,7 +331,6 @@ function Slide6() {
         .ticker-track {
           display: inline-flex;
           width: max-content;
-          min-width: 200%;
           white-space: nowrap;
           animation: ticker-loop 14s linear infinite;
         }
@@ -343,6 +338,8 @@ function Slide6() {
           flex: 0 0 auto;
           padding-right: 1.75rem;
         }
+        @keyframes flood-flicker { 0%,100%{opacity:.85} 50%{opacity:1} }
+        .animate-flood-flicker { animation: flood-flicker 2.8s ease-in-out infinite; }
       `}</style>
     </div>
   );

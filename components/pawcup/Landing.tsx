@@ -275,7 +275,7 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
 
       {/* Top header */}
       <header className="absolute top-0 left-0 right-0 z-20 flex items-center px-8 py-6">
-        <Image src={logo.url} alt="logo" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1 ring-2 ring-purple-400/60" unoptimized />
+        <Image src={logo.url} alt="GitHub Wrapped" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1 ring-2 ring-purple-400/60" unoptimized />
       </header>
 
       <div className="pointer-events-none absolute left-[6vw] top-[58%] z-20 hidden -translate-y-1/2 xl:block">
@@ -332,41 +332,11 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
           100% { transform: translateY(105vh) rotate(720deg); opacity: 0.8; }
         }
         .animate-confetti { animation: confetti-fall linear infinite; }
-        @keyframes float-cat {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-12px); }
-        }
-        .animate-float { animation: float-cat 3s ease-in-out infinite; }
-        @keyframes tail-wag {
-          0%, 100% { transform: rotate(-15deg); }
-          50% { transform: rotate(20deg); }
-        }
-        .animate-tail { animation: tail-wag 1.2s ease-in-out infinite; transform-origin: bottom left; }
-        @keyframes blink {
-          0%, 92%, 100% { transform: scaleY(1); }
-          95% { transform: scaleY(0.1); }
-        }
-        .animate-blink { animation: blink 4s infinite; transform-origin: center; }
-        @keyframes ball-spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-ball { animation: ball-spin 6s linear infinite; transform-origin: center; }
         @keyframes twinkle {
           0%, 100% { opacity: 0.2; }
           50% { opacity: 1; }
         }
         .animate-twinkle { animation: twinkle 2s ease-in-out infinite; }
-        @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(250,204,21,0.7); }
-          50% { box-shadow: 0 0 0 12px rgba(250,204,21,0); }
-        }
-        .animate-pulse-glow { animation: pulse-glow 2s infinite; }
-        @keyframes ear-twitch {
-          0%, 90%, 100% { transform: rotate(0deg); }
-          93% { transform: rotate(-12deg); }
-        }
-        .animate-ear { animation: ear-twitch 5s infinite; transform-origin: bottom center; }
       `}</style>
     </div>
   );

@@ -176,7 +176,7 @@ function ProfileCard({ flat }: { flat: Flat }) {
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
       className="relative mt-0 w-full max-w-[380px] text-white"
     >
-      <SlideCard accentColor={ACCENT} chapter={1} title="Liftoff">
+      <SlideCard accentColor={ACCENT}>
         <motion.div variants={cardItem} className="flex items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

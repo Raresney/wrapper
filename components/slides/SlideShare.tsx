@@ -646,13 +646,13 @@ export default function SlideShare({
             <ChapterHeadingMobile n={8} title="Your Planet" />
             <MobilePlanet color={palette.a} />
           </div>
-          <SlideCard ref={cardRef} accentColor={palette.a} chapter={8} title="Your Planet">
+          <SlideCard ref={cardRef} accentColor={palette.a}>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-base font-bold text-white"
                 style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 20px ${palette.glow}` }}>
                 {flat.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={flat.avatarUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={flat.avatarUrl} alt={flat.username} className="h-full w-full object-cover" />
                 ) : flat.username.slice(0, 2).toUpperCase()}
               </div>
               <div>

@@ -12,6 +12,20 @@ const STARS = Array.from({ length: 40 }).map(() => ({
   x: r() * 100, y: r() * 100, d: r() * 3, s: 1 + r() * 2,
 }));
 
+// Small cat-eared silhouette standing in for a player dot on the tactical replay.
+function CatToken({ x, y, r: rad, body, accent, outline }: { x: number; y: number; r: number; body: string; accent: string; outline: string }) {
+  return (
+    <g>
+      <polygon points={`${x - rad * 0.78},${y - rad * 0.5} ${x - rad * 0.32},${y - rad * 1.25} ${x - rad * 0.04},${y - rad * 0.55}`}
+        fill={body} stroke={outline} strokeWidth={Math.max(rad * 0.12, 0.3)} />
+      <polygon points={`${x + rad * 0.78},${y - rad * 0.5} ${x + rad * 0.32},${y - rad * 1.25} ${x + rad * 0.04},${y - rad * 0.55}`}
+        fill={body} stroke={outline} strokeWidth={Math.max(rad * 0.12, 0.3)} />
+      <circle cx={x} cy={y} r={rad} fill={body} stroke={outline} strokeWidth={Math.max(rad * 0.14, 0.35)} />
+      <circle cx={x} cy={y} r={rad * 0.42} fill={accent} />
+    </g>
+  );
+}
+
 function Slide5() {
   return (
     <div
@@ -79,46 +93,52 @@ function Slide5() {
               <span className="text-purple-300/60 text-[8px] font-mono">54:22</span>
             </div>
 
-            {/* main replay screen */}
-            <div className="relative rounded-lg overflow-hidden bg-black border border-purple-400/30 mb-2"
-                 style={{ aspectRatio: "16/9" }}>
-              <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(90deg, #14532d 0 20px, #166534 20px 40px)" }} />
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 320 180" preserveAspectRatio="none">
-                {/* field lines */}
-                <rect x="4" y="4" width="312" height="172" fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.4" />
-                <line x1="4" y1="90" x2="316" y2="90" stroke="#fff" strokeWidth="1" opacity="0.4" />
-                <circle cx="160" cy="90" r="30" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4" />
-                <rect x="4" y="60" width="50" height="60" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4" />
-                <rect x="266" y="60" width="50" height="60" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4" />
-                {/* left team · yellow + blue */}
-                {[[80,70],[60,95],[80,115],[110,80],[110,100],[140,88]].map(([x,y],i) => (
-                  <g key={`w${i}`}>
-                    <circle cx={x} cy={y} r="5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.5" />
-                    <circle cx={x} cy={y} r="2" fill="#1d4ed8" />
-                  </g>
-                ))}
-                {/* opp team players */}
-                {[[240,72],[260,90],[240,110],[210,82],[210,100],[180,90]].map(([x,y],i) => (
-                  <g key={`o${i}`}>
-                    <circle cx={x} cy={y} r="5" fill="#d946ef" stroke="#a21caf" strokeWidth="0.5" />
-                    <circle cx={x} cy={y} r="2" fill="#fff" />
-                  </g>
-                ))}
-                {/* referee · pale yellow + black */}
-                <circle cx="160" cy="88" r="7" fill="#fef08a" stroke="#854d0e" strokeWidth="1" opacity="0.95" />
-                <circle cx="160" cy="88" r="3" fill="#000" />
-              </svg>
-              {/* incident highlight ring */}
-              <div className="absolute animate-var-ping"
-                   style={{ left: "49%", top: "47%", width: 28, height: 28, marginLeft: -14, marginTop: -14, borderRadius: "50%", border: "2px solid #facc15", boxShadow: "0 0 16px rgba(234,179,8,0.6)" }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <div className="absolute top-1.5 left-1.5 bg-amber-400 text-purple-950 text-[7px] font-black px-1.5 py-0.5 rounded tracking-widest">? REPLAY</div>
-              <div className="absolute top-1.5 right-1.5 text-white/70 text-[7px] font-mono">CAM 3 · WIDE</div>
-              <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-2 py-0.5 flex items-center gap-2">
-                <div className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
-                  <div className="h-full w-[62%] bg-amber-400 rounded-full" />
+            {/* main replay screen — realistic monitor bezel */}
+            <div className="relative rounded-md bg-gradient-to-b from-zinc-600 via-zinc-700 to-zinc-800 p-[5px] shadow-[0_16px_40px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.18)] mb-2"
+                 style={{ border: "1.5px solid #18181b" }}>
+              {/* power LED */}
+              <div className="absolute top-[3px] right-[6px] w-1 h-1 rounded-full bg-emerald-400 animate-blink shadow-[0_0_4px_rgba(74,222,128,0.85)] z-30" />
+
+              <div className="relative rounded-[3px] overflow-hidden bg-black border border-purple-400/25"
+                   style={{ aspectRatio: "16/9" }}>
+                <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(90deg, #14532d 0 20px, #166534 20px 40px)" }} />
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 320 180" preserveAspectRatio="none">
+                  {/* field lines */}
+                  <rect x="4" y="4" width="312" height="172" fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.4" />
+                  <line x1="4" y1="90" x2="316" y2="90" stroke="#fff" strokeWidth="1" opacity="0.4" />
+                  <circle cx="160" cy="90" r="30" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4" />
+                  <rect x="4" y="60" width="50" height="60" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4" />
+                  <rect x="266" y="60" width="50" height="60" fill="none" stroke="#fff" strokeWidth="1" opacity="0.4" />
+                  {/* left team · yellow + blue */}
+                  {[[80,70],[60,95],[80,115],[110,80],[110,100],[140,88]].map(([x,y],i) => (
+                    <CatToken key={`w${i}`} x={x} y={y} r={5.5} body="#facc15" accent="#1d4ed8" outline="#92400e" />
+                  ))}
+                  {/* opp team players */}
+                  {[[240,72],[260,90],[240,110],[210,82],[210,100],[180,90]].map(([x,y],i) => (
+                    <CatToken key={`o${i}`} x={x} y={y} r={5.5} body="#e879f9" accent="#ffffff" outline="#86198f" />
+                  ))}
+                  {/* referee · pale yellow + black */}
+                  <CatToken x={160} y={88} r={7.5} body="#fef08a" accent="#1f2937" outline="#854d0e" />
+                </svg>
+                {/* incident highlight ring */}
+                <div className="absolute animate-var-ping"
+                     style={{ left: "49%", top: "47%", width: 28, height: 28, marginLeft: -14, marginTop: -14, borderRadius: "50%", border: "2px solid #facc15", boxShadow: "0 0 16px rgba(234,179,8,0.6)" }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                {/* glass sheen */}
+                <div className="pointer-events-none absolute inset-0 z-20"
+                     style={{ background: "linear-gradient(125deg, rgba(255,255,255,0.12) 0%, transparent 32%, transparent 68%, rgba(255,255,255,0.05) 100%)" }} />
+                <div className="absolute top-1.5 left-1.5 bg-amber-400 text-purple-950 text-[7px] font-black px-1.5 py-0.5 rounded tracking-widest z-20">? REPLAY</div>
+                <div className="absolute top-1.5 right-1.5 text-white/70 text-[7px] font-mono z-20">CAM 3 · WIDE</div>
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-2 py-0.5 flex items-center gap-2 z-20">
+                  <div className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
+                    <div className="h-full w-[62%] bg-amber-400 rounded-full" />
+                  </div>
+                  <span className="text-white/60 text-[6px] font-mono">54:19</span>
                 </div>
-                <span className="text-white/60 text-[6px] font-mono">54:19</span>
+              </div>
+              {/* brand strip */}
+              <div className="flex items-center justify-center pt-1">
+                <span className="text-zinc-400/70 text-[5px] tracking-[0.4em] font-bold select-none">PAW·CAM</span>
               </div>
             </div>
 
@@ -129,31 +149,34 @@ function Slide5() {
                 { label: "CAM 5", active: true,  players: [[25,45],[50,50],[72,42],[40,68],[60,65],[80,55]] },
                 { label: "CAM 8", active: false, players: [[35,38],[55,52],[75,45],[42,65],[62,70],[78,60]] },
               ].map((cam) => (
-                <div key={cam.label} className={`relative rounded overflow-hidden border ${cam.active ? "border-amber-400" : "border-purple-400/20"}`}
-                     style={{ aspectRatio: "16/9" }}>
-                  <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(90deg, #14532d 0 10px, #166534 10px 20px)" }} />
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 56" preserveAspectRatio="none">
-                    <rect x="2" y="2" width="96" height="52" fill="none" stroke="#fff" strokeWidth="0.8" opacity="0.35" />
-                    <line x1="2" y1="28" x2="98" y2="28" stroke="#fff" strokeWidth="0.6" opacity="0.3" />
-                    {cam.players.slice(0,3).map(([x,y],i) => (
-                      <g key={`w${i}`}>
-                        <circle cx={x} cy={y} r="3" fill="#facc15" stroke="#ca8a04" strokeWidth="0.3" />
-                        <circle cx={x} cy={y} r="1.2" fill="#1d4ed8" />
-                      </g>
-                    ))}
-                    {cam.players.slice(3).map(([x,y],i) => (
-                      <g key={`o${i}`}>
-                        <circle cx={x} cy={y} r="3" fill="#d946ef" stroke="#a21caf" strokeWidth="0.3" />
-                        <circle cx={x} cy={y} r="1.2" fill="#fff" />
-                      </g>
-                    ))}
-                    {cam.active && <g><circle cx="50" cy="50" r="4" fill="#fef08a" stroke="#854d0e" strokeWidth="0.5" opacity="0.95" /><circle cx="50" cy="50" r="1.8" fill="#000" /></g>}
-                  </svg>
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-center py-0.5">
-                    <span className={`text-[6px] font-mono font-bold ${cam.active ? "text-amber-300" : "text-white/50"}`}>{cam.label}</span>
+                <div key={cam.label} className="relative rounded-[4px] p-[3px]"
+                     style={{
+                       background: cam.active ? "linear-gradient(180deg,#78350f,#451a03)" : "linear-gradient(180deg,#52525b,#27272a)",
+                       border: cam.active ? "1px solid #fbbf24" : "1px solid #18181b",
+                       boxShadow: "0 6px 16px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12)",
+                     }}>
+                  <div className="relative rounded-[2px] overflow-hidden border border-black/40" style={{ aspectRatio: "16/9" }}>
+                    <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(90deg, #14532d 0 10px, #166534 10px 20px)" }} />
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 56" preserveAspectRatio="none">
+                      <rect x="2" y="2" width="96" height="52" fill="none" stroke="#fff" strokeWidth="0.8" opacity="0.35" />
+                      <line x1="2" y1="28" x2="98" y2="28" stroke="#fff" strokeWidth="0.6" opacity="0.3" />
+                      {cam.players.slice(0,3).map(([x,y],i) => (
+                        <CatToken key={`w${i}`} x={x} y={y} r={3.2} body="#facc15" accent="#1d4ed8" outline="#92400e" />
+                      ))}
+                      {cam.players.slice(3).map(([x,y],i) => (
+                        <CatToken key={`o${i}`} x={x} y={y} r={3.2} body="#e879f9" accent="#ffffff" outline="#86198f" />
+                      ))}
+                      {cam.active && <CatToken x={50} y={50} r={4} body="#fef08a" accent="#1f2937" outline="#854d0e" />}
+                    </svg>
+                    <div className="absolute inset-0 bg-black/20" />
+                    {/* glass sheen */}
+                    <div className="pointer-events-none absolute inset-0 z-10"
+                         style={{ background: "linear-gradient(125deg, rgba(255,255,255,0.14) 0%, transparent 35%, transparent 70%, rgba(255,255,255,0.04) 100%)" }} />
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-center py-0.5 z-10">
+                      <span className={`text-[6px] font-mono font-bold ${cam.active ? "text-amber-300" : "text-white/50"}`}>{cam.label}</span>
+                    </div>
+                    {cam.active && <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400 animate-blink z-10" />}
                   </div>
-                  {cam.active && <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400 animate-blink" />}
                 </div>
               ))}
             </div>
@@ -228,10 +251,6 @@ function Slide5() {
         .animate-twinkle { animation: twinkle 2.5s ease-in-out infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
         .animate-blink { animation: blink 1s ease-in-out infinite; }
-        @keyframes card-glow { 0%,100%{opacity:.4} 50%{opacity:1} }
-        .animate-card-glow { animation: card-glow 2s ease-in-out infinite; }
-        @keyframes card-float { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-8px) rotate(-4deg)} }
-        .animate-card-float { animation: card-float 2.2s ease-in-out infinite; }
         @keyframes spark { 0%,100%{opacity:0;transform:scale(0.5) translateY(0)} 50%{opacity:1;transform:scale(1.2) translateY(-6px)} }
         .animate-spark { animation: spark 1.4s ease-in-out infinite; }
         @keyframes var-ping { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.25);opacity:0.6} }

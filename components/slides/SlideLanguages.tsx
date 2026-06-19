@@ -217,7 +217,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
 
           <motion.div variants={stagger} initial="hidden" animate="show"
             className="w-[min(380px,92vw)]">
-            <SlideCard accentColor={ACCENT} chapter={3} title="Dodging Bugs" className="text-white">
+            <SlideCard accentColor={ACCENT} className="text-white">
               <motion.div variants={item} className="flex items-center gap-3">
                 <div className="rounded-full flex-shrink-0 overflow-hidden"
                   style={{ width: 40, height: 40, background: flat.avatarUrl ? `url(${flat.avatarUrl}) center/cover` : "linear-gradient(135deg, #6366f1, #a855f7)", border: `1px solid ${ACCENT}40` }}>

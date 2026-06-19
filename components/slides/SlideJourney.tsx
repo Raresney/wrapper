@@ -181,7 +181,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
           </div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
             className="w-[min(380px,92vw)]">
-            <SlideCard accentColor={ACCENT} chapter={5} title="Refuel Stop" className="text-white">
+            <SlideCard accentColor={ACCENT} className="text-white">
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}

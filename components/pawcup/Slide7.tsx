@@ -10,6 +10,16 @@ import catWhite from "@/components/pawcup/assets/cat-white.png.asset.json";
 import catBrown from "@/components/pawcup/assets/cat-brown.png.asset.json";
 import catSilver from "@/components/pawcup/assets/cat-silver.png.asset.json";
 
+function TrophyGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" />
+      <path d="M7 5H4a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4M17 5h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4" />
+      <path d="M9 19h6M12 14v5" />
+    </svg>
+  );
+}
+
 // Deterministic RNG so SSR and client output match (no hydration mismatch)
 function seeded(seed: number) {
   let s = seed >>> 0;
@@ -29,11 +39,6 @@ const CONFETTI = Array.from({ length: 28 }).map(() => ({
   dur: 5 + r2() * 5,
   c: ["#facc15", "#a855f7", "#ec4899", "#22d3ee", "#ffffff"][Math.floor(r2() * 5)],
   rot: r2() * 360,
-}));
-const r3 = seeded(990011);
-const FIREWORKS = Array.from({ length: 6 }).map(() => ({
-  x: 10 + r3() * 80, y: 10 + r3() * 40, d: r3() * 4,
-  c: ["#facc15", "#a855f7", "#ec4899", "#22d3ee"][Math.floor(r3() * 4)],
 }));
 const SCREEN_FW = [
   { x: 12, y: 18, d: 0,    c: "#facc15", size: 72,  n: 16 },
@@ -181,82 +186,88 @@ function Slide7() {
         </div>
       </div>
 
-      {/* ====== RIGHT: modern flat-screen TV ====== */}
+      {/* ====== RIGHT: next-day sports newspaper front page ====== */}
       <div className="absolute right-0 top-0 bottom-0 w-[32%] z-10 flex items-center justify-center">
-        <div className="relative w-[65%]">
-          {/* TV chassis — slim dark panel */}
-          <div className="relative rounded-[10px] shadow-[0_30px_80px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.4)]"
-               style={{ background: "linear-gradient(160deg,#d4d4d8,#a1a1aa,#71717a)", padding: "9px 9px 12px", border: "2px solid #6b7280" }}>
+        <div className="relative w-[60%] animate-paper-sway">
+          {/* second sheet peeking out behind, for depth */}
+          <div className="absolute inset-0 translate-x-[6px] translate-y-[10px] rotate-[3deg] rounded-[2px] bg-[#e5ddc8] shadow-xl" />
+          <div className="absolute inset-0 translate-x-[3px] translate-y-[5px] rotate-[1.2deg] rounded-[2px] bg-[#ece3cd] shadow-lg" />
 
-            {/* top bezel row */}
-            <div className="flex items-center justify-between px-2 mb-2">
-              <div className="text-zinc-600 text-[6px] tracking-[0.5em] font-semibold">PAW·VISION</div>
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-blink shadow-[0_0_5px_rgba(239,68,68,0.9)]" />
+          {/* front page */}
+          <div className="relative rounded-[2px] shadow-[0_34px_70px_rgba(0,0,0,0.65)] overflow-hidden"
+               style={{ background: "#f3ecdc" }}>
+            {/* paper grain */}
+            <div className="absolute inset-0 opacity-[0.07] mix-blend-multiply pointer-events-none"
+              style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "120px" }} />
+            {/* aged vignette */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, transparent 55%, rgba(120,98,60,0.18) 100%)" }} />
+
+            {/* "stop press" stamp */}
+            <div className="absolute top-[18%] right-2 z-20 rotate-[18deg] rounded-sm border-2 border-red-700/80 px-1.5 py-[1px] text-red-700/90 text-[6px] font-black tracking-[0.2em]">
+              EXTRA!
             </div>
 
-            {/* screen */}
-            <div className="relative rounded-[5px] overflow-hidden aspect-[4/5] shadow-[inset_0_0_30px_rgba(0,0,0,0.9)]">
-              <Image
-                src={stadiumCelebration.url}
-                alt="Packed stadium celebrating with fireworks and confetti"
-                width={1024}
-                height={1280}
-                className="absolute inset-0 w-full h-full object-cover animate-zoom-slow"
-                loading="lazy"
-                unoptimized
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-purple-900/20" />
-              {/* subtle scanlines */}
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.12)_0,rgba(0,0,0,0.12)_1px,transparent_1px,transparent_3px)] z-10 pointer-events-none" />
-              {/* glass glare */}
-              <div className="absolute inset-0 pointer-events-none z-10"
-                   style={{ background: "linear-gradient(130deg,rgba(255,255,255,0.07) 0%,transparent 35%,transparent 65%,rgba(255,255,255,0.03) 100%)" }} />
-              {/* flicker */}
-              <div className="absolute inset-0 bg-white/0 animate-screen-flicker pointer-events-none z-10" />
-
-              {/* fireworks on screen */}
-              {FIREWORKS.map((f, i) => (
-                <div key={i} className="absolute w-2 h-2 rounded-full animate-firework z-20"
-                  style={{ left: `${f.x}%`, top: `${f.y}%`, background: f.c, boxShadow: `0 0 30px 8px ${f.c}`, animationDelay: `${f.d}s` }} />
-              ))}
-
-              {/* LIVE pill */}
-              <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-red-600 text-white text-[9px] font-black tracking-[0.3em] px-2 py-0.5 rounded shadow-lg z-20">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-blink" />LIVE · FINAL
+            <div className="relative p-2.5">
+              {/* masthead */}
+              <div className="flex items-center justify-between text-zinc-600 text-[5px] font-bold tracking-[0.18em] pb-1">
+                <span>VOL. XII · NO. 2026</span>
+                <span>PRICE: 1 SARDINE</span>
               </div>
-              <div className="absolute top-2 right-2 text-amber-200 text-[8px] tracking-[0.3em] font-mono z-20">CAM · 04</div>
+              <div className="border-y-2 border-zinc-900 py-1">
+                <h1 className="text-center font-black tracking-tight text-zinc-900 text-[19px] font-serif">
+                  THE&nbsp;PAW&nbsp;POST
+                </h1>
+              </div>
+              <div className="text-center text-[5.5px] tracking-[0.32em] text-zinc-600 font-semibold py-1 border-b-2 border-zinc-900">
+                WORLD CUP FINAL EDITION · JUNE 2026
+              </div>
 
-              {/* CHAMPIONS overlay */}
-              <div className="absolute bottom-0 left-0 right-0 z-20">
-                <div className="px-3 pb-1">
-                  <div className="text-amber-300/90 text-[9px] tracking-[0.4em] font-bold">GTH · WORLD CUP</div>
-                  <h2 className="text-4xl font-black leading-[0.9] tracking-tight bg-gradient-to-b from-white via-amber-200 to-amber-500 bg-clip-text text-transparent animate-title-glow">
-                    CHAMPIONS
-                  </h2>
+              {/* headline */}
+              <h2 className="text-center font-black leading-[0.82] tracking-tight text-zinc-900 font-serif mt-2"
+                  style={{ fontSize: "clamp(22px,7vw,34px)" }}>
+                CHAMPIONS!
+              </h2>
+              <p className="text-center text-[7.5px] font-semibold italic text-zinc-700 mt-1 mb-2 px-1">
+                Purple Paws FC stun the world, lift the trophy after a thrilling 2–1 final
+              </p>
+
+              {/* photo */}
+              <div className="relative w-full aspect-[4/3] overflow-hidden border-2 border-zinc-900">
+                <Image
+                  src={stadiumCelebration.url}
+                  alt="Packed stadium celebrating with fireworks and confetti"
+                  width={1024}
+                  height={1280}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ filter: "contrast(1.04) brightness(1.04) saturate(1.05)" }}
+                  loading="lazy"
+                  unoptimized
+                />
+                {/* faint halftone print dots — texture without muddying the image */}
+                <div className="absolute inset-0 mix-blend-multiply opacity-[0.12]"
+                  style={{ backgroundImage: "radial-gradient(circle, rgba(20,15,10,0.55) 0.5px, transparent 0.5px)", backgroundSize: "3.5px 3.5px" }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(243,236,220,0) 84%, rgba(243,236,220,0.85) 100%)" }} />
+              </div>
+              <p className="text-[5px] italic text-zinc-600 mt-1 mb-2 leading-snug">
+                Fans flood the pitch as the final whistle confirms history. — Staff photo
+              </p>
+
+              {/* two-column body copy (typographic filler, sells the print layout) */}
+              <div className="grid grid-cols-2 gap-2 border-t border-zinc-400 pt-1.5">
+                <div>
+                  <p className="text-[5.5px] font-black uppercase tracking-wide text-zinc-900 mb-1">By Our Pitch-side Correspondent</p>
+                  <FakeTextLines seed={11} lines={7} />
                 </div>
-                <div className="overflow-hidden bg-black/70 border-t border-amber-500/40">
-                  <div className="whitespace-nowrap py-0.5 text-amber-300 text-[8px] tracking-widest font-mono animate-ticker">
-                    ★ FT · GTH 2–1 WRP · WORLD CHAMPIONS · 82,500 FANS · ★ FT · GTH 2–1 WRP · WORLD CHAMPIONS · 82,500 FANS ·
+                <div>
+                  <div className="border border-zinc-900 p-1.5 mb-1.5">
+                    <div className="text-center text-[5px] font-bold tracking-[0.25em] text-zinc-600">FINAL SCORE</div>
+                    <div className="text-center text-[13px] font-black text-zinc-900 leading-tight">GTH 2–1 WRP</div>
                   </div>
+                  <FakeTextLines seed={37} lines={5} />
                 </div>
               </div>
             </div>
-
-            {/* bottom bezel — brand strip */}
-            <div className="flex items-center justify-center mt-2.5">
-              <div className="text-zinc-600 text-[7px] tracking-[0.6em] font-bold select-none">PAW · VISION</div>
-            </div>
-
-            {/* bottom edge highlight */}
-            <div className="absolute bottom-0 left-6 right-6 h-[1px] rounded-full bg-white/5" />
           </div>
-
-          {/* slim neck */}
-          <div className="mx-auto w-[7%] h-7 bg-gradient-to-b from-zinc-400 to-zinc-600" />
-          <div className="mx-auto w-[55%] h-[10px] rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.6)]"
-               style={{ background: "linear-gradient(180deg,#a1a1aa,#52525b)" }} />
-          {/* base shadow */}
-          <div className="mx-auto mt-1 w-[58%] h-1.5 rounded-[50%] bg-black/40 blur-md" />
         </div>
       </div>
 
@@ -264,8 +275,8 @@ function Slide7() {
       <div data-wc-center-card className="absolute inset-0 z-20 flex items-center justify-center px-4 pointer-events-none">
         <div className="w-[440px] max-w-[90vw] rounded-3xl bg-[#161029]/85 backdrop-blur-xl border border-purple-400/20 shadow-[0_30px_80px_-20px_rgba(168,85,247,0.5)] p-7 pointer-events-auto">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 grid place-items-center text-purple-950 font-black text-2xl shadow-[0_0_30px_rgba(250,204,21,0.6)]">
-              🏆
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 grid place-items-center text-purple-950 shadow-[0_0_30px_rgba(250,204,21,0.6)]">
+              <TrophyGlyph />
             </div>
             <div>
               <div className="text-amber-300/80 text-[10px] tracking-[0.35em] font-semibold">WORLD CUP 2026</div>
@@ -316,20 +327,8 @@ function Slide7() {
         .animate-spot-sway { animation: spot-sway 7s ease-in-out infinite; transform-origin: 50% 0%; }
         @keyframes glow-pulse { 0%,100%{opacity:.55} 50%{opacity:1} }
         .animate-glow-pulse { animation: glow-pulse 3.5s ease-in-out infinite; }
-        @keyframes cat-hold { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        .animate-cat-hold { animation: cat-hold 3.6s ease-in-out infinite; transform-origin: bottom center; }
-        @keyframes team-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-        .animate-team-bob { animation: team-bob 2.6s ease-in-out infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-        .animate-blink { animation: blink 1s ease-in-out infinite; }
-        @keyframes title-glow { 0%,100%{filter:drop-shadow(0 0 8px rgba(250,204,21,0.5))} 50%{filter:drop-shadow(0 0 22px rgba(250,204,21,0.9))} }
-        .animate-title-glow { animation: title-glow 2.6s ease-in-out infinite; }
-        @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-        .animate-ticker { animation: ticker 18s linear infinite; display:inline-block; padding-left:100%; }
-        @keyframes zoom-slow { 0%,100%{transform:scale(1.02)} 50%{transform:scale(1.08)} }
-        .animate-zoom-slow { animation: zoom-slow 14s ease-in-out infinite; }
-        @keyframes screen-flicker { 0%,97%,100%{opacity:0} 98%{opacity:.08} 99%{opacity:0} }
-        .animate-screen-flicker { animation: screen-flicker 6s linear infinite; background:#fff; }
+        @keyframes paper-sway { 0%,100%{transform:rotate(-2.5deg)} 50%{transform:rotate(-1.4deg)} }
+        .animate-paper-sway { animation: paper-sway 6s ease-in-out infinite; }
         @keyframes fw-ring {
           0%   { transform: translate(-50%,-50%) scale(0.05); opacity: 1; }
           55%  { opacity: 0.85; }
@@ -349,13 +348,6 @@ function Slide7() {
           100% { transform: rotate(var(--angle,0deg)) scaleY(0.2); opacity: 0; }
         }
         .animate-fw-spark { animation: fw-spark 1.55s ease-out infinite; }
-        @keyframes firework {
-          0%   { transform:scale(.2); opacity:0 }
-          20%  { transform:scale(1); opacity:1 }
-          60%  { transform:scale(2.4); opacity:.6 }
-          100% { transform:scale(3.2); opacity:0 }
-        }
-        .animate-firework { animation: firework 2.6s ease-out infinite; }
       `}</style>
     </div>
   );
@@ -373,6 +365,21 @@ function Teammate({ className, src, style }: { className?: string; src: string; 
         loading="lazy"
         unoptimized
       />
+    </div>
+  );
+}
+
+// Deterministic gray bars standing in for unreadable-at-this-scale print body copy.
+function FakeTextLines({ seed, lines }: { seed: number; lines: number }) {
+  const rnd = seeded(seed);
+  const widths = Array.from({ length: lines }).map((_, i) =>
+    i === lines - 1 ? 40 + rnd() * 20 : 78 + rnd() * 20
+  );
+  return (
+    <div className="flex flex-col gap-[2.5px]">
+      {widths.map((w, i) => (
+        <div key={i} className="h-[3px] rounded-[1px] bg-zinc-700/35" style={{ width: `${Math.min(w, 100)}%` }} />
+      ))}
     </div>
   );
 }

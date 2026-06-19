@@ -190,8 +190,6 @@ function Slide1() {
         .animate-twinkle { animation: twinkle 2.5s ease-in-out infinite; }
         @keyframes float-slow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
         .animate-float-slow { animation: float-slow 4s ease-in-out infinite; }
-        @keyframes ball-roll { 0%,100%{transform:translateX(0) rotate(0)} 50%{transform:translateX(8px) rotate(20deg)} }
-        .animate-ball-roll { animation: ball-roll 3s ease-in-out infinite; }
         @keyframes jalon-sway { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)} }
         .animate-sway { animation: jalon-sway 3.5s ease-in-out infinite; transform-origin: bottom center; }
         @keyframes chalk-draw { 0%{stroke-dashoffset:200} 100%{stroke-dashoffset:0} }

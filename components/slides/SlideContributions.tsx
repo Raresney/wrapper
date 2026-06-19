@@ -241,7 +241,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
 
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
             className="w-full max-w-[380px]">
-            <SlideCard accentColor={ACCENT} chapter={2} title="The Chase" className="text-white">
+            <SlideCard accentColor={ACCENT} className="text-white">
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border"

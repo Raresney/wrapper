@@ -142,7 +142,7 @@ function ChevronRight() { return <svg width="14" height="14" viewBox="0 0 14 14"
 // â”€â”€ main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function WrappedPage() {
   const router = useRouter();
-  const { worldCup } = useTheme();
+  const { worldCup, ready, animate } = useTheme();
   const activeSlides = worldCup ? WORLD_CUP_BONUS_SLIDES : BASE_SLIDES;
   const activeTotal = activeSlides.length;
   const [profile,          setProfile]          = useState<WrappedProfile | null>(null);
@@ -257,10 +257,10 @@ export default function WrappedPage() {
     >
       {/* world cup decorative layer â€” renders behind all content */}
       {/* ambient glow */}
-      <div className={`pointer-events-none fixed inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${worldCup ? "opacity-0" : "opacity-100"}`}
+      <div className={`pointer-events-none fixed inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && worldCup ? "opacity-0" : "opacity-100"}`}
         style={{ background: "radial-gradient(ellipse at 50% 0%,rgba(139,92,246,0.12) 0%,transparent 65%)" }} />
       {/* film grain */}
-      <div className={`pointer-events-none fixed inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${worldCup ? "opacity-0" : "opacity-[0.028]"}`}
+      <div className={`pointer-events-none fixed inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && worldCup ? "opacity-0" : "opacity-[0.028]"}`}
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px" }} />
 
       {/* â”€â”€ top bar â”€â”€ */}
@@ -299,17 +299,17 @@ export default function WrappedPage() {
             className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-contain lg:overflow-hidden">
             <div className="relative h-full w-full overflow-hidden">
               <div
-                className={`absolute inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
-                  worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+                className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+                  ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
                 }`}
               >
                 {normalizedSlideState.current === "share"
-                  ? <SlideShare profile={profile} showStartOver={!worldCup} />
+                  ? <SlideShare profile={profile} showStartOver={!(ready && worldCup)} />
                   : <CurrentSlide profile={profile} />}
               </div>
               <div
-                className={`absolute inset-0 will-change-[opacity] transition-opacity duration-[520ms] ease-out ${
-                  worldCup ? "opacity-100" : "pointer-events-none opacity-0"
+                className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+                  ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
               >
                 <div className="wc-pawcup-scene absolute inset-0">

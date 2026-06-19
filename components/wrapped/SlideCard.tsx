@@ -4,8 +4,6 @@ import React from "react";
 
 type SlideCardProps = {
   accentColor: string;
-  chapter: number;
-  title: string;
   /** Extra classes applied to the outer card div (use for sizing: h-[Npx] w-full etc.) */
   className?: string;
   children: React.ReactNode;
@@ -14,8 +12,9 @@ type SlideCardProps = {
 /**
  * Shared visual shell for all original-theme slide cards.
  * Adds: dark rich background, colored border + glow, top/bottom accent bars,
- * "GITHUB WRAPPED 2026 · CH.0N · TITLE" header, and an ambient glow blob.
- * Content scrolls inside the card; the header stays fixed at the top.
+ * and an ambient glow blob. The chapter/title heading is rendered separately
+ * by ChapterHeadingAnchor / ChapterHeadingMobile, outside the card.
+ * Content scrolls inside the card.
  */
 export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
   function SlideCard({ accentColor, className = "", children }, ref) {

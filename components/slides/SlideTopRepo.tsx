@@ -92,18 +92,18 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
   const showStarred = !!starred && starred.name !== top?.name;
   const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } };
 
-  const [ufoX, setUfoX] = useState(0);
+  const ufoX = useMotionValue(0);
   useEffect(() => {
     let raf: number;
     const start = performance.now();
     const tick = (now: number) => {
       const t = (now - start) / 1000;
-      setUfoX(Math.sin((t * Math.PI * 2) / 6) * 90);
+      ufoX.set(Math.sin((t * Math.PI * 2) / 6) * 90);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [ufoX]);
 
   return (
     <div className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>

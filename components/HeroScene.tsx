@@ -196,24 +196,28 @@ export function HeroScene() {
         />
       </motion.div>
 
-      {/* ── commit dots (rocket exhaust) ── */}
+      {/* ── commit dots (rocket exhaust) — transform instead of left/top/margin ── */}
       <div className="absolute left-1/2 z-10" style={{ top: MOON_ANCHOR }}>
         {dots.map(dot => (
           <span key={dot.id} className="commit-dot absolute block rounded-full"
-            style={{ left: dot.x, top: dot.y, width: 13, height: 13, marginLeft: -6.5, marginTop: -6.5,
+            style={{
+              width: 13, height: 13,
+              transform: `translate(calc(${dot.x}px - 50%), calc(${dot.y}px - 50%))`,
+              willChange: "transform, opacity",
               background: "oklch(0.88 0.32 145)",
               boxShadow: "0 0 14px 4px oklch(0.78 0.28 145 / 0.75), 0 0 6px 2px oklch(0.92 0.34 145 / 0.9)" }} />
         ))}
       </div>
 
-      {/* ── shooting stars ── */}
+      {/* ── shooting stars — transform instead of left/top ── */}
       {shoots.map(s => (
         <span key={s.id} className="shooting-star absolute block"
           style={{
-            left: `${s.x}%`, top: `${s.y}%`,
+            left: 0, top: 0,
             width: 80, height: 1.5,
             borderRadius: 2,
-            transform: `rotate(${s.angle}deg)`,
+            transform: `translate(${s.x}vw, ${s.y}vh) rotate(${s.angle}deg)`,
+            willChange: "transform, opacity",
             background: "linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.85) 50%, rgba(255,255,255,0))",
             boxShadow: "0 0 6px rgba(255,255,255,0.4)",
           }}

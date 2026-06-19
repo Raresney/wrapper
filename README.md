@@ -1,5 +1,13 @@
 # GitHub Wrapped
 
+## License & Usage Restriction
+
+**All Rights Reserved.**
+
+This project is proprietary and confidential. Access, use, copying, modification, distribution, or deployment of this software — in whole or in part — is strictly prohibited without explicit written permission from the author.
+
+Only the project owner and explicitly authorized collaborators may use, modify, or contribute to this codebase. Unauthorized use is strictly forbidden.
+
 GitHub Wrapped turns a GitHub profile into a shareable developer recap. It pulls GitHub activity, calculates developer metrics, assigns an archetype, optionally generates an AI narrative, and presents the result as animated slides.
 
 ## Stack

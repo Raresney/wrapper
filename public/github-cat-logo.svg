@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="sh" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="8" flood-color="#00000022"/>
+    </filter>
+    <clipPath id="circ">
+      <circle cx="256" cy="275" r="215"/>
+    </clipPath>
+  </defs>
+
+  <!-- Left ear -->
+  <path d="M 148 148 L 108 52 L 214 108 Z" fill="white" filter="url(#sh)"/>
+  <!-- Right ear -->
+  <path d="M 364 148 L 404 52 L 298 108 Z" fill="white" filter="url(#sh)"/>
+
+  <!-- Main circle -->
+  <circle cx="256" cy="275" r="215" fill="white" filter="url(#sh)"/>
+
+  <!-- Git branch lines -->
+  <path d="M 256 430 C 256 430 256 360 256 310" stroke="#1e1e1e" stroke-width="38" stroke-linecap="round" fill="none" clip-path="url(#circ)"/>
+  <path d="M 256 310 C 256 290 258 250 262 185" stroke="#1e1e1e" stroke-width="38" stroke-linecap="round" fill="none" clip-path="url(#circ)"/>
+  <path d="M 256 310 C 240 300 190 295 142 295" stroke="#1e1e1e" stroke-width="38" stroke-linecap="round" fill="none" clip-path="url(#circ)"/>
+  <path d="M 256 280 C 280 270 330 250 380 240" stroke="#1e1e1e" stroke-width="38" stroke-linecap="round" fill="none" clip-path="url(#circ)"/>
+
+  <!-- Nodes -->
+  <circle cx="262" cy="178" r="46" fill="#1e1e1e" clip-path="url(#circ)"/>
+  <circle cx="136" cy="296" r="46" fill="#1e1e1e" clip-path="url(#circ)"/>
+  <circle cx="386" cy="234" r="46" fill="#1e1e1e" clip-path="url(#circ)"/>
+</svg>

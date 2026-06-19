@@ -7,6 +7,9 @@ import logo from "@/components/pawcup/assets/logo3.asset.json";
 import catMascot from "@/components/pawcup/assets/cat-mascot.asset.json";
 
 function FootballPixelTitle({ isLoggedIn }: { isLoggedIn: boolean }) {
+  const line1 = "ALL TIME";
+  const line2 = "WRAPPER";
+
   return (
     <div className="relative select-none text-left">
       <div className="absolute -left-3 -top-4 h-5 w-2 rounded-sm bg-zinc-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]" />
@@ -16,25 +19,80 @@ function FootballPixelTitle({ isLoggedIn }: { isLoggedIn: boolean }) {
       >
         <div className="mb-2 flex items-center justify-between gap-4">
           <span className="text-[8px] font-black uppercase tracking-[0.28em] text-emerald-200/55">Sub board</span>
-          <span className="rounded bg-emerald-300/8 px-2 py-0.5 text-[8px] font-black tabular-nums text-emerald-100/70">90+4</span>
+          <span
+            className="rounded bg-emerald-300/8 px-2 py-0.5 text-[8px] font-black tabular-nums text-emerald-100/70"
+            style={{ animation: "wc-score-blink 1.6s ease-in-out infinite" }}
+          >
+            90+4
+          </span>
         </div>
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.1]"
-          style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 5px, rgba(52,211,153,0.28) 5px, rgba(52,211,153,0.28) 6px)" }}
-        />
-        <div className="relative">
+
+        {/* Scrolling scanlines — translateY instead of background-position (GPU) */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.1]">
+          <div
+            className="absolute inset-x-0 top-0"
+            style={{
+              height: "calc(100% + 6px)",
+              background: "repeating-linear-gradient(0deg, transparent, transparent 5px, rgba(52,211,153,0.28) 5px, rgba(52,211,153,0.28) 6px)",
+              animation: "wc-scanlines 6s linear infinite",
+              willChange: "transform",
+            }}
+          />
+        </div>
+
+        <div className="relative overflow-hidden">
+          {/* Shimmer sweep — translateX instead of left (GPU) */}
+          <div
+            className="pointer-events-none absolute inset-y-0 w-1/3"
+            style={{
+              left: 0,
+              background: "linear-gradient(105deg, transparent, rgba(255,255,255,0.09) 50%, transparent)",
+              animation: "wc-shimmer 3.8s ease-in-out infinite",
+              willChange: "transform",
+            }}
+          />
+
           <div
             className="font-black uppercase leading-[0.84] tracking-[-0.06em] text-white"
             style={{
               fontSize: "clamp(34px, 4.1vw, 62px)",
-              textShadow:
-                "0 0 8px rgba(52,211,153,0.26), 0 0 18px rgba(250,204,21,0.18), 0 8px 22px rgba(0,0,0,0.5)",
+              animation: "wc-glow-pulse 2.6s ease-in-out infinite",
             }}
           >
-            ALL TIME
-            <br />
-            WRAPPER
+            {/* Line 1 — letter flip-in */}
+            <div style={{ perspective: "400px" }}>
+              {line1.split("").map((ch, i) => (
+                <span
+                  key={i}
+                  style={{
+                    display: "inline-block",
+                    animation: `wc-letter-flip 0.42s ${i * 0.065}s both`,
+                    willChange: "transform, opacity",
+                    backfaceVisibility: "hidden",
+                  }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </div>
+            {/* Line 2 — letter flip-in, offset after line1 */}
+            <div style={{ perspective: "400px" }}>
+              {line2.split("").map((ch, i) => (
+                <span
+                  key={i}
+                  style={{
+                    display: "inline-block",
+                    animation: `wc-letter-flip 0.42s ${line1.length * 0.065 + i * 0.065 + 0.12}s both`,
+                    willChange: "transform, opacity",
+                    backfaceVisibility: "hidden",
+                  }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </div>
           </div>
+
           <div className="mt-3 flex items-center gap-2">
             <span
               className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.22em] ${
@@ -42,6 +100,7 @@ function FootballPixelTitle({ isLoggedIn }: { isLoggedIn: boolean }) {
                   ? "border-emerald-300/45 bg-emerald-300/12 text-emerald-200"
                   : "border-amber-300/35 bg-amber-300/10 text-amber-200"
               }`}
+              style={{ animation: "wc-badge-pulse 2.4s ease-in-out infinite" }}
             >
               {isLoggedIn ? "UNLOCKED" : "SUB IN 90+4"}
             </span>
@@ -49,6 +108,34 @@ function FootballPixelTitle({ isLoggedIn }: { isLoggedIn: boolean }) {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes wc-letter-flip {
+          0%   { opacity: 0; transform: rotateX(90deg) scaleY(0.5); }
+          60%  { opacity: 1; transform: rotateX(-8deg) scaleY(1.04); }
+          100% { opacity: 1; transform: rotateX(0deg) scaleY(1); }
+        }
+        @keyframes wc-glow-pulse {
+          0%, 100% { text-shadow: 0 0 8px rgba(52,211,153,0.26), 0 0 18px rgba(250,204,21,0.18), 0 8px 22px rgba(0,0,0,0.5); }
+          50%       { text-shadow: 0 0 18px rgba(52,211,153,0.60), 0 0 36px rgba(250,204,21,0.40), 0 0 52px rgba(52,211,153,0.22), 0 8px 22px rgba(0,0,0,0.5); }
+        }
+        @keyframes wc-score-blink {
+          0%, 42%, 100% { opacity: 1; }
+          48%, 96%      { opacity: 0.18; }
+        }
+        @keyframes wc-badge-pulse {
+          0%, 100% { opacity: 1;    box-shadow: 0 0 0 0 rgba(52,211,153,0.0); }
+          50%      { opacity: 0.82; box-shadow: 0 0 0 5px rgba(52,211,153,0.18); }
+        }
+        @keyframes wc-scanlines {
+          from { transform: translateY(0); }
+          to   { transform: translateY(-6px); }
+        }
+        @keyframes wc-shimmer {
+          0%        { transform: translateX(-100%); }
+          55%, 100% { transform: translateX(320%); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -269,7 +356,7 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
         <div
           key={i}
           className="absolute rounded-full bg-white animate-twinkle"
-          style={{ left: `${s.x}%`, top: `${s.y}%`, width: 2, height: 2, animationDelay: `${s.d}s` }}
+          style={{ left: `${s.x}%`, top: `${s.y}%`, width: 2, height: 2, animationDelay: `${s.d}s`, willChange: "opacity" }}
         />
       ))}
 
@@ -307,20 +394,20 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
       />
 
       {/* Confetti */}
-      <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden" style={{ contain: "layout style paint" }}>
         {confetti.map((c, i) => (
           <div
             key={i}
-            className="absolute top-[-20px] animate-confetti"
+            className="absolute top-0 animate-confetti"
             style={{
               left: `${c.left}%`,
               width: c.size,
               height: c.size * 0.4,
               background: c.color,
-              transform: `rotate(${c.rot}deg)`,
               animationDelay: `${c.delay}s`,
               animationDuration: `${c.duration}s`,
               borderRadius: c.shape === 0 ? "2px" : c.shape === 1 ? "50%" : "0",
+              willChange: "transform, opacity",
             }}
           />
         ))}
@@ -328,8 +415,8 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
 
       <style>{`
         @keyframes confetti-fall {
-          0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(105vh) rotate(720deg); opacity: 0.8; }
+          0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(105vh) rotate(720deg); opacity: 0.7; }
         }
         .animate-confetti { animation: confetti-fall linear infinite; }
         @keyframes twinkle {

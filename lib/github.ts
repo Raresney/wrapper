@@ -163,7 +163,7 @@ export async function fetchGitHubUser(username: string, token?: string): Promise
     followers: number;
   };
 
-  const u = await apiFetch<RawUser>(`${GH_API}/users/${username}`, token);
+  const u = await apiFetch<RawUser>(`${GH_API}/users/${encodeURIComponent(username)}`, token);
 
   let pinnedRepos: string[] = [];
   if (token) {
@@ -204,7 +204,7 @@ async function fetchGitHubRepos(username: string, token?: string): Promise<GitHu
 
   const all: GitHubRepo[] = [];
   let page = 1;
-  let base = `${GH_API}/users/${username}/repos?sort=pushed&per_page=100&type=owner`;
+  let base = `${GH_API}/users/${encodeURIComponent(username)}/repos?sort=pushed&per_page=100&type=owner`;
 
   if (token) {
     try {
@@ -321,7 +321,7 @@ async function fetchPrivateRepoCommits(
       try {
         type RawCommit = { commit: { message: string } };
         const commits = await apiFetch<RawCommit[]>(
-          `${GH_API}/repos/${username}/${repo.name}/commits?author=${username}&since=${period.startDate}T00:00:00Z&until=${period.endDate}T23:59:59Z&per_page=100`,
+          `${GH_API}/repos/${encodeURIComponent(username)}/${encodeURIComponent(repo.name)}/commits?author=${encodeURIComponent(username)}&since=${period.startDate}T00:00:00Z&until=${period.endDate}T23:59:59Z&per_page=100`,
           token
         );
         for (const c of commits) results.push({ message: c.commit.message });
@@ -393,7 +393,7 @@ async function fetchLanguageStats(
       batch.map(async (r) => {
         try {
           const data = await apiFetch<Record<string, number>>(
-            `${GH_API}/repos/${username}/${r.name}/languages`,
+            `${GH_API}/repos/${encodeURIComponent(username)}/${encodeURIComponent(r.name)}/languages`,
             token
           );
           for (const [lang, b] of Object.entries(data)) {
@@ -441,7 +441,7 @@ async function fetchContributionsUnauthed(
     let events: GHEvent[];
     try {
       events = await apiFetch<GHEvent[]>(
-        `${GH_API}/users/${username}/events?per_page=100&page=${page}`
+        `${GH_API}/users/${encodeURIComponent(username)}/events?per_page=100&page=${page}`
       );
     } catch { break; }
 

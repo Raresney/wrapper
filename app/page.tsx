@@ -521,17 +521,18 @@ function HomePageInner() {
 
   const handleGenerate = useCallback(async () => {
     if (!username.trim() || loading) return;
-    if (!isLoggedIn && !usernameValid) {
-      setError("That doesn't look like a valid GitHub username");
+    // /api/github now requires an authenticated session — the OAuth token is used
+    // server-side and never travels through the browser. Send unauthenticated
+    // users to GitHub sign-in instead of letting the request 401.
+    if (!isLoggedIn) {
+      signIn("github", { callbackUrl: authCallbackUrl() });
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const token = session?.accessToken;
       const res = await fetch(
-        `/api/github?username=${encodeURIComponent(username.trim())}&periodType=${periodType}`,
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        `/api/github?username=${encodeURIComponent(username.trim())}&periodType=${periodType}`
       );
       if (!res.ok) {
         if (res.status === 404) throw new Error("GitHub user not found");
@@ -683,7 +684,7 @@ function HomePageInner() {
             style={{ backdropFilter: "blur(20px) saturate(1.6)" }}
           >
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
-              Pick any period — week, month, year or all time. Get a cinematic recap of your commits, repos, languages and streaks.
+              Connect your GitHub account, then pick any period — week, month, year or all time — for a cinematic recap of your commits, repos, languages and streaks.
             </p>
             {/* auth-dependent row — crossfades between loading / signed-out / signed-in
                 instead of popping, since useSession() briefly reports "loading" right
@@ -861,13 +862,15 @@ function HomePageInner() {
                   Your GitHub activity, decoded into a cinematic recap.
                 </h3>
                 <p className="relative mt-5 text-[14px] leading-relaxed text-zinc-300">
-                  Generate a cinematic recap of your GitHub activity — no account needed. Connect for the full experience and unlock{" "}
-                  <span className="font-semibold text-violet-300">All time</span> mode.
+                  Connect your GitHub account to generate a cinematic recap for any period — week,
+                  month, year or{" "}
+                  <span className="font-semibold text-violet-300">All time</span>. Your access token
+                  stays on the server and is never exposed to the browser.
                 </p>
 
                 <ol className="relative mt-5 space-y-3">
                   {[
-                    { n: "01", label: "Enter your username", desc: "Public profiles work instantly — no login required." },
+                    { n: "01", label: "Sign in with GitHub", desc: "We read your stats with your session — your token never reaches the browser." },
                     { n: "02", label: "Pick a period & AI tone", desc: "Last 30 days, this year, all time. Roast, hype, or poetic." },
                     { n: "03", label: "Generate your recap", desc: "We analyse your repos, commits, languages & streaks." },
                     { n: "04", label: "Share it", desc: "Download your slides or share a link directly." },

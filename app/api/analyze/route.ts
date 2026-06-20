@@ -79,8 +79,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json(profile, { status: 200 });
   } catch (err) {
+    // Log details server-side only; return a generic body to the client.
     console.error("api/analyze POST:", err);
-    const message = err instanceof Error ? err.message : "unknown error";
-    return NextResponse.json({ error: "analysis_failed", message }, { status: 500 });
+    return NextResponse.json({ error: "analysis_failed" }, { status: 500 });
   }
 }

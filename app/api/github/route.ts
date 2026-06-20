@@ -1,10 +1,17 @@
-﻿import { NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { fetchGitHubRawData, fetchGitHubUser } from "@/lib/github";
 import type { GitHubError } from "@/lib/github";
 import type { Period } from "@/types/wrapped";
+import { isRateLimited } from "@/lib/rate-limit";
 
 const VALID_PERIOD_TYPES = ["week", "month", "year", "alltime", "custom"] as const;
 type PeriodValue = (typeof VALID_PERIOD_TYPES)[number];
+
+// GitHub usernames: 1–39 chars, alphanumeric or single hyphens (no leading/
+// trailing hyphen). Rejecting anything else also kills path traversal via
+// `../user` and any URL-injection in downstream GitHub API calls.
+const GITHUB_USERNAME_RE = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
 
 function isIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -78,7 +85,21 @@ function derivePeriod(
   }
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  // Require an authenticated session. The user's OAuth token is read from the
+  // encrypted JWT server-side only — never accepted from the client, and there
+  // is no shared server-PAT fallback (kills RT-01/RT-02/RT-03 at the root).
+  const jwt = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  const token = jwt?.accessToken as string | undefined;
+  if (!token) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  // Rate-limit keyed on the authenticated identity (not a spoofable IP header).
+  if (isRateLimited(`github:${jwt.sub ?? "unknown"}`, 30, 60_000)) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(request.url);
   const username = searchParams.get("username");
   const periodType = searchParams.get("periodType");
@@ -88,16 +109,13 @@ export async function GET(request: Request) {
   if (!username) {
     return NextResponse.json({ error: "username_required" }, { status: 400 });
   }
+  if (!GITHUB_USERNAME_RE.test(username)) {
+    return NextResponse.json({ error: "invalid_username" }, { status: 400 });
+  }
   if (!periodType || !(VALID_PERIOD_TYPES as readonly string[]).includes(periodType)) {
     return NextResponse.json({ error: "invalid_period_type" }, { status: 400 });
   }
 
-  // User OAuth token → server fallback token (must look like a real GH token) → unauthenticated
-  const userToken = request.headers.get("Authorization")?.replace("Bearer ", "") ?? undefined;
-  const envToken  = process.env.GITHUB_TOKEN;
-  const serverToken = envToken && (envToken.startsWith("ghp_") || envToken.startsWith("github_pat_") || envToken.startsWith("ghs_"))
-    ? envToken : undefined;
-  const token = userToken ?? serverToken ?? undefined;
   const validPeriod = periodType as PeriodValue;
   const dateValidationError = validateDates(validPeriod, startDate, endDate);
 

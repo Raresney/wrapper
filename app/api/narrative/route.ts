@@ -1,8 +1,9 @@
 export const dynamic = "force-dynamic";
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { generateNarrative } from "@/lib/groq";
-import { getClientIp, isRateLimited } from "@/lib/rate-limit";
+import { isRateLimited } from "@/lib/rate-limit";
+import { getToken } from "next-auth/jwt";
 import type { WrappedProfile, AiTone } from "@/types/wrapped";
 
 const VALID_TONES: AiTone[] = ["funny", "brutal", "motivational"];
@@ -34,9 +35,13 @@ function isWrappedProfile(body: unknown): body is WrappedProfile {
   );
 }
 
-export async function POST(request: Request) {
-  const clientIp = getClientIp(request);
-  if (isRateLimited(`narrative:${clientIp}`, 12, 60_000)) {
+export async function POST(request: NextRequest) {
+  // Cost-bearing (Groq) endpoint: require auth and rate-limit per identity (RT-04).
+  const jwt = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  if (!jwt) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  if (isRateLimited(`narrative:${jwt.sub ?? "unknown"}`, 12, 60_000)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 

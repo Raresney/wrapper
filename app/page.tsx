@@ -517,17 +517,18 @@ function HomePageInner() {
 
   const handleGenerate = useCallback(async () => {
     if (!username.trim() || loading) return;
-    if (!isLoggedIn && !usernameValid) {
-      setError("That doesn't look like a valid GitHub username");
+    // /api/github now requires an authenticated session — the OAuth token is used
+    // server-side and never travels through the browser. Send unauthenticated
+    // users to GitHub sign-in instead of letting the request 401.
+    if (!isLoggedIn) {
+      signIn("github", { callbackUrl: authCallbackUrl() });
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const token = session?.accessToken;
       const res = await fetch(
-        `/api/github?username=${encodeURIComponent(username.trim())}&periodType=${periodType}`,
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        `/api/github?username=${encodeURIComponent(username.trim())}&periodType=${periodType}`
       );
       if (!res.ok) {
         if (res.status === 404) throw new Error("GitHub user not found");

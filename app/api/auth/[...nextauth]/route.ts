@@ -8,7 +8,9 @@ const handler = NextAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope: "read:user user:email repo",
+          // Least privilege: only public profile data is needed to compute
+          // Wrapped stats. NEVER request `repo` (full private read/write).
+          scope: "read:user",
         },
       },
     }),
@@ -24,7 +26,8 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string | undefined;
+      // Do NOT expose the OAuth access token to the browser. It stays in the
+      // encrypted JWT and is read server-side only (see app/api/github).
       session.login = token.login as string | undefined;
       return session;
     },

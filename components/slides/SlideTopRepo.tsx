@@ -156,11 +156,23 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                 </span>
               </motion.div>
 
-              <motion.div {...fadeUp} transition={{ delay: 0.4 }} className="mt-2 leading-none">
-                <div style={{ fontSize: 40, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.04em", background: "linear-gradient(120deg,#7cff8a 0%,#22d3ee 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
-                  <CountUp value={flat.totalCommits} />
+              <motion.div {...fadeUp} transition={{ delay: 0.4 }} className="mt-2 flex items-start justify-between gap-3">
+                <div className="leading-none">
+                  <div style={{ fontSize: 40, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.04em", background: "linear-gradient(120deg,#7cff8a 0%,#22d3ee 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+                    <CountUp value={flat.totalCommits} />
+                  </div>
+                  <div className="mt-1 text-[11px] uppercase tracking-wider text-white/45">commits fired</div>
                 </div>
-                <div className="mt-1 text-[11px] uppercase tracking-wider text-white/45">commits fired</div>
+                {flat.pinnedRepos.length > 0 && (
+                  <div className="flex flex-col items-end gap-1 pt-0.5">
+                    <div className="text-[10px] uppercase tracking-wider text-white/40">Pinned</div>
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {flat.pinnedRepos.slice(0, 4).map(r => (
+                        <span key={r} className="rounded-full border border-cyan-300/20 bg-cyan-300/[0.07] px-2 py-0.5 font-mono text-[10px] text-cyan-200 max-w-[120px] truncate">{r}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
 
               {top ? (
@@ -234,14 +246,6 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                 ))}
               </motion.div>
 
-              {flat.pinnedRepos.length > 0 && (
-                <motion.div {...fadeUp} transition={{ delay: 0.85 }} className="mt-3">
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-white/45">Pinned</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {flat.pinnedRepos.slice(0, 4).map(r => (<span key={r} className="rounded-full border border-cyan-300/20 bg-cyan-300/[0.07] px-2 py-0.5 font-mono text-[10px] text-cyan-200">{r}</span>))}
-                  </div>
-                </motion.div>
-              )}
 
             </SlideCard>
           </motion.div>

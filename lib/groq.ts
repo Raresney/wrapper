@@ -229,42 +229,54 @@ function parseLLMResponse(content: string): NarrativeCore | null {
 
 // ── groq call helper ─────────────────────────────────────────────────────────
 
+type GroqResult = { core: NarrativeCore; error: null } | { core: null; error: string };
+
 async function callGroq(
   apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   temperature: number,
-): Promise<NarrativeCore | null> {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 520,
-      temperature,
-      top_p: 0.9,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user",   content: userPrompt },
-      ],
-    }),
-  });
+): Promise<GroqResult> {
+  let res: Response;
+  try {
+    res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 520,
+        temperature,
+        top_p: 0.9,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user",   content: userPrompt },
+        ],
+      }),
+    });
+  } catch (e) {
+    const msg = `fetch threw: ${e instanceof Error ? e.message : String(e)}`;
+    console.error("[groq]", msg);
+    return { core: null, error: msg };
+  }
 
   if (!res.ok) {
     const errText = await res.text();
-    console.error(`[groq] HTTP ${res.status}:`, errText);
-    return null;
+    const msg = `HTTP ${res.status}: ${errText.slice(0, 200)}`;
+    console.error("[groq]", msg);
+    return { core: null, error: msg };
   }
 
   const json = (await res.json()) as GroqApiResponse;
   const raw = json.choices[0]?.message.content ?? "";
   console.log("[groq] raw response:", raw.slice(0, 300));
-  return parseLLMResponse(raw);
+  const core = parseLLMResponse(raw);
+  if (!core) return { core: null, error: `parse failed, raw="${raw.slice(0, 150)}"` };
+  return { core, error: null };
 }
 
 // ── main export ──────────────────────────────────────────────────────────────
@@ -303,30 +315,27 @@ export async function generateNarrative(profile: WrappedProfile): Promise<Narrat
 
   console.log(`[groq] run=${rollId} voice="${voice.slice(0, 30)}..." focus="${focusArea.slice(0, 40)}..."`);
 
-  let narrativeCore: NarrativeCore | null = null;
+  const errors: string[] = [];
 
-  try {
-    narrativeCore = await callGroq(apiKey, SYSTEM_PROMPT, userPrompt, 0.95);
-    console.log("[groq] attempt 1:", narrativeCore ? "OK" : "FAILED");
-  } catch (e) {
-    console.error("[groq] attempt 1 threw:", e);
-  }
+  const attempt1 = await callGroq(apiKey, SYSTEM_PROMPT, userPrompt, 0.95);
+  console.log("[groq] attempt 1:", attempt1.error ?? "OK");
+  if (attempt1.error) errors.push(`attempt1: ${attempt1.error}`);
 
-  if (!narrativeCore) {
-    // Retry: stricter prompt, lower temperature — avoids repeating the same structural mistake
+  if (!attempt1.core) {
     const retryPrompt =
       `Tone: ${profile.tone}. ` +
       USER_PROMPTS[profile.tone] +
       `\nDeveloper stats: ${JSON.stringify(payload)}`;
-    try {
-      narrativeCore = await callGroq(apiKey, SYSTEM_PROMPT_RETRY, retryPrompt, 0.95);
-      console.log("[groq] attempt 2 (retry):", narrativeCore ? "OK" : "FAILED");
-    } catch (e) {
-      console.error("[groq] attempt 2 threw:", e);
+    const attempt2 = await callGroq(apiKey, SYSTEM_PROMPT_RETRY, retryPrompt, 0.95);
+    console.log("[groq] attempt 2:", attempt2.error ?? "OK");
+    if (attempt2.error) errors.push(`attempt2: ${attempt2.error}`);
+
+    if (!attempt2.core) {
+      const fb = fallbackOutput(profile);
+      return { ...fb, _debug: errors.join(" | ") };
     }
+    return { ...attempt2.core, generatedAt: new Date().toISOString() };
   }
 
-  if (!narrativeCore) return fallbackOutput(profile);
-
-  return { ...narrativeCore, generatedAt: new Date().toISOString() };
+  return { ...attempt1.core, generatedAt: new Date().toISOString() };
 }

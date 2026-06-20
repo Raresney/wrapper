@@ -26,12 +26,14 @@ export default function ShareModal({
   slideRef,
   username,
   slideTitle,
+  worldCup = false,
 }: {
   open: boolean;
   onClose: () => void;
   slideRef: RefObject<HTMLDivElement | null>;
   username: string;
   slideTitle: string;
+  worldCup?: boolean;
 }) {
   const [scope, setScope] = useState<Scope>("card");
   const [busy, setBusy] = useState(false);
@@ -55,7 +57,9 @@ export default function ShareModal({
   }, []);
 
   const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNavigator).canShare === "function";
-  const caption = `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GitHubWrapped`;
+  const caption = worldCup
+    ? `@${username} at the World Cup ⚽🐾 #WorldCup #GitHubWrapped`
+    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GitHubWrapped`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {

@@ -265,6 +265,7 @@ export type NarrativeOutput = {
   shareCaption: string;
   generatedAt: string;
   isFallback?: boolean;
+  _debug?: string;
 };
 
 export type WrappedProfile = {

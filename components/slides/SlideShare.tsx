@@ -290,7 +290,7 @@ function renderCompanion(primary: ArchetypeId, a: string, b: string): React.Reac
   }
 }
 
-function Planet({ spec }: { spec: PlanetSpec }) {
+function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
   const { palette, username, primary, secondary, planetType } = spec;
   const rng = makeRng(hashString(`${username}-${primary}-${secondary ?? "none"}-${spec.topLanguage}`));
   // Short stable ID for SVG gradient/filter IDs (avoids collisions if multiple planets render)
@@ -552,6 +552,9 @@ function Planet({ spec }: { spec: PlanetSpec }) {
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
         <p className="text-xs uppercase tracking-[0.3em]" style={{ color: palette.a, opacity: 0.8 }}>{planetType}</p>
         <p className="mt-1 text-lg italic text-zinc-200" style={{ fontFamily: "serif" }}>{username}</p>
+        {caption && (
+          <p className="mt-2 text-xs leading-snug text-zinc-400 max-w-[280px] mx-auto">{caption}</p>
+        )}
       </motion.div>
     </div>
   );
@@ -612,8 +615,9 @@ export default function SlideShare({
 
   const roastLine = profile.narrative?.roastLine ?? fallback.roastLine;
   const narrativeText = profile.narrative?.archetypeDescription ?? fallback.archetypeDescription;
+  const shareCaption = profile.narrative?.shareCaption ?? fallback.shareCaption;
 
-  const badgesEarned = flat.traitBadges.slice(0, 5);
+  const badgesEarned = flat.traitBadges.slice(0, 6);
 
   const startOver = () => {
     try { sessionStorage.removeItem("wrappedProfile"); } catch {}
@@ -655,10 +659,20 @@ export default function SlideShare({
                   <img src={flat.avatarUrl} alt={flat.username} className="h-full w-full object-cover" />
                 ) : flat.username.slice(0, 2).toUpperCase()}
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Your Planet</p>
                 <p className="text-base font-bold text-zinc-100">@{flat.username}</p>
               </div>
+              {profile.narrative && (
+                <div
+                  title={profile.narrative.isFallback ? "Fallback narrative" : "AI narrative"}
+                  className="h-2 w-2 rounded-full flex-shrink-0"
+                  style={{
+                    background: profile.narrative.isFallback ? "#ef4444" : "#22c55e",
+                    boxShadow: profile.narrative.isFallback ? "0 0 6px #ef4444" : "0 0 6px #22c55e",
+                  }}
+                />
+              )}
             </div>
             <h1 className="mt-3 font-extrabold leading-tight"
               style={{ fontSize: 28, background: `linear-gradient(90deg, ${palette.b}, ${palette.a})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-0.02em" }}>
@@ -705,7 +719,7 @@ export default function SlideShare({
         {/* RIGHT — planet */}
         <motion.div className="relative hidden lg:block" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.8 }}>
           <PlanetStage>
-            <Planet spec={planetSpec} />
+            <Planet spec={planetSpec} caption={shareCaption} />
           </PlanetStage>
         </motion.div>
       </div>

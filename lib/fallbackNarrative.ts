@@ -540,16 +540,166 @@ function archetypeDescTier(weight: number): keyof DescPool {
   return "lo";
 }
 
+// ── Archetype-specific intro vibe lines ──────────────────────────────────────
+const ARCH_INTRO: Record<ArchetypeId, ((t: T) => string)[]> = {
+  foundry: [
+    (t) => `${t.repos} repos, ${t.commits} commits, and a pace that didn't ask anyone's permission.`,
+    (t) => `The forge ran hot all of ${t.period}: ${t.commits} commits built, ${t.repos} repos shipped.`,
+    (t) => `${t.period}: ${t.lang}, ${t.repos} repos, ${t.commits} commits. The Foundry never cooled down.`,
+  ],
+  afterglow: [
+    (t) => `${t.nightPct}% of the work happened after dark. The rest was just warm-up.`,
+    (t) => `Welcome to the Afterglow era — ${t.commits} commits, peak at ${t.peak}, sleep schedule: pending.`,
+    (t) => `${t.period} ran on late nights and ${t.lang}. The timestamps don't lie.`,
+  ],
+  trail_mapper: [
+    (t) => `${t.repos} repos, ${t.commits} commits, and not one direction that lasted the whole year.`,
+    (t) => `Welcome to the trail: ${t.repos} repos charted, ${t.commits} commits dropped, ${t.lang} leading.`,
+    (t) => `${t.period} looked like exploration. It was. ${t.repos} repos prove it.`,
+  ],
+  cartographer: [
+    (t) => `${t.repo} got everything. ${t.commits} commits. One map, one focus, no detours.`,
+    (t) => `Welcome to the deep end of ${t.repo} — ${t.commits} commits, ${t.lang}, full attention.`,
+    (t) => `${t.period}: mostly ${t.repo}, mostly ${t.lang}. The focus was the whole point.`,
+  ],
+  silent_current: [
+    (t) => `${t.commits} commits across ${t.period}, arriving exactly when they needed to.`,
+    (t) => `Welcome to the current — quiet for a reason, ${t.commits} commits deep.`,
+    (t) => `${t.period} ran on its own schedule. The log caught up eventually.`,
+  ],
+  signal_booster: [
+    (t) => `${t.commits} commits, ${t.prs} PRs merged. The signal left your machine and kept going.`,
+    (t) => `Welcome to the amplified run — ${t.commits} commits, ${t.prs} PRs, reach beyond the source.`,
+    (t) => `${t.period}: the work traveled. ${t.prs} merged PRs is the receipt.`,
+  ],
+  anvil: [
+    (t) => `${t.streak} days in a row. ${t.commits} commits. This era didn't believe in rest days.`,
+    (t) => `Welcome to the streak — ${t.streak} days at the longest, ${t.commits} commits as proof.`,
+    (t) => `${t.period}: one unbroken run. ${t.streak} days, ${t.commits} commits, no exceptions.`,
+  ],
+  chaos_pilot: [
+    (t) => `${t.repos} repos, ${t.commits} commits, and a flight plan nobody else would recognize.`,
+    (t) => `Welcome to the cockpit: ${t.repos} repos spinning, ${t.commits} commits launched, ${t.lang} technically winning.`,
+    (t) => `${t.period} went everywhere at once. ${t.repos} repos is the evidence.`,
+  ],
+  flashpoint: [
+    (t) => `Something clicked in ${t.period}. ${t.streak} days and ${t.commits} commits later, it's still going.`,
+    (t) => `Welcome to the acceleration — ${t.commits} commits trending up and a ${t.streak}-day streak that hit hard.`,
+    (t) => `${t.period} started quiet and ended loud. The trajectory is right there in the data.`,
+  ],
+  constellation_weaver: [
+    (t) => `${t.commits} commits, ${t.prs} PRs merged. The work didn't stay local — it connected.`,
+    (t) => `Welcome to the woven run — ${t.commits} commits, ${t.prs} PRs, and a network that kept growing.`,
+    (t) => `${t.period}: ${t.prs} PRs merged. You built with people, not just for them.`,
+  ],
+  caretaker: [
+    (t) => `${t.repo} got better. ${t.commits} commits as proof. That's the whole story.`,
+    (t) => `Welcome to the maintenance era — ${t.repo}, ${t.commits} commits, and a log full of things made right.`,
+    (t) => `${t.period}: the kind of work that makes ${t.repo} proud. ${t.commits} commits, carefully placed.`,
+  ],
+  deep_diver: [
+    (t) => `${t.lang}, ${t.commits} commits, one direction. The dive was the destination.`,
+    (t) => `Welcome to the deep end of ${t.lang} — ${t.commits} commits and a distribution that barely noticed anything else.`,
+    (t) => `${t.period}: ${t.lang} ran everything. ${t.commits} commits say you had no reason to look elsewhere.`,
+  ],
+  archive_keeper: [
+    (t) => `${t.repos} repos, ${t.commits} commits, and an account that's been building longer than most.`,
+    (t) => `Welcome to the archive — ${t.commits} commits, ${t.repos} repos, and a timeline with real depth behind it.`,
+    (t) => `${t.period} built on everything before it. ${t.repos} repos, ${t.streak} days at the best streak.`,
+  ],
+  lone_orbit: [
+    (t) => `${t.commits} commits, ${t.repos} repos, ${t.prs} PRs. The work stayed close and the results speak anyway.`,
+    (t) => `Welcome to the orbit — ${t.commits} commits, mostly your own repos, mostly on your own terms.`,
+    (t) => `${t.period}: self-directed and complete. ${t.commits} commits, ${t.prs} PRs merged, by choice.`,
+  ],
+};
+
+// ── Archetype-specific share captions ────────────────────────────────────────
+const ARCH_CAPTION: Record<ArchetypeId, ((t: T) => string)[]> = {
+  foundry: [
+    (t) => `@${t.name}: ${t.repos} repos, ${t.commits} commits. The Foundry never closed. #GitHubWrapped`,
+    (t) => `${t.lang} + ${t.repos} repos + ${t.commits} commits = The Foundry. That's the whole equation.`,
+    (t) => `${t.commits} commits. ${t.repos} repos. No days off. #GitHubWrapped`,
+  ],
+  afterglow: [
+    (t) => `@${t.name}: ${t.nightPct}% nocturnal, ${t.commits} commits, peak at ${t.peak}. The Afterglow doesn't sleep. #GitHubWrapped`,
+    (t) => `${t.commits} commits and a ${t.peak} bedtime. The Afterglow is real.`,
+    (t) => `Peak at ${t.peak}, ${t.nightPct}% after dark, ${t.commits} commits shipped. Classic Afterglow. #GitHubWrapped`,
+  ],
+  trail_mapper: [
+    (t) => `@${t.name}: ${t.repos} repos, ${t.commits} commits, ${t.lang}. The trail goes further than the map. #GitHubWrapped`,
+    (t) => `${t.lang} leads, ${t.repos} repos follow, ${t.commits} commits scatter. Trail Mapper behavior.`,
+    (t) => `${t.commits} commits, ${t.repos} repos, and a different horizon every month. #GitHubWrapped`,
+  ],
+  cartographer: [
+    (t) => `@${t.name}: ${t.commits} commits, mostly ${t.repo}, mostly ${t.lang}. One map. One direction. #GitHubWrapped`,
+    (t) => `${t.repo} got the focus. ${t.commits} commits confirm it. #GitHubWrapped`,
+    (t) => `${t.lang} + ${t.repo} + ${t.commits} commits. The Cartographer doesn't wander. #GitHubWrapped`,
+  ],
+  silent_current: [
+    (t) => `@${t.name}: ${t.commits} commits, ${t.curStreak} days current streak. Quiet isn't absence. #GitHubWrapped`,
+    (t) => `${t.commits} commits on a schedule nobody else set. Silent Current energy.`,
+    (t) => `${t.period}: ${t.commits} commits, arriving exactly when they needed to. #GitHubWrapped`,
+  ],
+  signal_booster: [
+    (t) => `@${t.name}: ${t.commits} commits, ${t.prs} PRs merged. The signal traveled. #GitHubWrapped`,
+    (t) => `${t.prs} PRs merged and the reach kept going. Signal Booster behavior. #GitHubWrapped`,
+    (t) => `${t.commits} commits, ${t.prs} PRs, and a presence that escaped my own repos. #GitHubWrapped`,
+  ],
+  anvil: [
+    (t) => `@${t.name}: ${t.streak} days in a row. ${t.commits} commits. The Anvil doesn't take days off. #GitHubWrapped`,
+    (t) => `${t.streak}-day streak, ${t.commits} commits. Consistency was the whole strategy. #GitHubWrapped`,
+    (t) => `${t.commits} commits, ${t.streak} unbroken days. That's not a habit, that's an identity. #GitHubWrapped`,
+  ],
+  chaos_pilot: [
+    (t) => `@${t.name}: ${t.repos} repos, ${t.commits} commits, and a flight plan nobody else would recognize. #GitHubWrapped`,
+    (t) => `${t.repos} repos, ${t.lang} technically winning, ${t.commits} commits everywhere. Chaos Pilot behavior.`,
+    (t) => `${t.commits} commits, ${t.repos} repos, no particular altitude. #GitHubWrapped`,
+  ],
+  flashpoint: [
+    (t) => `@${t.name}: ${t.commits} commits and a ${t.streak}-day streak that appeared out of nowhere and stuck. #GitHubWrapped`,
+    (t) => `Something clicked. ${t.streak} days, ${t.commits} commits, still accelerating. Flashpoint. #GitHubWrapped`,
+    (t) => `${t.period}: quiet start, loud finish. ${t.commits} commits and a trajectory that's hard to argue with. #GitHubWrapped`,
+  ],
+  constellation_weaver: [
+    (t) => `@${t.name}: ${t.commits} commits, ${t.prs} PRs merged. Built with people, not just for them. #GitHubWrapped`,
+    (t) => `${t.prs} PRs merged and the network kept growing. Constellation Weaver behavior. #GitHubWrapped`,
+    (t) => `${t.commits} commits, ${t.prs} PRs, and a collaboration footprint that didn't stay contained. #GitHubWrapped`,
+  ],
+  caretaker: [
+    (t) => `@${t.name}: ${t.commits} commits on ${t.repo}. Not new features. Better code. #GitHubWrapped`,
+    (t) => `${t.commits} commits and most of them made ${t.repo} better than they found it. Caretaker behavior.`,
+    (t) => `${t.repo} is in good hands. ${t.commits} commits of evidence. #GitHubWrapped`,
+  ],
+  deep_diver: [
+    (t) => `@${t.name}: ${t.commits} commits, almost all of them in ${t.lang}. The Deep Diver goes one direction. #GitHubWrapped`,
+    (t) => `${t.lang}. ${t.commits} commits. One stack. No detours. #GitHubWrapped`,
+    (t) => `${t.commits} commits deep in ${t.lang} and the distribution didn't even notice anything else. #GitHubWrapped`,
+  ],
+  archive_keeper: [
+    (t) => `@${t.name}: ${t.repos} repos, ${t.commits} commits, and an account that's been building longer than most. #GitHubWrapped`,
+    (t) => `${t.commits} commits across a timeline that newer accounts haven't had time to build. Archive Keeper energy.`,
+    (t) => `${t.streak}-day best streak, ${t.repos} repos, ${t.commits} commits. The Archive Keeper keeps receipts. #GitHubWrapped`,
+  ],
+  lone_orbit: [
+    (t) => `@${t.name}: ${t.commits} commits, ${t.prs} PRs. The Lone Orbit ships solo. #GitHubWrapped`,
+    (t) => `${t.commits} commits, ${t.repos} repos, ${t.prs} PRs merged. Self-sufficient by design. #GitHubWrapped`,
+    (t) => `${t.commits} commits on my own terms. ${t.prs} PRs says it all. #GitHubWrapped`,
+  ],
+};
+
 export function buildFallbackNarrative(input: FallbackInput, tone: AiTone): FallbackNarrative {
   const safeTone: AiTone = (["funny", "brutal", "motivational"] as AiTone[]).includes(tone) ? tone : "funny";
   const t = tokens(input);
   const archRoast = ARCH_ROAST[input.archetypeId];
   const archDesc  = ARCH_DESC[input.archetypeId];
+  const archIntro = ARCH_INTRO[input.archetypeId];
+  const archCaption = ARCH_CAPTION[input.archetypeId];
   const tier      = archetypeDescTier(input.primaryWeight);
   return {
-    roastLine:            archRoast ? rand(archRoast)(t)          : rand(ROAST[safeTone])(t),
-    archetypeDescription: archDesc  ? rand(archDesc[tier])(t)     : rand(DESC[safeTone])(t),
-    introVibeLine: rand(INTRO[safeTone])(t),
-    shareCaption:  rand(CAPTION[safeTone])(t),
+    roastLine:            archRoast   ? rand(archRoast)(t)        : rand(ROAST[safeTone])(t),
+    archetypeDescription: archDesc    ? rand(archDesc[tier])(t)   : rand(DESC[safeTone])(t),
+    introVibeLine:        archIntro   ? rand(archIntro)(t)        : rand(INTRO[safeTone])(t),
+    shareCaption:         archCaption ? rand(archCaption)(t)      : rand(CAPTION[safeTone])(t),
   };
 }

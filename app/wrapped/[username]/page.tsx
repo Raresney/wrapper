@@ -165,6 +165,7 @@ export default function WrappedPage() {
       });
       if (!res.ok) return;
       const data = (await res.json()) as WrappedProfile;
+      console.log(`[narrative] source=${data.narrative?.isFallback ? "FALLBACK" : "GROQ"}${data.narrative?._debug ? ` | error: ${data.narrative._debug}` : ""}`);
       setProfile(prev => prev ? { ...prev, narrative: data.narrative } : prev);
     } catch { /* narrative is optional */ }
     finally { setNarrativeLoading(false); }
@@ -371,6 +372,7 @@ export default function WrappedPage() {
         slideRef={slideAreaRef}
         username={profile.user.login}
         slideTitle={SLIDE_TITLES[normalizedSlideState.current]}
+        worldCup={worldCup}
       />
     </div>
   );

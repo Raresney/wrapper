@@ -680,7 +680,7 @@ function HomePageInner() {
             style={{ backdropFilter: "blur(20px) saturate(1.6)" }}
           >
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
-              Pick any period — week, month, year or all time. Get a cinematic recap of your commits, repos, languages and streaks.
+              Connect your GitHub account, then pick any period — week, month, year or all time — for a cinematic recap of your commits, repos, languages and streaks.
             </p>
             {/* auth-dependent row — crossfades between loading / signed-out / signed-in
                 instead of popping, since useSession() briefly reports "loading" right
@@ -846,10 +846,10 @@ function HomePageInner() {
                   Your GitHub activity, decoded into a cinematic recap.
                 </h2>
                 <p className="relative mt-5 text-[14px] leading-relaxed text-zinc-300">
-                  Generate a cinematic recap of your GitHub year for any period. For the most complete
-                  experience, authentication is recommended: the{" "}
-                  <span className="font-semibold text-violet-300">All time</span> mode unlocks once you
-                  connect your GitHub account.
+                  Connect your GitHub account to generate a cinematic recap for any period — week,
+                  month, year or{" "}
+                  <span className="font-semibold text-violet-300">All time</span>. Your access token
+                  stays on the server and is never exposed to the browser.
                 </p>
                 <p className="relative mt-3 text-[13px] leading-relaxed text-zinc-500">
                   Every month we ship a fresh <span className="font-semibold text-zinc-300">visual theme</span>{" "}to keep

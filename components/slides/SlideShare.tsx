@@ -776,7 +776,6 @@ export default function SlideShare({
                 ) : flat.username.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Your Planet</p>
                 <p className="text-base font-bold text-zinc-100">@{flat.username}</p>
                 <p className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</p>
               </div>

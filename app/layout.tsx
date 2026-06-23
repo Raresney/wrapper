@@ -11,9 +11,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://githubwrapped.dev"),
-  title: "GitHub Wrapped",
+  title: "GrindIT",
   description: "Turn your GitHub activity into a shareable developer recap.",
-  applicationName: "GitHub Wrapped",
+  applicationName: "GrindIT",
   icons: {
     icon: [
       { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
@@ -25,14 +25,14 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   openGraph: {
-    title: "GitHub Wrapped",
+    title: "GrindIT",
     description: "Turn your GitHub activity into a shareable developer recap.",
-    images: [{ url: "/logo3.png", width: 1024, height: 1024, alt: "GitHub Wrapped" }],
+    images: [{ url: "/logo3.png", width: 1024, height: 1024, alt: "GrindIT" }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GitHub Wrapped",
+    title: "GrindIT",
     description: "Turn your GitHub activity into a shareable developer recap.",
     images: ["/logo3.png"],
   },

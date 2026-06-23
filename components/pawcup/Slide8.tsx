@@ -94,40 +94,63 @@ export default function Slide8({ profile, speech, speechLoading }: {
             />
 
             <div className="relative p-6 pb-5">
+              {/* GrindIT logo — top right */}
+              <div className="absolute top-5 right-5 pointer-events-none">
+                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  <span style={{ color: award.color, textShadow: `0 0 14px ${award.color}aa` }}>G</span>rind<span style={{ color: award.color, textShadow: `0 0 14px ${award.color}aa` }}>IT</span>
+                </span>
+              </div>
+
               {/* header row */}
-              <div className="flex items-start justify-between">
+              <div>
+                <div
+                  className="text-[9px] font-black tracking-[0.55em] mb-0.5"
+                  style={{ color: `${award.color}99` }}
+                >
+                  WORLD CUP 2026
+                </div>
+                <div
+                  className="text-[11px] font-semibold tracking-[0.22em]"
+                  style={{ color: `${award.color}77` }}
+                >
+                  INDIVIDUAL AWARD
+                </div>
+                {/* LLM status LED */}
+                {!speechLoading && (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <div
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{
+                        background: speech ? "#4ade80" : "#f87171",
+                        boxShadow: speech ? "0 0 6px #4ade80" : "0 0 6px #f87171",
+                      }}
+                    />
+                    <span className="text-[8px] tracking-[0.2em] text-white/30">
+                      {speech ? "LLM" : "FALLBACK"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* award name + badge aligned */}
+              <div className="mt-4 flex items-center justify-between gap-3">
                 <div>
                   <div
-                    className="text-[9px] font-black tracking-[0.55em] mb-0.5"
-                    style={{ color: `${award.color}99` }}
+                    className="text-[30px] font-black leading-none tracking-tight"
+                    style={{
+                      color: award.color,
+                      textShadow: `0 0 40px ${award.glow}`,
+                    }}
                   >
-                    WORLD CUP 2026
+                    {award.name}
                   </div>
-                  <div
-                    className="text-[11px] font-semibold tracking-[0.22em]"
-                    style={{ color: `${award.color}77` }}
-                  >
-                    INDIVIDUAL AWARD
+                  <div className="mt-1 text-[11px] font-semibold tracking-[0.25em] text-white/50 uppercase">
+                    {award.subtitle}
                   </div>
-                  {/* LLM status LED */}
-                  {!speechLoading && (
-                    <div className="mt-1.5 flex items-center gap-1.5">
-                      <div
-                        className="h-1.5 w-1.5 rounded-full"
-                        style={{
-                          background: speech ? "#4ade80" : "#f87171",
-                          boxShadow: speech ? "0 0 6px #4ade80" : "0 0 6px #f87171",
-                        }}
-                      />
-                      <span className="text-[8px] tracking-[0.2em] text-white/30">
-                        {speech ? "LLM" : "FALLBACK"}
-                      </span>
-                    </div>
-                  )}
                 </div>
-                {/* award icon */}
+                {/* award icon — aligned with title */}
                 <div
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl"
+                  className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl"
                   style={{
                     background: `${award.color}18`,
                     border: `1px solid ${award.border}`,
@@ -136,22 +159,6 @@ export default function Slide8({ profile, speech, speechLoading }: {
                   }}
                 >
                   <AwardIcon id={award.id} className="h-8 w-8" />
-                </div>
-              </div>
-
-              {/* award name */}
-              <div className="mt-4">
-                <div
-                  className="text-[30px] font-black leading-none tracking-tight"
-                  style={{
-                    color: award.color,
-                    textShadow: `0 0 40px ${award.glow}`,
-                  }}
-                >
-                  {award.name}
-                </div>
-                <div className="mt-1 text-[11px] font-semibold tracking-[0.25em] text-white/50 uppercase">
-                  {award.subtitle}
                 </div>
               </div>
 

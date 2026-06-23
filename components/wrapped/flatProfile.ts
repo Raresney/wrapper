@@ -320,3 +320,29 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     traitBadgesTotal: BADGE_COUNT,
   };
 }
+
+export function formatGitHubAge(githubAgeDays: number): string {
+  if (githubAgeDays < 30) {
+    return `${githubAgeDays} day${githubAgeDays !== 1 ? "s" : ""}`;
+  }
+  if (githubAgeDays < 365) {
+    const months = Math.round(githubAgeDays / 30.4);
+    return `${months} month${months !== 1 ? "s" : ""}`;
+  }
+  const years = githubAgeDays / 365;
+  const rounded = Math.round(years * 10) / 10;
+  if (rounded % 1 === 0) {
+    return rounded === 1 ? "1 year" : `${rounded} years`;
+  }
+  return `${rounded} years`;
+}
+
+export function formatWrappedLabel(type: string): string {
+  switch (type) {
+    case "week":    return "Weekly Wrapped";
+    case "month":   return "Monthly Wrapped";
+    case "year":    return "Yearly Wrapped";
+    case "alltime": return "All-Time Wrapped";
+    default:        return "Wrapped";
+  }
+}

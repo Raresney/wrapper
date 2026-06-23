@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE7_TAIL_NODES } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
@@ -113,6 +113,8 @@ function StatItem({ label, value }: { label: string; value: number }) {
 
 export default function SlideArchetype({ profile, sparse = false }: { profile: WrappedProfile; sparse?: boolean }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
   const badges = flat.traitBadges.slice(0, 6);
   const topBadgeId = badges[0]?.id;
   const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
@@ -159,13 +161,18 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
             <MobilePlanet color="#a855f7" />
           </div>
           <SlideCard accentColor={ACCENT}>
+            <div className="absolute top-4 right-4 z-20 pointer-events-none">
+              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
+              </span>
+            </div>
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}
                 alt={flat.username} className="h-10 w-10 rounded-full border border-white/10 bg-white/5" width={40} height={40} />
               <div className="min-w-0">
                 <div className="truncate text-base font-bold">@{flat.username}</div>
-                <div className="text-[10px] text-white/55">{flat.period.label} · Wrapped</div>
+                <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
               </div>
             </div>
             <div className="mt-3 flex">

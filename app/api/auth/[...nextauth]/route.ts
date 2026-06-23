@@ -8,9 +8,8 @@ const handler = NextAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       authorization: {
         params: {
-          // Least privilege: only public profile data is needed to compute
-          // Wrapped stats. NEVER request `repo` (full private read/write).
-          scope: "read:user",
+            // read:user — profile data; repo — private repos, PRs, issues, contributions; read:org — org repos and membership
+          scope: "read:user repo read:org",
         },
       },
     }),

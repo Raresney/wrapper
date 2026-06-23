@@ -318,8 +318,8 @@ function Nav() {
                 <CommitNodes />
               </div>
             </div>
-            <span className="text-[13px] font-semibold tracking-[-0.01em] text-white/90">
-              wrapped<span style={{ color: "var(--violet-glow)" }}>.dev</span>
+            <span className="text-[22px] font-black tracking-tight" style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 0 24px rgba(139,92,246,0.35)" }}>
+              <span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>G</span>rind<span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>IT</span>
             </span>
           </Link>
           {/* center: tagline — absolutely positioned so it's truly centered */}

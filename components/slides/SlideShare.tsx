@@ -351,26 +351,36 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
     <div className="relative flex flex-col items-center">
 
       {/* ── archetype companion ── */}
-      <div className="pointer-events-none absolute z-10" style={{ top: 18, right: -36 }}>
+      <div className="pointer-events-none absolute z-30" style={{ top: 18, right: 8 }}>
         {renderCompanion(primary, palette.a, palette.b)}
       </div>
 
-      {/* ── orbit trail ── */}
-      <motion.div className="absolute flex items-center justify-center"
-        style={{ width: 360, height: 360, top: 0, left: 0 }}
-        animate={{ rotate: 360 }} transition={{ duration: 42, repeat: Infinity, ease: "linear" }}>
+      {/* ── orbit trail ──
+           Planet is 300×300, center at (parent_center_x, 150px from top).
+           Orbit container: 360×360, shifted so its center aligns with planet center. ── */}
+      <motion.div
+        style={{ position: "absolute", width: 360, height: 360, top: 150 - 180, left: "50%", marginLeft: -180, zIndex: 20 }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 42, repeat: Infinity, ease: "linear" }}>
         {Array.from({ length: orbitCount }).map((_, i) => {
           const angle = (i / orbitCount) * Math.PI * 2;
-          const r = 192 + (i % 3) * 9;
+          const r = 165 + (i % 3) * 6;
+          const size = i % 5 === 0 ? 5 : 3;
           return (
             <span key={i} className="absolute rounded-full"
-              style={{ width: i % 5 === 0 ? 5 : 3, height: i % 5 === 0 ? 5 : 3, background: i % 3 === 0 ? palette.b : palette.a, boxShadow: `0 0 7px ${palette.glow}`, transform: `translate(${Math.cos(angle) * r}px, ${Math.sin(angle) * r}px)` }} />
+              style={{
+                width: size, height: size,
+                top: 180 - size / 2 + Math.sin(angle) * r,
+                left: 180 - size / 2 + Math.cos(angle) * r,
+                background: i % 3 === 0 ? palette.b : palette.a,
+                boxShadow: `0 0 7px ${palette.glow}`,
+              }} />
           );
         })}
       </motion.div>
 
       {/* ── planet ── */}
-      <div className="relative overflow-hidden rounded-full" style={{ width: 360, height: 360 }}>
+      <div className="relative overflow-hidden rounded-full" style={{ width: 300, height: 300 }}>
 
         {/* sphere: slowly rotates so surface features drift */}
         <motion.div className="relative h-full w-full overflow-hidden rounded-full"
@@ -548,7 +558,7 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
 
       </div>
 
-      <motion.div className="mx-auto mt-8 w-[min(300px,82%)]"
+      <motion.div className="mx-auto mt-8 w-[min(360px,90%)]"
         initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, ease: [0.22, 1, 0.36, 1] }}>
         <div className="relative rounded-2xl border px-5 py-3 text-center backdrop-blur-sm"
           style={{
@@ -677,7 +687,7 @@ export default function SlideShare({
             <ChapterHeadingMobile n={8} title="Your Planet" />
             <MobilePlanet color={palette.a} />
           </div>
-          <SlideCard ref={cardRef} accentColor={palette.a}>
+          <SlideCard ref={cardRef} accentColor={palette.a} sizeStyle={{ width: "min(405px, 92vw)", height: "min(610px, 85vh)" }}>
             {/* collectible edition strip */}
             <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2.5">
               <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-zinc-500">★ Wrapped · {flat.period.label}</span>

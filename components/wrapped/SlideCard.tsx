@@ -4,8 +4,8 @@ import React from "react";
 
 type SlideCardProps = {
   accentColor: string;
-  /** Extra classes applied to the outer card div (use for sizing: h-[Npx] w-full etc.) */
   className?: string;
+  sizeStyle?: { width?: string; height?: string };
   children: React.ReactNode;
 };
 
@@ -17,7 +17,7 @@ type SlideCardProps = {
  * Content scrolls inside the card.
  */
 export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
-  function SlideCard({ accentColor, className = "", children }, ref) {
+  function SlideCard({ accentColor, className = "", sizeStyle, children }, ref) {
     return (
       <div
         ref={ref}
@@ -25,6 +25,8 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
         data-accent={accentColor}
         className={`relative flex flex-col overflow-hidden rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(380px,92vw)] h-[min(580px,84vh)] ${className}`}
         style={{
+          ...(sizeStyle?.width  && { width:  sizeStyle.width }),
+          ...(sizeStyle?.height && { height: sizeStyle.height }),
           background: "rgba(7, 4, 22, 0.95)",
           backdropFilter: "blur(28px) saturate(1.8)",
           WebkitBackdropFilter: "blur(28px) saturate(1.8)",

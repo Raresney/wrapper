@@ -231,10 +231,14 @@ function getFallback(awardName: string, username: string, keyStat: string): stri
 
 // ── Validation ────────────────────────────────────────────────────────────────
 
+const WC_PRIMARY_MODEL  = "llama-3.3-70b-versatile";
+const WC_FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL ?? "llama-3.1-8b-instant";
+
 async function callWcGroq(
   apiKey: string,
   systemPrompt: string,
   userPrompt: string,
+  model = WC_PRIMARY_MODEL,
 ): Promise<string | null> {
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -245,7 +249,7 @@ async function callWcGroq(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model,
         max_tokens: 200,
         temperature: 0.95,
         top_p: 0.9,
@@ -315,7 +319,8 @@ export async function POST(request: NextRequest) {
   const awardSubtitle = clean(body.awardSubtitle, 80);
   const keyStat       = clean(body.keyStat, 40);
   const speechHint    = clean(body.speechHint, 200);
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey         = process.env.GROQ_API_KEY;
+  const fallbackApiKey = process.env.GROQ_FALLBACK_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json(
@@ -367,6 +372,11 @@ export async function POST(request: NextRequest) {
       `Strict retry: keep it ceremonial, concrete, and valid on the first try.`;
     speech = await callWcGroq(apiKey, retrySystemPrompt, retryUserPrompt);
     console.log("[wc-prize] attempt 2 (retry):", speech ? "OK" : "FAILED");
+  }
+
+  if (!speech && fallbackApiKey) {
+    speech = await callWcGroq(fallbackApiKey, systemPrompt, userPrompt, WC_FALLBACK_MODEL);
+    console.log("[wc-prize] attempt 3 (fallback model):", speech ? "OK" : "FAILED");
   }
 
   return NextResponse.json(

@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { PlanetStage, SlideShell, MobilePlanet, Rocket } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
@@ -168,7 +168,7 @@ function StatBox({ label, value, accent }: { label: string; value: number | stri
   );
 }
 
-function ProfileCard({ flat }: { flat: Flat }) {
+function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: string; wrappedLabel: string }) {
   const maxRepo = Math.max(...flat.topRepos.map((r) => r.commits), 1);
   return (
     <motion.div
@@ -178,6 +178,11 @@ function ProfileCard({ flat }: { flat: Flat }) {
       className="relative mt-0 w-full max-w-[380px] text-white"
     >
       <SlideCard accentColor={ACCENT}>
+        <div className="absolute top-4 right-4 z-20 pointer-events-none">
+          <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
+          </span>
+        </div>
         <motion.div variants={cardItem} className="flex items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -187,15 +192,8 @@ function ProfileCard({ flat }: { flat: Flat }) {
             style={{ borderColor: `${ACCENT}80` }}
           />
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: `${ACCENT}80` }}>
-              Commander
-            </div>
             <div className="text-base font-bold">@{flat.username}</div>
-            {flat.githubAgeYears > 0 && (
-              <div className="text-[10px] text-white/35">
-                {flat.githubAgeYears === 1 ? "1 year on GitHub" : `${flat.githubAgeYears} years on GitHub`}
-              </div>
-            )}
+            <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
           </div>
         </motion.div>
 
@@ -339,6 +337,8 @@ function TransmissionLine({ message }: { message: string }) {
 // ── Slide ──────────────────────────────────────────────────────────────────
 export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
 
   const introVibeLine = useMemo(() => {
     const nightRatio = flat.totalCommits > 0 ? flat.nightCommits / flat.totalCommits : 0;
@@ -394,7 +394,7 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
           <Rocket />
         </div>
       }
-      center={<ProfileCard flat={cardFlat} />}
+      center={<ProfileCard flat={cardFlat} ageLabel={ageLabel} wrappedLabel={wrappedLabel} />}
       right={
         <>
           <PlanetStage className="scale-[0.82] -translate-y-12 lg:-translate-x-8">

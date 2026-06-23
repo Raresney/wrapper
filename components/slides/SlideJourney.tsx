@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -170,6 +170,8 @@ function formatShortDate(dateStr: string): string {
 
 export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
   const heatmap = flat.commitsByMonth;
   const loc = flat.totalLinesOfCode;
   const trendLabel = flat.growth.trend === "up" ? `▲ +${flat.growth.deltaPercent}%` : flat.growth.trend === "down" ? `▼ ${flat.growth.deltaPercent}%` : "▬ steady";
@@ -197,13 +199,18 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
             className="w-[min(380px,92vw)]">
             <SlideCard accentColor={ACCENT} className="text-white">
+            <div className="absolute top-4 right-4 z-20 pointer-events-none">
+              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
+              </span>
+            </div>
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}
                 alt={flat.username} className="h-10 w-10 rounded-full border border-white/10 bg-white/5" width={40} height={40} />
               <div className="min-w-0 flex-1">
                 <div className="truncate text-base font-bold text-white">@{flat.username}</div>
-                <div className="text-[10px] text-white/50">{flat.period.label}</div>
+                <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
               </div>
             </div>
             <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">

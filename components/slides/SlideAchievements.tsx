@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE6_TAIL_NODES } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
@@ -50,6 +50,8 @@ function StarRating({ count }: { count: number }) {
 
 export default function SlideAchievements({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
   const unlocked = flat.achievementsUnlocked;
   const locked = flat.achievementsLocked;
   const hasUnlocked = unlocked.length > 0;
@@ -95,12 +97,17 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
             <MobilePlanet color="#ec4899" />
           </div>
           <SlideCard accentColor={ACCENT}>
+            <div className="absolute top-4 right-4 z-20 pointer-events-none">
+              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
+              </span>
+            </div>
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || avatarUrl(flat.username)} alt={`@${flat.username}`} className="size-10 rounded-full border border-white/10 bg-white/5" width={40} height={40} />
               <div className="min-w-0">
                 <div className="truncate text-base font-bold">@{flat.username}</div>
-                <div className="text-[10px] text-white/50">{flat.period.label} · Cat Crew</div>
+                <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}

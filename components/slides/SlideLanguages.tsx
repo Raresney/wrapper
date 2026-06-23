@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -234,6 +234,8 @@ function LanguagePlanet({ langs }: { langs: { name: string; color: string; perce
 
 export default function SlideLanguages({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
   const langs = flat.topLanguages.slice(0, 5);
   const topLang = langs[0];
   const hasLangs = langs.length > 0;
@@ -263,6 +265,11 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
           <motion.div variants={stagger} initial="hidden" animate="show"
             className="w-[min(380px,92vw)]">
             <SlideCard accentColor={ACCENT} className="text-white">
+              <div className="absolute top-4 right-4 z-20 pointer-events-none">
+                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
+                </span>
+              </div>
               <motion.div variants={item} className="flex items-center gap-3">
                 <div className="rounded-full flex-shrink-0 overflow-hidden"
                   style={{ width: 40, height: 40, background: flat.avatarUrl ? `url(${flat.avatarUrl}) center/cover` : "linear-gradient(135deg, #6366f1, #a855f7)", border: `1px solid ${ACCENT}40` }}>
@@ -270,7 +277,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
                 </div>
                 <div className="min-w-0">
                   <div className="text-white font-bold text-base truncate">@{flat.username}</div>
-                  <div className="text-[10px]" style={{ color: `${ACCENT}60` }}>{flat.period.label}</div>
+                  <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
                 </div>
               </motion.div>
 

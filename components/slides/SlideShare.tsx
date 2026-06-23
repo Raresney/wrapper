@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useRef, useMemo, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
@@ -305,6 +305,30 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
   const isExplorer   = primary === "trail_mapper" || primary === "chaos_pilot" || spec.explorerScore >= 50;
   const isVeteran    = primary === "archive_keeper" || spec.totalRepos >= 25 || spec.totalCommits >= 2500;
 
+  // ── archetype visual identity ──────────────────────────────────────────────
+  const archLabel: Record<string, string> = {
+    constellation_weaver: "Network Architect", foundry: "Core Builder",
+    afterglow: "Night Architect", anvil: "Power Forger",
+    cartographer: "Deep Mapper", deep_diver: "Domain Expert",
+    flashpoint: "Growth Engine", trail_mapper: "Explorer", chaos_pilot: "Chaos Pilot",
+    archive_keeper: "Veteran Guardian", lone_orbit: "Solo Satellite",
+    silent_current: "Silent Force", signal_booster: "Signal Amplifier",
+    caretaker: "Ecosystem Guard",
+  };
+  const archColor = isNocturnal ? "#818cf8"
+    : isCollab     ? "#fbbf24"
+    : isHighOutput ? "#f87171"
+    : isFocused    ? "#22d3ee"
+    : isGrowth     ? "#4ade80"
+    : isExplorer   ? "#c084fc"
+    : isVeteran    ? "#fb923c"
+    : primary === "signal_booster" ? "#f59e0b"
+    : primary === "silent_current" ? "#7dd3fc"
+    : primary === "caretaker"      ? "#86efac"
+    : primary === "lone_orbit"     ? "#bae6fd"
+    : palette.a;
+  const auraDuration = isNocturnal ? 4.0 : isHighOutput ? 2.6 : isGrowth ? 3.2 : 5.5;
+
   // ── orbital config ─────────────────────────────────────────────────────────
   const ringed     = primary !== "lone_orbit" && (spec.totalRepos >= 15 || isCollab || isFocused);
   const orbitCount = Math.min(13, 4 + Math.floor(spec.totalCommits / 350) + Math.floor(spec.mergedPrs / 8));
@@ -350,14 +374,58 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
   return (
     <div className="relative flex flex-col items-center">
 
-      {/* ── archetype companion ── */}
+      {/* ── archetype companion — with soft glow backdrop ── */}
       <div className="pointer-events-none absolute z-30" style={{ top: 18, right: 8 }}>
-        {renderCompanion(primary, palette.a, palette.b)}
+        <div className="relative inline-block">
+          <div className="pointer-events-none absolute inset-0 -m-3 rounded-full"
+            style={{ background: `radial-gradient(circle, ${archColor}40 0%, transparent 70%)`, filter: "blur(8px)" }} />
+          {renderCompanion(primary, palette.a, palette.b)}
+        </div>
       </div>
 
-      {/* ── orbit trail ──
-           Planet is 300×300, center at (parent_center_x, 150px from top).
-           Orbit container: 360×360, shifted so its center aligns with planet center. ── */}
+      {/* ── archetype aura — large radial halo behind planet ── */}
+      <motion.div
+        className="pointer-events-none absolute rounded-full"
+        style={{
+          width: 480, height: 480,
+          top: 150 - 240, left: "50%", marginLeft: -240,
+          zIndex: 4,
+          background: `radial-gradient(circle, ${archColor}22 0%, ${archColor}0c 42%, transparent 68%)`,
+        }}
+        animate={{
+          scale: isHighOutput ? [1, 1.09, 1] : [1, 1.04, 1],
+          opacity: isNocturnal ? [0.7, 1.0, 0.7] : [0.55, 0.9, 0.55],
+        }}
+        transition={{ duration: auraDuration, repeat: Infinity, ease: "easeInOut" }} />
+
+      {/* ── orbital ring traces — faint dashed arcs showing orbit paths ── */}
+      <div className="pointer-events-none absolute" style={{ width: 360, height: 360, top: 150 - 180, left: "50%", marginLeft: -180, zIndex: 10 }}>
+        <svg viewBox="0 0 360 360" className="h-full w-full" style={{ overflow: "visible" }}>
+          {[165, 171, 177].map((r, i) => (
+            <circle key={i} cx="180" cy="180" r={r}
+              fill="none"
+              stroke={i % 2 === 0 ? palette.a : palette.b}
+              strokeWidth={0.8 - i * 0.2}
+              strokeDasharray={i === 0 ? "3 10" : `2 ${14 + i * 5}`}
+              opacity={0.24 - i * 0.06} />
+          ))}
+        </svg>
+      </div>
+
+      {/* ── atmospheric pulse ring — breathing corona just outside planet ── */}
+      <motion.div
+        className="pointer-events-none absolute rounded-full"
+        style={{
+          width: 316, height: 316,
+          top: 150 - 158, left: "50%", marginLeft: -158,
+          zIndex: 12,
+          border: `1px solid ${archColor}`,
+          boxShadow: `0 0 20px ${archColor}55, 0 0 44px ${archColor}22`,
+        }}
+        animate={{ scale: [1, 1.038, 1], opacity: [0.52, 0.14, 0.52] }}
+        transition={{ duration: auraDuration * 0.78, repeat: Infinity, ease: "easeInOut" }} />
+
+      {/* ── orbit trail (rotating dot ring) ── */}
       <motion.div
         style={{ position: "absolute", width: 360, height: 360, top: 150 - 180, left: "50%", marginLeft: -180, zIndex: 20 }}
         animate={{ rotate: 360 }}
@@ -379,201 +447,205 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
         })}
       </motion.div>
 
-      {/* ── planet ── */}
-      <div className="relative overflow-hidden rounded-full" style={{ width: 300, height: 300 }}>
+      {/* ── planet — spring entry animation ── */}
+      <motion.div
+        initial={{ scale: 0.82, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+        style={{ position: "relative", zIndex: 15 }}>
+        <div className="relative overflow-hidden rounded-full" style={{ width: 300, height: 300 }}>
 
-        {/* sphere: slowly rotates so surface features drift */}
-        <motion.div className="relative h-full w-full overflow-hidden rounded-full"
-          style={{
-            background: `radial-gradient(circle at 32% 28%, ${palette.b}ee, ${palette.a} 52%, rgba(0,0,0,0.98) 108%)`,
-            boxShadow: `0 0 64px ${palette.glow}, inset -42px -32px 80px rgba(0,0,0,0.78), inset 24px 22px 60px ${palette.glow}42`,
-          }}
-          animate={{ rotate: 360 }} transition={{ duration: 110, repeat: Infinity, ease: "linear" }}>
-
-          <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full">
-            <defs>
-              {/* soft blur for terrain + atmospheric blobs */}
-              <filter id={`${uid}-soft`}><feGaussianBlur stdDeviation="5.5" /></filter>
-              <filter id={`${uid}-med`}><feGaussianBlur stdDeviation="2.5" /></filter>
-              {/* terrain fill: light at top-left, fades at edges */}
-              <radialGradient id={`${uid}-tg`} cx="36%" cy="28%" r="72%">
-                <stop offset="0%" stopColor={palette.b} stopOpacity="0.58" />
-                <stop offset="100%" stopColor={palette.a} stopOpacity="0.05" />
-              </radialGradient>
-              {/* atmosphere rim: thin coloured glow at sphere edge */}
-              <radialGradient id={`${uid}-rim`} cx="50%" cy="50%" r="50%">
-                <stop offset="66%" stopColor="transparent" stopOpacity="0" />
-                <stop offset="87%" stopColor={palette.a} stopOpacity="0.62" />
-                <stop offset="100%" stopColor={palette.b} stopOpacity="0.28" />
-              </radialGradient>
-              {/* terminator: dark side shadow */}
-              <radialGradient id={`${uid}-term`} cx="76%" cy="74%" r="54%">
-                <stop offset="18%" stopColor="transparent" stopOpacity="0" />
-                <stop offset="100%" stopColor="black" stopOpacity="0.76" />
-              </radialGradient>
-            </defs>
-
-            {/* continent-like terrain blobs — soft, organic */}
-            {blobs.map((b, i) => (
-              <ellipse key={`b${i}`}
-                cx={b.cx} cy={b.cy} rx={b.rx} ry={b.ry}
-                fill={`url(#${uid}-tg)`} opacity={b.op}
-                transform={`rotate(${b.rot} ${b.cx} ${b.cy})`}
-                filter={`url(#${uid}-soft)`} />
-            ))}
-
-            {/* atmospheric bands */}
-            {Array.from({ length: bandCount }).map((_, i) => (
-              <rect key={`bd${i}`}
-                x="-18" y={24 + i * Math.floor(148 / bandCount)} width="236" height={6 + (i % 2) * 3} rx="3"
-                fill={i % 2 === 0 ? bc1 : bc2}
-                opacity={0.38 + (i % 2) * 0.07}
-                transform={`rotate(${i % 2 === 0 ? -7 : 6} 100 100)`} />
-            ))}
-
-            {/* aurora: wide soft band near top (nocturnal devs) */}
-            {showAurora && (
-              <ellipse cx="100" cy="58" rx="85" ry="28"
-                fill="none" stroke={palette.b} strokeWidth="22" opacity="0.2"
-                filter={`url(#${uid}-soft)`} />
-            )}
-
-            {/* storm swirl: chaotic / high-growth explorers */}
-            {showStorm && (
-              <g>
-                <ellipse cx="122" cy="84" rx="26" ry="14" fill="none" stroke={palette.b} strokeWidth="2.8" opacity="0.48" />
-                <ellipse cx="122" cy="84" rx="15" ry="7.5" fill="none" stroke={palette.a} strokeWidth="2" opacity="0.36" />
-                <circle cx="122" cy="84" r="4.5" fill={palette.b} opacity="0.28" />
-              </g>
-            )}
-
-            {/* polar cap: focused / consistent devs */}
-            {showCap && (
-              <ellipse cx="100" cy="9" rx="56" ry="22"
-                fill={palette.b} opacity="0.28"
-                filter={`url(#${uid}-soft)`} />
-            )}
-
-            {/* mist cloud patches: calm / quiet devs */}
-            {showMist && (
-              <>
-                <ellipse cx="70" cy="110" rx="40" ry="22" fill="white" opacity="0.09" filter={`url(#${uid}-soft)`} />
-                <ellipse cx="138" cy="75" rx="30" ry="18" fill="white" opacity="0.07" filter={`url(#${uid}-soft)`} />
-              </>
-            )}
-
-            {/* signal_booster: concentric pulse rings */}
-            {showPulse && (
-              <>
-                <circle cx="100" cy="100" r="58" fill="none" stroke={palette.b} strokeWidth="1.4" opacity="0.22" />
-                <circle cx="100" cy="100" r="74" fill="none" stroke={palette.b} strokeWidth="0.9" opacity="0.14" />
-                <circle cx="100" cy="100" r="90" fill="none" stroke={palette.a} strokeWidth="0.5" opacity="0.09" />
-              </>
-            )}
-
-            {/* lone_orbit: dark equatorial void band — isolation */}
-            {showVoid && (
-              <rect x="-18" y="82" width="236" height="36" rx="5"
-                fill="black" opacity="0.38" filter={`url(#${uid}-soft)`} />
-            )}
-
-            {/* archive_keeper: ancient strata rings */}
-            {showStrata && [0, 1, 2, 3].map((i) => (
-              <ellipse key={`st${i}`} cx="100" cy={44 + i * 34} rx="90" ry="5"
-                fill="none" stroke={palette.b} strokeWidth="0.9"
-                opacity={0.10 + i * 0.04} filter={`url(#${uid}-med)`} />
-            ))}
-
-            {/* caretaker: evenly distributed settlement dots */}
-            {showSettlements && Array.from({ length: 8 }).map((_, i) => {
-              const a = (i / 8) * Math.PI * 2;
-              return (
-                <g key={`set${i}`}>
-                  <circle cx={100 + Math.cos(a) * 48} cy={100 + Math.sin(a) * 48}
-                    r="2.6" fill={palette.b} opacity="0.18" filter={`url(#${uid}-med)`} />
-                  <circle cx={100 + Math.cos(a) * 48} cy={100 + Math.sin(a) * 48}
-                    r="1.2" fill={palette.b} opacity="0.65" />
-                </g>
-              );
-            })}
-
-            {/* city / network nodes: collaborative or veteran devs */}
-            {showCities && cityNodes.map((d, i) => (
-              <g key={`c${i}`}>
-                <circle cx={d.cx} cy={d.cy} r={d.r * 2.4} fill={palette.b} opacity="0.1" filter={`url(#${uid}-med)`} />
-                <circle cx={d.cx} cy={d.cy} r={d.r} fill={d.hub ? palette.b : "#fde04799"} opacity={d.hub ? 0.92 : 0.58} />
-                {d.hub && i > 0 && (
-                  <line x1={d.cx} y1={d.cy} x2={cityNodes[0].cx} y2={cityNodes[0].cy}
-                    stroke={palette.b} strokeWidth="0.4" opacity="0.2" />
-                )}
-              </g>
-            ))}
-
-            {/* atmosphere rim glow */}
-            <circle cx="100" cy="100" r="99" fill={`url(#${uid}-rim)`} />
-            {/* terminator shadow (night side) */}
-            <circle cx="100" cy="100" r="99" fill={`url(#${uid}-term)`} />
-          </svg>
-
-        </motion.div>
-
-        {/* rings — inclined ellipses */}
-        {ringed && [0, 1].map((i) => (
-          <div key={i} className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border"
+          {/* sphere: slowly rotates so surface features drift */}
+          <motion.div className="relative h-full w-full overflow-hidden rounded-full"
             style={{
-              width: 390 + i * 24, height: 52 + i * 14,
-              marginLeft: -(390 + i * 24) / 2, marginTop: -(52 + i * 14) / 2,
-              transform: "rotate(-17deg)",
-              borderColor: i === 0 ? `${palette.b}60` : `${palette.a}42`,
-              boxShadow: `0 0 18px ${palette.glow}`,
-            }} />
-        ))}
+              background: `radial-gradient(circle at 32% 28%, ${palette.b}ee, ${palette.a} 52%, rgba(0,0,0,0.98) 108%)`,
+              boxShadow: `0 0 64px ${palette.glow}, inset -42px -32px 80px rgba(0,0,0,0.78), inset 24px 22px 60px ${palette.glow}42`,
+            }}
+            animate={{ rotate: 360 }} transition={{ duration: 110, repeat: Infinity, ease: "linear" }}>
 
-        {/* comet streak */}
-        {hasComet && (
-          <motion.div className="absolute inset-0"
-            animate={{ rotate: -360 }} transition={{ duration: 22, repeat: Infinity, ease: "linear" }}>
-            <div className="absolute left-1/2 top-1 -translate-x-1/2 rounded-full"
-              style={{ width: 88, height: 3, background: `linear-gradient(90deg, transparent, ${palette.b}cc)` }} />
+            <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full">
+              <defs>
+                <filter id={`${uid}-soft`}><feGaussianBlur stdDeviation="5.5" /></filter>
+                <filter id={`${uid}-med`}><feGaussianBlur stdDeviation="2.5" /></filter>
+                <radialGradient id={`${uid}-tg`} cx="36%" cy="28%" r="72%">
+                  <stop offset="0%" stopColor={palette.b} stopOpacity="0.58" />
+                  <stop offset="100%" stopColor={palette.a} stopOpacity="0.05" />
+                </radialGradient>
+                <radialGradient id={`${uid}-rim`} cx="50%" cy="50%" r="50%">
+                  <stop offset="66%" stopColor="transparent" stopOpacity="0" />
+                  <stop offset="87%" stopColor={palette.a} stopOpacity="0.62" />
+                  <stop offset="100%" stopColor={palette.b} stopOpacity="0.28" />
+                </radialGradient>
+                <radialGradient id={`${uid}-term`} cx="76%" cy="74%" r="54%">
+                  <stop offset="18%" stopColor="transparent" stopOpacity="0" />
+                  <stop offset="100%" stopColor="black" stopOpacity="0.76" />
+                </radialGradient>
+              </defs>
+
+              {blobs.map((b, i) => (
+                <ellipse key={`b${i}`}
+                  cx={b.cx} cy={b.cy} rx={b.rx} ry={b.ry}
+                  fill={`url(#${uid}-tg)`} opacity={b.op}
+                  transform={`rotate(${b.rot} ${b.cx} ${b.cy})`}
+                  filter={`url(#${uid}-soft)`} />
+              ))}
+
+              {Array.from({ length: bandCount }).map((_, i) => (
+                <rect key={`bd${i}`}
+                  x="-18" y={24 + i * Math.floor(148 / bandCount)} width="236" height={6 + (i % 2) * 3} rx="3"
+                  fill={i % 2 === 0 ? bc1 : bc2}
+                  opacity={0.38 + (i % 2) * 0.07}
+                  transform={`rotate(${i % 2 === 0 ? -7 : 6} 100 100)`} />
+              ))}
+
+              {showAurora && (
+                <ellipse cx="100" cy="58" rx="85" ry="28"
+                  fill="none" stroke={palette.b} strokeWidth="22" opacity="0.2"
+                  filter={`url(#${uid}-soft)`} />
+              )}
+
+              {showStorm && (
+                <g>
+                  <ellipse cx="122" cy="84" rx="26" ry="14" fill="none" stroke={palette.b} strokeWidth="2.8" opacity="0.48" />
+                  <ellipse cx="122" cy="84" rx="15" ry="7.5" fill="none" stroke={palette.a} strokeWidth="2" opacity="0.36" />
+                  <circle cx="122" cy="84" r="4.5" fill={palette.b} opacity="0.28" />
+                </g>
+              )}
+
+              {showCap && (
+                <ellipse cx="100" cy="9" rx="56" ry="22"
+                  fill={palette.b} opacity="0.28"
+                  filter={`url(#${uid}-soft)`} />
+              )}
+
+              {showMist && (
+                <>
+                  <ellipse cx="70" cy="110" rx="40" ry="22" fill="white" opacity="0.09" filter={`url(#${uid}-soft)`} />
+                  <ellipse cx="138" cy="75" rx="30" ry="18" fill="white" opacity="0.07" filter={`url(#${uid}-soft)`} />
+                </>
+              )}
+
+              {showPulse && (
+                <>
+                  <circle cx="100" cy="100" r="58" fill="none" stroke={palette.b} strokeWidth="1.4" opacity="0.22" />
+                  <circle cx="100" cy="100" r="74" fill="none" stroke={palette.b} strokeWidth="0.9" opacity="0.14" />
+                  <circle cx="100" cy="100" r="90" fill="none" stroke={palette.a} strokeWidth="0.5" opacity="0.09" />
+                </>
+              )}
+
+              {showVoid && (
+                <rect x="-18" y="82" width="236" height="36" rx="5"
+                  fill="black" opacity="0.38" filter={`url(#${uid}-soft)`} />
+              )}
+
+              {showStrata && [0, 1, 2, 3].map((i) => (
+                <ellipse key={`st${i}`} cx="100" cy={44 + i * 34} rx="90" ry="5"
+                  fill="none" stroke={palette.b} strokeWidth="0.9"
+                  opacity={0.10 + i * 0.04} filter={`url(#${uid}-med)`} />
+              ))}
+
+              {showSettlements && Array.from({ length: 8 }).map((_, i) => {
+                const a = (i / 8) * Math.PI * 2;
+                return (
+                  <g key={`set${i}`}>
+                    <circle cx={100 + Math.cos(a) * 48} cy={100 + Math.sin(a) * 48}
+                      r="2.6" fill={palette.b} opacity="0.18" filter={`url(#${uid}-med)`} />
+                    <circle cx={100 + Math.cos(a) * 48} cy={100 + Math.sin(a) * 48}
+                      r="1.2" fill={palette.b} opacity="0.65" />
+                  </g>
+                );
+              })}
+
+              {showCities && cityNodes.map((d, i) => (
+                <g key={`c${i}`}>
+                  <circle cx={d.cx} cy={d.cy} r={d.r * 2.4} fill={palette.b} opacity="0.1" filter={`url(#${uid}-med)`} />
+                  <circle cx={d.cx} cy={d.cy} r={d.r} fill={d.hub ? palette.b : "#fde04799"} opacity={d.hub ? 0.92 : 0.58} />
+                  {d.hub && i > 0 && (
+                    <line x1={d.cx} y1={d.cy} x2={cityNodes[0].cx} y2={cityNodes[0].cy}
+                      stroke={palette.b} strokeWidth="0.4" opacity="0.2" />
+                  )}
+                </g>
+              ))}
+
+              <circle cx="100" cy="100" r="99" fill={`url(#${uid}-rim)`} />
+              <circle cx="100" cy="100" r="99" fill={`url(#${uid}-term)`} />
+            </svg>
+
           </motion.div>
-        )}
 
-        {/* satellites */}
-        {Array.from({ length: satCount }).map((_, i) => (
-          <motion.div key={i}
-            className="absolute left-1/2 top-1/2"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 13 + i * 10, repeat: Infinity, ease: "linear" }}
-            style={{ width: 0, height: 0 }}>
-            <span className="absolute block rounded-full"
+          {/* rings — inclined ellipses */}
+          {ringed && [0, 1].map((i) => (
+            <div key={i} className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border"
               style={{
-                width: Math.max(5, 11 - i * 2),
-                height: Math.max(5, 11 - i * 2),
-                background: i % 2 === 0 ? palette.b : palette.a,
-                transform: `translate(${163 + i * 19}px, -${Math.max(5, 11 - i * 2) / 2}px)`,
-                boxShadow: `0 0 12px ${palette.glow}`,
+                width: 390 + i * 24, height: 52 + i * 14,
+                marginLeft: -(390 + i * 24) / 2, marginTop: -(52 + i * 14) / 2,
+                transform: "rotate(-17deg)",
+                borderColor: i === 0 ? `${palette.b}60` : `${palette.a}42`,
+                boxShadow: `0 0 18px ${palette.glow}`,
               }} />
-          </motion.div>
-        ))}
+          ))}
 
-      </div>
-
-      <motion.div className="mx-auto mt-8 w-[min(360px,90%)]"
-        initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, ease: [0.22, 1, 0.36, 1] }}>
-        <div className="relative rounded-2xl border px-5 py-3 text-center backdrop-blur-sm"
-          style={{
-            borderColor: `${palette.a}40`,
-            background: `linear-gradient(160deg, ${palette.a}16, rgba(255,255,255,0.015))`,
-            boxShadow: `0 0 34px ${palette.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
-          }}>
-          <p className="text-[10px] uppercase tracking-[0.32em]" style={{ color: palette.a }}>{planetType}</p>
-          <p className="mt-1 text-xl italic text-zinc-100" style={{ fontFamily: "serif" }}>@{username}</p>
-          {caption && (
-            <>
-              <div className="mx-auto my-2.5 h-px w-12" style={{ background: `${palette.a}55` }} />
-              <p className="text-[13px] leading-snug text-zinc-300">{caption}</p>
-            </>
+          {/* comet streak */}
+          {hasComet && (
+            <motion.div className="absolute inset-0"
+              animate={{ rotate: -360 }} transition={{ duration: 22, repeat: Infinity, ease: "linear" }}>
+              <div className="absolute left-1/2 top-1 -translate-x-1/2 rounded-full"
+                style={{ width: 88, height: 3, background: `linear-gradient(90deg, transparent, ${palette.b}cc)` }} />
+            </motion.div>
           )}
+
+          {/* satellites */}
+          {Array.from({ length: satCount }).map((_, i) => (
+            <motion.div key={i}
+              className="absolute left-1/2 top-1/2"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 13 + i * 10, repeat: Infinity, ease: "linear" }}
+              style={{ width: 0, height: 0 }}>
+              <span className="absolute block rounded-full"
+                style={{
+                  width: Math.max(5, 11 - i * 2),
+                  height: Math.max(5, 11 - i * 2),
+                  background: i % 2 === 0 ? palette.b : palette.a,
+                  transform: `translate(${163 + i * 19}px, -${Math.max(5, 11 - i * 2) / 2}px)`,
+                  boxShadow: `0 0 12px ${palette.glow}`,
+                }} />
+            </motion.div>
+          ))}
+
+        </div>
+      </motion.div>
+
+      {/* ── caption — double-bezel card with archetype badge ── */}
+      <motion.div className="mx-auto mt-8 w-[min(360px,90%)]"
+        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, ease: [0.22, 1, 0.36, 1] }}>
+        {/* outer shell */}
+        <div className="rounded-[1.5rem] p-[2px]" style={{
+          background: `${archColor}80`,
+          boxShadow: `0 0 28px ${archColor}70, 0 0 56px ${archColor}38, 0 10px 44px rgba(0,0,0,0.55)`,
+        }}>
+          {/* inner core */}
+          <div className="rounded-[calc(1.5rem-2px)] px-4 py-3 text-center" style={{
+            background: `linear-gradient(160deg, rgba(5,3,18,0.97), rgba(10,6,26,0.95))`,
+            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.07), inset 0 0 28px ${archColor}0d`,
+          }}>
+            {/* archetype badge */}
+            <span className="inline-flex items-center rounded-full px-2 py-[2px] text-[8px] uppercase tracking-[0.3em]"
+              style={{ background: `${archColor}1c`, color: archColor, border: `1px solid ${archColor}44` }}>
+              {archLabel[primary] ?? "Developer"}
+            </span>
+
+            <p className="mt-1.5 text-[9px] uppercase tracking-[0.28em]" style={{ color: palette.a }}>{planetType}</p>
+            <p className="mt-0.5 text-base italic" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "serif" }}>@{username}</p>
+
+            {caption && (
+              <>
+                <div className="mx-auto my-2 h-px w-8"
+                  style={{ background: `linear-gradient(90deg, transparent, ${archColor}75, transparent)` }} />
+                <p className="text-[11px] leading-snug" style={{ color: "rgba(212,212,228,0.80)" }}>{caption}</p>
+              </>
+            )}
+          </div>
         </div>
       </motion.div>
     </div>
@@ -588,6 +660,8 @@ export default function SlideShare({
   showStartOver?: boolean;
 }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
   const cardRef = useRef<HTMLDivElement>(null);
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -688,28 +762,47 @@ export default function SlideShare({
             <MobilePlanet color={palette.a} />
           </div>
           <SlideCard ref={cardRef} accentColor={palette.a} sizeStyle={{ width: "min(405px, 92vw)", height: "min(610px, 85vh)" }}>
-            {/* collectible edition strip */}
-            <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2.5">
-              <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-zinc-500">★ Wrapped · {flat.period.label}</span>
-              <span className="font-mono text-[9px] tracking-[0.2em] text-zinc-500">No.{serial}</span>
+            <div className="absolute top-4 right-4 z-20 pointer-events-none">
+              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                <span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>G</span>rind<span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>IT</span>
+              </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-base font-bold text-white"
-                style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 20px ${palette.glow}` }}>
+              <div className="relative flex-shrink-0 h-10 w-10 overflow-hidden rounded-full text-base font-bold text-white flex items-center justify-center"
+                style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 16px ${palette.glow}` }}>
                 {flat.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={flat.avatarUrl} alt={flat.username} className="h-full w-full object-cover" />
+                  <img src={flat.avatarUrl} alt={flat.username} className="absolute inset-0 h-full w-full object-cover" />
                 ) : flat.username.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Your Planet</p>
                 <p className="text-base font-bold text-zinc-100">@{flat.username}</p>
+                <p className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</p>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <span className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] whitespace-nowrap"
-                  style={{ color: palette.a, border: `1px solid ${palette.a}55`, background: `${palette.a}14`, boxShadow: `0 0 10px ${palette.glow}` }}>
-                  {grade} grade
-                </span>
+            </div>
+            <div className="mt-3 flex items-center justify-start gap-10">
+              <h1 className="font-extrabold leading-tight"
+                style={{ fontSize: 28, background: `linear-gradient(90deg, ${palette.b}, ${palette.a})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-0.02em" }}>
+                {archetype}
+              </h1>
+              <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] whitespace-nowrap"
+                    style={{ color: palette.a, border: `1px solid ${palette.a}55`, background: `${palette.a}14`, boxShadow: `0 0 10px ${palette.glow}` }}>
+                    {grade} grade
+                  </span>
+                  {profile.narrative && (
+                    <div
+                      title={profile.narrative.isFallback ? "Fallback narrative" : "AI narrative"}
+                      className="h-2 w-2 rounded-full flex-shrink-0"
+                      style={{
+                        background: profile.narrative.isFallback ? "#ef4444" : "#22c55e",
+                        boxShadow: profile.narrative.isFallback ? "0 0 6px #ef4444" : "0 0 6px #22c55e",
+                      }}
+                    />
+                  )}
+                </div>
                 <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <span key={i} className="text-[13px] leading-none"
@@ -717,21 +810,7 @@ export default function SlideShare({
                   ))}
                 </div>
               </div>
-              {profile.narrative && (
-                <div
-                  title={profile.narrative.isFallback ? "Fallback narrative" : "AI narrative"}
-                  className="h-2 w-2 rounded-full flex-shrink-0"
-                  style={{
-                    background: profile.narrative.isFallback ? "#ef4444" : "#22c55e",
-                    boxShadow: profile.narrative.isFallback ? "0 0 6px #ef4444" : "0 0 6px #22c55e",
-                  }}
-                />
-              )}
             </div>
-            <h1 className="mt-3 font-extrabold leading-tight"
-              style={{ fontSize: 28, background: `linear-gradient(90deg, ${palette.b}, ${palette.a})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-0.02em" }}>
-              {archetype}
-            </h1>
             {roastLine && (
               <p className="mt-2 text-sm font-semibold leading-snug" style={{ color: palette.a }}>&ldquo;{roastLine}&rdquo;</p>
             )}
@@ -752,10 +831,10 @@ export default function SlideShare({
                 { n: formatNum(flat.pullRequests.merged), l: "PRs merged" },
                 { n: formatNum(flat.totalRepos), l: "repos" },
               ].map((s) => (
-                <div key={s.l} className="rounded-lg border px-2.5 py-1.5"
+                <div key={s.l} className="rounded-lg border px-2.5 py-1"
                   style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.025)" }}>
-                  <p className="text-base font-semibold text-zinc-50">{s.n}</p>
-                  <p className="mt-0.5 text-[9px] uppercase tracking-widest text-zinc-500">{s.l}</p>
+                  <p className="text-sm font-semibold text-zinc-50">{s.n}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-zinc-500">{s.l}</p>
                 </div>
               ))}
             </div>

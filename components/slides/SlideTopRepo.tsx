@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion, useMotionValue, useTransform, animate, type MotionValue } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -87,6 +87,8 @@ function CommitStream({ ufoX }: { ufoX: MotionValue<number> }) {
 
 export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
   const top = flat.topRepoCard;
   const ageStr = top && top.ageDays > 0
     ? (top.ageDays >= 365 ? `${Math.floor(top.ageDays / 365)}y` : `${Math.max(1, Math.round(top.ageDays / 30))}mo`)
@@ -150,12 +152,17 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
           </div>
           <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full max-w-[380px]">
             <SlideCard accentColor={ACCENT} className="text-white">
+              <div className="absolute top-4 right-4 z-20 pointer-events-none">
+                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
+                </span>
+              </div>
               <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border border-white/15 bg-white/5 object-cover" />
                 <div className="min-w-0">
                   <div className="truncate text-base font-bold">@{flat.username}</div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/45">{flat.period.label}</div>
+                  <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
                 </div>
               </motion.div>
               <motion.div {...fadeUp} transition={{ delay: 0.35 }} className="mt-3">

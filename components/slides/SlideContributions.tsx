@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
-import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -211,6 +211,8 @@ function Planet() {
 
 export default function SlideContributions({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
+  const ageLabel = formatGitHubAge(profile.metrics.githubAge);
+  const wrappedLabel = formatWrappedLabel(profile.period.type);
   const prsMerged = flat.pullRequests.merged;
   const hasPRs = prsMerged > 0;
   const issuesOpened = flat.issuesOpened;
@@ -256,13 +258,18 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
             className="w-full max-w-[380px]">
             <SlideCard accentColor={ACCENT} className="text-white">
+              <div className="absolute top-4 right-4 z-20 pointer-events-none">
+                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
+                </span>
+              </div>
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border"
                   style={{ borderColor: `${ACCENT}55` }} />
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: `${ACCENT}70` }}>The Mouse Chase</div>
                   <div className="text-base font-bold text-white">@{flat.username}</div>
+                  <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
                 </div>
               </motion.div>
 

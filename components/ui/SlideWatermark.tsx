@@ -19,11 +19,11 @@ export function SlideWatermark() {
             "0 0 0 1.5px oklch(0.72 0.18 295 / 0.72), 0 0 7px oklch(0.72 0.18 295 / 0.45)",
         }}
       />
-      <span
-        className="text-[10px] font-bold tracking-[0.06em]"
-        style={{ color: "rgba(255,255,255,0.78)" }}
-      >
-        GrindIT
+      {/* G and IT in violet, rind in white — matching landing screen branding */}
+      <span className="text-[10px] font-bold tracking-[0.06em] whitespace-nowrap">
+        <span style={{ color: "oklch(0.72 0.18 295)" }}>G</span>
+        <span style={{ color: "rgba(255,255,255,0.85)" }}>rind</span>
+        <span style={{ color: "oklch(0.72 0.18 295)" }}>IT</span>
       </span>
     </div>
   );

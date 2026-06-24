@@ -241,18 +241,18 @@ async function addCardWatermark(container: HTMLElement): Promise<void> {
   const wm = document.createElement("div");
   wm.style.cssText = [
     "position:absolute", "bottom:18px", "right:18px",
-    "display:flex", "align-items:center", "gap:6px",
-    "padding:5px 10px 5px 6px", "border-radius:20px",
+    "display:flex", "align-items:center", "gap:8px",
+    "padding:6px 12px 6px 7px", "border-radius:20px",
     "background:rgba(0,0,0,0.38)", "pointer-events:none",
   ].join(";");
 
   if (logoDataUrl) {
     const img = document.createElement("img");
     img.src = logoDataUrl;
-    img.width = 18; img.height = 18;
+    img.width = 26; img.height = 26;
     img.style.cssText = [
-      "width:18px", "height:18px", "border-radius:50%",
-      "box-shadow:0 0 0 1.5px oklch(0.72 0.18 295 / 0.72),0 0 7px oklch(0.72 0.18 295 / 0.45)",
+      "width:26px", "height:26px", "border-radius:50%",
+      "box-shadow:0 0 0 1.5px oklch(0.72 0.18 295 / 0.72),0 0 9px oklch(0.72 0.18 295 / 0.5)",
     ].join(";");
     wm.appendChild(img);
   }
@@ -261,7 +261,7 @@ async function addCardWatermark(container: HTMLElement): Promise<void> {
   const makeSpan = (text: string, color: string) => {
     const s = document.createElement("span");
     s.textContent = text;
-    s.style.cssText = `color:${color};font-size:10px;font-weight:700;letter-spacing:0.06em;font-family:system-ui,-apple-system,sans-serif;white-space:nowrap;`;
+    s.style.cssText = `color:${color};font-size:13px;font-weight:700;letter-spacing:0.06em;font-family:system-ui,-apple-system,sans-serif;white-space:nowrap;`;
     return s;
   };
   const label = document.createElement("span");

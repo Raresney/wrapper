@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
 import { MobileGate } from "@/components/ui/MobileGate";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -50,6 +52,8 @@ export default function RootLayout({
         <SessionProviderWrapper>
           <MobileGate>{children}</MobileGate>
         </SessionProviderWrapper>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

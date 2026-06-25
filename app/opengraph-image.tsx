@@ -25,7 +25,7 @@ export default function Image() {
           src={LOGO_SRC}
           width={220}
           height={220}
-          style={{ borderRadius: 36, flexShrink: 0 }}
+          style={{ borderRadius: 36, flexShrink: 0, border: "2px solid rgba(167,139,250,0.35)", boxShadow: "0 0 0 4px rgba(167,139,250,0.08)" }}
         />
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div

@@ -22,7 +22,7 @@ export default function Image() {
         }}
       >
         <div style={{ borderRadius: 36, border: "2px solid rgba(167,139,250,0.35)", boxShadow: "0 0 0 4px rgba(167,139,250,0.08)", flexShrink: 0, display: "flex" }}>
-            <img src={LOGO_SRC} width={220} height={220} style={{ borderRadius: 34, display: "block", boxShadow: "0 0 0 1.5px rgba(0,0,0,0.7)" }} />
+            <img src={LOGO_SRC} width={220} height={220} style={{ borderRadius: 34, display: "block", boxShadow: "0 0 0 3px rgba(0,0,0,0.85)" }} />
           </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div
@@ -34,7 +34,7 @@ export default function Image() {
               display: "flex",
             }}
           >
-            <span style={{ color: "#a78bfa" }}>G</span><span style={{ color: "#ffffff" }}>rindIT</span>
+            <span style={{ color: "#a78bfa" }}>G</span><span style={{ color: "#ffffff" }}>rind</span><span style={{ color: "#a78bfa" }}>IT</span>
           </div>
           <div
             style={{

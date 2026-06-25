@@ -25,19 +25,19 @@ export default function Image() {
           src={LOGO_SRC}
           width={220}
           height={220}
-          style={{ borderRadius: 36, flexShrink: 0, border: "2px solid rgba(167,139,250,0.35)", boxShadow: "0 0 0 4px rgba(167,139,250,0.08)" }}
+          style={{ borderRadius: 110, flexShrink: 0, border: "2px solid rgba(167,139,250,0.35)", boxShadow: "0 0 0 4px rgba(167,139,250,0.08)" }}
         />
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
               fontSize: 100,
               fontWeight: 800,
-              color: "#ffffff",
               lineHeight: 1,
               letterSpacing: "-2px",
+              display: "flex",
             }}
           >
-            GrindIT
+            <span style={{ color: "#ffffff" }}>Grind</span><span style={{ color: "#a78bfa" }}>IT</span>
           </div>
           <div
             style={{

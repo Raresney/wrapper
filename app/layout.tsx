@@ -13,7 +13,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://githubwrapped.dev"),
+  metadataBase: new URL("https://grindit.dev"),
   title: "GrindIT",
   description: "Turn your GitHub activity into a shareable developer recap.",
   applicationName: "GrindIT",
@@ -30,14 +30,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "GrindIT",
     description: "Turn your GitHub activity into a shareable developer recap.",
-    images: [{ url: "/logo3.png", width: 1024, height: 1024, alt: "GrindIT" }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "GrindIT",
     description: "Turn your GitHub activity into a shareable developer recap.",
-    images: ["/logo3.png"],
   },
 };
 

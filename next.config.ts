@@ -35,6 +35,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   transpilePackages: ["next-auth"],
   devIndicators: false,
+  // Include public assets in the serverless bundle for opengraph-image.tsx (readFile).
+  outputFileTracingIncludes: {
+    "/opengraph-image": ["./public/logo3.png"],
+  },
   images: {
     remotePatterns: [
       {

@@ -595,7 +595,7 @@ function HomePageInner() {
     } finally {
       setLoading(false);
     }
-  }, [username, periodType, tone, loading, session, isLoggedIn, usernameValid]);
+  }, [username, periodType, tone, loading, isLoggedIn, usernameValid]);
 
   return (
     <main className="relative overflow-hidden text-white" style={{ background: "var(--space-deep)" }}>

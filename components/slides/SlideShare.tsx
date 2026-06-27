@@ -715,13 +715,6 @@ export default function SlideShare({
 
   const badgesEarned = flat.traitBadges.slice(0, 6);
 
-  // Collectible-poster metadata: a stable serial from the username and a star
-  // grade from the rarity of the strongest badge earned.
-  const serial = useMemo(() => {
-    let h = 2166136261;
-    for (let i = 0; i < flat.username.length; i++) { h ^= flat.username.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return String((h >>> 0) % 10000).padStart(4, "0");
-  }, [flat.username]);
   const RARITY_RANK: Record<string, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
   const grade = badgesEarned[0]?.rarity ?? "rare";
   const stars = RARITY_RANK[grade] ?? 3;

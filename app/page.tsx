@@ -312,17 +312,17 @@ function Nav() {
         <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
-          <Link href="/" className="relative z-10 flex items-center gap-1.5 sm:gap-2">
-            <div className="relative h-11 w-11 shrink-0 sm:h-[72px] sm:w-[72px]">
+          <Link href="/" className="relative z-10 flex items-center gap-1 sm:gap-2">
+            <div className="relative h-8 w-8 shrink-0 sm:h-11 sm:w-11">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo1.png" alt="GitHub Wrapped" width={72} height={72}
-                className="h-11 w-11 rounded-xl object-cover select-none sm:h-[72px] sm:w-[72px] sm:rounded-2xl"
+                className="h-8 w-8 rounded-lg object-cover select-none sm:h-11 sm:w-11 sm:rounded-xl"
                 draggable={false} />
               <div className="hidden sm:block">
                 <CommitNodes />
               </div>
             </div>
-            <span className="text-[22px] font-black tracking-tight" style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 0 24px rgba(139,92,246,0.35)" }}>
+            <span className="text-[17px] font-black tracking-tight sm:text-[22px]" style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 0 24px rgba(139,92,246,0.35)" }}>
               <span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>G</span>rind<span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>IT</span>
             </span>
           </Link>
@@ -703,7 +703,7 @@ function HomePageInner() {
         <div className="relative z-10 mx-auto w-full max-w-xl px-5">
           <motion.div initial={{ opacity: 0, y: 14, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.2 }}
-            className="relative flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-5 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
+            className="relative flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-3 py-2 sm:px-5 sm:py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
             style={{ backdropFilter: "blur(20px) saturate(1.6)" }}
           >
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
@@ -836,7 +836,7 @@ function HomePageInner() {
       {/* ══ HOW IT WORKS ══════════════════════════════════════════════════ */}
       <section
         id="features"
-        className="relative scroll-mt-28 px-5 py-32 transition-colors duration-700"
+        className="relative scroll-mt-28 px-5 py-12 md:py-32 transition-colors duration-700"
         style={{
           background: worldCup
             ? "linear-gradient(180deg, rgba(35,4,60,0.98) 0%, rgba(20,3,40,0.96) 22%, var(--space-deep) 68%)"
@@ -856,8 +856,8 @@ function HomePageInner() {
             viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }}>
 
             {/* section title — outside the card */}
-            <div className="mb-10 text-center">
-              <h2 className="text-[32px] font-bold tracking-[-0.04em] text-white md:text-[40px]">
+            <div className="mb-6 text-center md:mb-10">
+              <h2 className="text-[26px] font-bold tracking-[-0.04em] text-white md:text-[40px]">
                 How it{" "}
                 <span className="bg-clip-text text-transparent"
                   style={{ backgroundImage: "linear-gradient(108deg, var(--violet-glow), var(--commit-green))" }}>
@@ -914,7 +914,7 @@ function HomePageInner() {
                 </p>
                   </div>
 
-                  <div className="relative">
+                  <div className="relative hidden sm:block">
                     <div className="absolute -inset-3 rounded-[1.4rem] bg-[radial-gradient(circle_at_50%_75%,rgba(139,92,246,0.28),transparent_58%)]" />
                     <div className="relative rounded-[1.35rem] border border-white/[0.08] bg-white/[0.035] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                       <div className="overflow-hidden rounded-[calc(1.35rem-0.5rem)] border border-white/[0.08] bg-black shadow-[0_20px_70px_-35px_rgba(139,92,246,0.85),inset_0_1px_1px_rgba(255,255,255,0.08)]">

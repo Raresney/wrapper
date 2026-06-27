@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 // Portrait-optimised orbit — fits within 375px screen width with comfortable margins
-const ORBIT_RX = 128;
-const ORBIT_RY = 66;
+const ORBIT_RX = 115;
+const ORBIT_RY = 88;
 const ORBIT_DURATION = 22000;
 const TAIL_OFFSET = 36;
-const MOON_ANCHOR = "36%";
+const MOON_ANCHOR = "40%";
 const INITIAL_ROCKET_TRANSFORM = `translate(-50%,-50%) translate(${ORBIT_RX}px,0px) rotate(98deg)`;
 
 const DOT_EMIT_MS = 420;
@@ -91,30 +91,6 @@ export function MobileHeroScene() {
 
   return (
     <div className="pointer-events-none absolute inset-0 isolate overflow-hidden">
-      {/* orbit ellipse guide */}
-      <svg
-        className="absolute left-1/2 opacity-[0.10]"
-        style={{
-          top: MOON_ANCHOR,
-          transform: "translate(-50%,-50%)",
-          width: ORBIT_RX * 2 + 40,
-          height: ORBIT_RY * 2 + 40,
-          overflow: "visible",
-        }}
-        aria-hidden
-      >
-        <ellipse
-          cx={ORBIT_RX + 20}
-          cy={ORBIT_RY + 20}
-          rx={ORBIT_RX}
-          ry={ORBIT_RY}
-          fill="none"
-          stroke="var(--violet-glow)"
-          strokeWidth="1"
-          strokeDasharray="4 8"
-        />
-      </svg>
-
       {/* planet soft glow */}
       <div
         className="absolute left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full"

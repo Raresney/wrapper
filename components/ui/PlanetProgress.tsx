@@ -179,7 +179,7 @@ export default function PlanetProgress({
             onClick={() => onNavigate(i)}
             aria-label={`Go to planet ${i + 1}`}
             aria-current={current === i ? "step" : undefined}
-            className="relative z-10 grid h-6 w-6 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:h-8 sm:w-8"
+            className="relative z-10 grid h-8 w-8 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           >
             <motion.span
               animate={current === i ? { scale: [1, 1.35, 1] } : { scale: 1 }}

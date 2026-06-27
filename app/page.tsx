@@ -784,7 +784,7 @@ function HomePageInner() {
             </AnimatePresence>
 
             {/* period row */}
-            <div className="flex items-center justify-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
               {PERIODS.map(({ label, value, requiresAuth }) => {
                 const locked = requiresAuth && !isLoggedIn;
                 return (
@@ -798,7 +798,7 @@ function HomePageInner() {
               })}
             </div>
             {/* tone row */}
-            <div className="flex items-center justify-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">AI tone</span>
               {TONES.map(({ label, value, icon: Icon }) => (
                 <button key={value} onClick={() => setTone(value)}

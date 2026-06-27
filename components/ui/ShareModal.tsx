@@ -87,9 +87,11 @@ export default function ShareModal({
   }, [open]);
 
   const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNav).canShare === "function";
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? (typeof window !== "undefined" ? window.location.origin : "")).replace(/\/+$/, "");
+  const recapUrl = `${appUrl}/wrapped/${username}`;
   const caption  = worldCup
-    ? `@${username} at the World Cup ⚽🐾 #WorldCup #GrindIT`
-    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GrindIT`;
+    ? `@${username} at the World Cup ⚽🐾\n\nMake yours:\n${recapUrl}\n\n#WorldCup #GrindIT`
+    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱\n\nMake yours:\n${recapUrl}\n\n#GrindIT`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {

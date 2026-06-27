@@ -8,6 +8,7 @@ import type { AiTone } from "@/types/wrapped";
 import { isValidGitHubUsername } from "@/lib/validation";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
+import SpaceBackground from "@/components/SpaceBackground";
 import { useTheme } from "@/lib/theme-context";
 import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
@@ -577,6 +578,7 @@ function HomePageInner() {
             ready && !worldCup ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
+          <SpaceBackground />
           <HeroScene />
         </div>
 
@@ -784,7 +786,7 @@ function HomePageInner() {
             </AnimatePresence>
 
             {/* period row */}
-            <div className="flex items-center justify-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
               {PERIODS.map(({ label, value, requiresAuth }) => {
                 const locked = requiresAuth && !isLoggedIn;
                 return (
@@ -798,7 +800,7 @@ function HomePageInner() {
               })}
             </div>
             {/* tone row */}
-            <div className="flex items-center justify-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">AI tone</span>
               {TONES.map(({ label, value, icon: Icon }) => (
                 <button key={value} onClick={() => setTone(value)}

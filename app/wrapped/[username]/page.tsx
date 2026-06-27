@@ -163,6 +163,27 @@ export default function WrappedPage() {
   const slideAreaRef = useRef<HTMLDivElement>(null);
   const normalizedSlideState = normalizeSlideState(slideState, activeSlides);
 
+  // Portrait phone detection — scale landscape slides to fit portrait width
+  const [portraitScale, setPortraitScale] = useState(1);
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w < h && w < 768) {
+        setPortraitScale(w / h);
+      } else {
+        setPortraitScale(1);
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
+  }, []);
+
   const fetchNarrative = useCallback(async (p: WrappedProfile, wc: boolean) => {
     setNarrativeLoading(true);
     try {
@@ -362,7 +383,16 @@ export default function WrappedPage() {
       </div>
 
       {/* â”€â”€ slide â”€â”€ */}
-      <div ref={slideAreaRef} className="absolute inset-0 z-10">
+      <div ref={slideAreaRef} className="absolute inset-0 z-10"
+        style={portraitScale !== 1 ? {
+          transformOrigin: "center center",
+          transform: `scale(${portraitScale})`,
+          width: `${100 / portraitScale}%`,
+          height: `${100 / portraitScale}%`,
+          top: `${-(100 / portraitScale - 100) / 2}%`,
+          left: `${-(100 / portraitScale - 100) / 2}%`,
+        } : undefined}
+      >
         {/* capture-only logo — covered on screen by real top bar (z-40), visible in screenshot */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo.url} alt="GrindIT" width={48} height={48}

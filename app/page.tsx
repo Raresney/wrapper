@@ -47,9 +47,9 @@ function authCallbackUrl() {
 // ── git branch commit nodes animation ─────────────────────────────────────
 // Positions detected via PIL at 72×72 display: original_px * 72/1024
 const BRANCH_NODES = [
-  { x: 43, y: 16 }, // mid-left node
-  { x: 58, y: 11 }, // top node
-  { x: 62, y: 19 }, // right node
+  { x: "59.7%", y: "22.2%" }, // mid-left node
+  { x: "80.6%", y: "15.3%" }, // top node
+  { x: "86.1%", y: "26.4%" }, // right node
 ];
 
 function CommitNodes() {
@@ -74,7 +74,7 @@ function CommitNodes() {
           style={{
             left: node.x, top: node.y,
             width: 6, height: 6,
-            marginLeft: -3, marginTop: -3,
+            transform: "translate(-50%, -50%)",
             background: lit.has(i) ? "oklch(0.88 0.32 145)" : "transparent",
             boxShadow: lit.has(i)
               ? "0 0 10px 3px oklch(0.78 0.28 145 / 0.85), 0 0 4px 1px oklch(0.92 0.36 145)"
@@ -338,14 +338,12 @@ function Nav() {
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
           <Link href="/" className="relative z-10 flex items-center gap-1 sm:gap-2">
-            <div className="relative h-8 w-8 shrink-0 sm:h-11 sm:w-11">
+            <div className="relative h-8 w-8 shrink-0 sm:h-[72px] sm:w-[72px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo1.png" alt="GitHub Wrapped" width={72} height={72}
-                className="h-8 w-8 rounded-lg object-cover select-none sm:h-11 sm:w-11 sm:rounded-xl"
+                className="h-8 w-8 rounded-lg object-cover select-none sm:h-[72px] sm:w-[72px] sm:rounded-xl"
                 draggable={false} />
-              <div className="hidden sm:block">
-                <CommitNodes />
-              </div>
+              <CommitNodes />
             </div>
             <span className="text-[17px] font-black tracking-tight sm:text-[22px]" style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 0 24px rgba(139,92,246,0.35)" }}>
               <span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>G</span>rind<span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>IT</span>
@@ -378,17 +376,19 @@ function Nav() {
               </a>
             </div>
           </div>
-          {/* right: auth — no z-index so dropdown z-50 escapes to header stacking context */}
-          <div className="relative flex flex-col items-center gap-1">
-            <AuthButton />
-            <div className="hidden items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300 sm:flex">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
-              Developer Recap · Any Period
+          {/* right: ThemeSwitch + auth */}
+          <div className="relative flex items-center gap-3">
+            <div className="flex flex-col items-center gap-1">
+              <AuthButton />
+              <div className="hidden items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300 sm:flex">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
+                Developer Recap · Any Period
+              </div>
             </div>
           </div>
         </div>
-        {/* ThemeSwitch — separate frame, right-aligned, aligned with landing logo height */}
-        <div className="relative z-0 mt-6 flex justify-end">
+        {/* ThemeSwitch — sub nav pill, vizibil pe toate screen-urile */}
+        <div className="relative z-0 mt-2 flex justify-end">
           <ThemeSwitch />
         </div>
       </div>

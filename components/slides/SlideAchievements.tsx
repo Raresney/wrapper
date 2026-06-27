@@ -1,13 +1,14 @@
 "use client";
 
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE6_TAIL_NODES } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import { BadgePopover, type PopoverBadge } from "@/components/wrapped/BadgePopover";
 
 const ACCENT = "#e879f9";
 
@@ -53,6 +54,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
   const ageLabel = formatGitHubAge(profile.metrics.githubAge);
   const wrappedLabel = formatWrappedLabel(profile.period.type);
   const unlocked = flat.achievementsUnlocked;
+  const [openBadge, setOpenBadge] = useState<{ badge: PopoverBadge; rect: DOMRect } | null>(null);
   const locked = flat.achievementsLocked;
   const hasUnlocked = unlocked.length > 0;
   const topTrophies = unlocked.slice(0, 5);
@@ -63,6 +65,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
   const avatarUrl = (seed: string) => `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(seed)}`;
 
   return (
+    <>
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute -left-40 top-1/3 size-[600px] rounded-full bg-fuchsia-600/10 blur-[140px]" />
       <div className="pointer-events-none absolute -right-40 bottom-0 size-[700px] rounded-full bg-purple-700/15 blur-[160px]" />
@@ -136,8 +139,11 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
               {hasUnlocked ? (
                 <div className="flex flex-col gap-2">
                   {topTrophies.map((t, i) => (
-                    <motion.div key={t.label} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.06 }}
-                      className="flex items-center gap-3 rounded-xl border px-3 py-1.5"
+                    <motion.button key={t.label} type="button" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.06 }}
+                      onClick={(e) => setOpenBadge({ badge: { id: t.label, label: t.label, icon: t.icon, color: t.color, explanation: t.reason }, rect: e.currentTarget.getBoundingClientRect() })}
+                      aria-haspopup="dialog"
+                      aria-label={`${t.label} trophy — show details`}
+                      className="flex items-center gap-3 rounded-xl border px-3 py-1.5 text-left transition-transform duration-150 hover:scale-[1.02] cursor-pointer"
                       style={{ borderColor: `${t.color}40`, background: `${t.color}10` }}>
                       <span style={{ color: t.color, filter: `drop-shadow(0 0 6px ${t.color}88)` }}>
                         <Glyph name={t.icon as GlyphName} size={26} />
@@ -149,7 +155,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
                         </div>
                         <div className="truncate text-[11px] text-white/55">{t.reason}</div>
                       </div>
-                    </motion.div>
+                    </motion.button>
                   ))}
                 </div>
               ) : (
@@ -206,5 +212,11 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
 
       <style>{`main .bg-gradient-to-br.text-transparent { font-size: 44px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }`}</style>
     </main>
+    <BadgePopover
+      badge={openBadge?.badge ?? null}
+      anchor={openBadge?.rect ?? null}
+      onClose={() => setOpenBadge(null)}
+    />
+    </>
   );
 }

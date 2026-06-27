@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
@@ -8,6 +8,7 @@ import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE7_TAIL_NODES } 
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import { BadgePopover, type PopoverBadge } from "@/components/wrapped/BadgePopover";
 
 const ACCENT = "#c084fc";
 
@@ -117,13 +118,13 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
   const wrappedLabel = formatWrappedLabel(profile.period.type);
   const badges = flat.traitBadges.slice(0, 6);
   const topBadgeId = badges[0]?.id;
-  const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
-  const selectedBadge = badges.find((b) => b.id === selectedBadgeId) ?? null;
+  const [openBadge, setOpenBadge] = useState<{ badge: PopoverBadge; rect: DOMRect } | null>(null);
   const archetypeDisplay = flat.archetype
     ? flat.archetype.toUpperCase().startsWith("THE ") ? flat.archetype.toUpperCase() : `THE ${flat.archetype.toUpperCase()}`
     : "THE BUILDER";
 
   return (
+    <>
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(60% 50% at 20% 30%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(50% 50% at 85% 70%, rgba(34,211,238,0.15), transparent 60%), radial-gradient(40% 40% at 70% 20%, rgba(255,62,165,0.12), transparent 60%)" }} />
@@ -212,11 +213,9 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
             })()}
 
             {badges.length > 0 ? (
-              <>
                 <div className="mt-3 grid grid-cols-3 gap-1.5">
                   {badges.map((b, i) => {
                     const isTop = b.id === topBadgeId;
-                    const isSelected = b.id === selectedBadgeId;
                     return (
                       <motion.button
                         key={b.id}
@@ -224,55 +223,27 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.9 + i * 0.08 }}
-                        onClick={() => setSelectedBadgeId(isSelected ? null : b.id)}
+                        onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
+                        aria-haspopup="dialog"
+                        aria-label={`${b.label} badge — show what it means`}
                         className="flex flex-col items-center gap-1.5 rounded-xl p-2 text-left transition-all"
                         style={{
-                          background: isSelected ? `${b.color}22` : `${b.color}10`,
-                          border: `1px solid ${b.color}${isSelected ? "88" : isTop ? "55" : "28"}`,
-                          boxShadow: isTop && !isSelected ? `0 0 18px ${b.color}44, inset 0 0 12px ${b.color}18` : isSelected ? `0 0 0 1px ${b.color}66, 0 0 20px ${b.color}55` : undefined,
+                          background: `${b.color}10`,
+                          border: `1px solid ${b.color}${isTop ? "55" : "28"}`,
+                          boxShadow: isTop ? `0 0 18px ${b.color}44, inset 0 0 12px ${b.color}18` : undefined,
                           cursor: "pointer",
                         }}>
                         <span style={{ color: b.color, filter: `drop-shadow(0 0 5px ${b.color}88)` }}>
                           <Glyph name={b.icon as GlyphName} size={22} />
                         </span>
                         <div className="text-center text-[9.5px] font-semibold leading-tight"
-                          style={{ color: isSelected || isTop ? b.color : "rgba(255,255,255,0.72)" }}>
+                          style={{ color: isTop ? b.color : "rgba(255,255,255,0.72)" }}>
                           {b.label}
                         </div>
                       </motion.button>
                     );
                   })}
                 </div>
-
-                {/* tap-to-reveal explanation panel */}
-                <AnimatePresence mode="wait">
-                  {selectedBadge && (
-                    <motion.div
-                      key={selectedBadge.id}
-                      initial={{ opacity: 0, y: -6, height: 0 }}
-                      animate={{ opacity: 1, y: 0, height: "auto" }}
-                      exit={{ opacity: 0, y: -4, height: 0 }}
-                      transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5"
-                        style={{ background: `${selectedBadge.color}14`, border: `1px solid ${selectedBadge.color}38` }}>
-                        <span className="shrink-0" style={{ color: selectedBadge.color, filter: `drop-shadow(0 0 6px ${selectedBadge.color}99)` }}>
-                          <Glyph name={selectedBadge.icon as GlyphName} size={26} />
-                        </span>
-                        <div className="min-w-0">
-                          <div className="text-[12px] font-bold leading-tight" style={{ color: selectedBadge.color }}>
-                            {selectedBadge.label}
-                          </div>
-                          <div className="mt-0.5 text-[10.5px] leading-snug text-white/65">
-                            {selectedBadge.explanation}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </>
             ) : (
               <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-xs text-white/50">
                 Still warming up — your vibe is taking shape.
@@ -345,5 +316,11 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
         @keyframes arc7b { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
       `}</style>
     </main>
+    <BadgePopover
+      badge={openBadge?.badge ?? null}
+      anchor={openBadge?.rect ?? null}
+      onClose={() => setOpenBadge(null)}
+    />
+    </>
   );
 }

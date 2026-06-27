@@ -109,10 +109,6 @@ function MobileRocket() {
         width={1024}
         height={1024}
         className="relative h-full w-full select-none object-contain"
-        style={{
-          filter:
-            "drop-shadow(0 0 20px rgba(190,160,255,0.8)) drop-shadow(0 10px 30px rgba(80,255,160,0.2))",
-        }}
         draggable={false}
       />
       <RocketCommitNodes />
@@ -171,21 +167,19 @@ export function MobileHeroScene() {
 
   return (
     <div className="pointer-events-none absolute inset-0" style={{ transform: "translateZ(0)" }}>
-      {/* planet soft glow */}
+      {/* planet soft glow — radial-gradients only, no filter to avoid GPU layer flash */}
       <div
-        className="absolute left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        className="absolute left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           top: MOON_ANCHOR,
-          background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.18), transparent 70%)",
-          filter: "blur(28px)",
+          background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.22), transparent 100%)",
         }}
       />
       <div
-        className="absolute left-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        className="absolute left-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           top: MOON_ANCHOR,
-          background: "radial-gradient(closest-side, oklch(0.72 0.18 295 / 0.1), transparent 70%)",
-          filter: "blur(10px)",
+          background: "radial-gradient(closest-side, oklch(0.72 0.18 295 / 0.14), transparent 100%)",
         }}
       />
 
@@ -202,11 +196,7 @@ export function MobileHeroScene() {
             width={620}
             height={620}
             className="block h-[200px] w-[200px] select-none object-contain"
-            style={{
-              opacity: 0.92,
-              filter:
-                "drop-shadow(0 0 60px rgba(160,120,255,0.38)) drop-shadow(0 0 110px rgba(120,80,220,0.22))",
-            }}
+            style={{ opacity: 0.92 }}
             draggable={false}
           />
         </div>

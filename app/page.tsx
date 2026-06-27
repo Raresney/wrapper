@@ -736,6 +736,16 @@ function HomePageInner() {
             className="relative flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-3 py-2 sm:px-5 sm:py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
             style={{ backdropFilter: "blur(20px) saturate(1.6)" }}
           >
+            <h1
+              className="text-center text-[22px] font-extrabold leading-tight tracking-[-0.03em] sm:text-[28px] bg-clip-text text-transparent"
+              style={{
+                backgroundImage: worldCup
+                  ? "linear-gradient(108deg, #f59e0b, #22c55e)"
+                  : "linear-gradient(108deg, var(--violet-glow), var(--commit-green))",
+              }}
+            >
+              Unwrap your GitHub story
+            </h1>
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
               Pick any period — week, month, year or all time. Get a cinematic recap of your commits, repos, languages and streaks.
             </p>

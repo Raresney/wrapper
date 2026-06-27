@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE6_TAIL_NODES } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes, SLIDE6_TAIL_NODES } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -97,7 +97,6 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
           className="relative w-full max-w-[380px] justify-self-center">
           <div className="lg:hidden">
             <ChapterHeadingMobile n={6} title="Trophy Haul" />
-            <MobilePlanet color="#ec4899" />
           </div>
           <SlideCard accentColor={ACCENT}>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
@@ -184,7 +183,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
           </SlideCard>
 
           {/* mobile: animated scene below the card (scroll to reveal) */}
-          <div className="mt-6 flex justify-center lg:hidden">
+          <div className="hidden">
             <motion.div className="relative w-[min(300px,80vw)]"
               animate={{ y: [0, -12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}

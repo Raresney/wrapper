@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -259,7 +259,6 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
         <div className="order-1 flex flex-col items-center justify-center lg:order-2">
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={3} title="Dodging Bugs" />
-            <MobilePlanet color="#d6552a" />
           </div>
 
           <motion.div variants={stagger} initial="hidden" animate="show"
@@ -376,7 +375,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
           </motion.div>
 
           {/* mobile: animated scene below the card */}
-          <div className="mt-6 h-[380px] w-[min(380px,92vw)] lg:hidden">
+          <div className="hidden">
             <LeftScene />
           </div>
         </div>

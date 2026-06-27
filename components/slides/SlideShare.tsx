@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useRef, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
@@ -754,7 +754,6 @@ export default function SlideShare({
         >
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={8} title="Your Planet" />
-            <MobilePlanet color={palette.a} />
           </div>
           <SlideCard ref={cardRef} accentColor={palette.a} sizeStyle={{ width: "min(405px, 92vw)", height: "min(610px, 85vh)" }}>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">

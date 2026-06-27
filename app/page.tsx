@@ -310,10 +310,10 @@ function Nav() {
       <div className="mx-auto max-w-6xl px-3 pt-3 pointer-events-auto sm:px-5 sm:pt-5">
         {/* mobile-only tagline bar — above the main nav pill */}
         <div
-          className="mb-1.5 flex items-center justify-between rounded-full border border-white/[0.07] bg-black/40 px-4 py-1.5 md:hidden"
+          className="mb-1.5 flex items-center justify-between rounded-full border border-white/[0.07] bg-black/40 px-4 py-1.5 lg:hidden"
           style={{ backdropFilter: "blur(20px) saturate(1.4)" }}
         >
-          <span className="text-[11px] font-semibold tracking-[-0.01em] text-white/85">
+          <span className="text-[13px] font-semibold tracking-[-0.01em] text-white/90">
             Your GitHub story,{" "}
             <span className="bg-clip-text text-transparent font-bold" style={{ backgroundImage: "linear-gradient(108deg,var(--silver),var(--violet-glow) 60%,var(--commit-green))" }}>
               unwrapped.
@@ -541,15 +541,6 @@ function HomePageInner() {
   const [tone,       setTone]       = useState<AiTone>("funny");
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState<string | null>(null);
-  const [isMobilePortrait, setIsMobilePortrait] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobilePortrait(window.innerWidth < window.innerHeight && window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    window.addEventListener("orientationchange", check);
-    return () => { window.removeEventListener("resize", check); window.removeEventListener("orientationchange", check); };
-  }, []);
 
   const usernameTouched = manualUsername.length > 0;
   const usernameValid = isValidGitHubUsername(manualUsername);
@@ -613,7 +604,9 @@ function HomePageInner() {
           }`}
         >
           <SpaceBackground />
-          {isMobilePortrait ? <MobileHeroScene /> : <HeroScene />}
+          {/* CSS-based switch: portrait phones (<1024px) get MobileHeroScene, desktop/landscape get HeroScene */}
+          <div className="block lg:hidden"><MobileHeroScene /></div>
+          <div className="hidden lg:block"><HeroScene /></div>
         </div>
 
         {/* top fade — covers nav area */}

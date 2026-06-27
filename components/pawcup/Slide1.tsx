@@ -3,8 +3,6 @@
 import Image from "next/image";
 import { useState } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
-import catBack from "@/components/pawcup/assets/cat-back.png.asset.json";
-
 
 function Slide1() {
   const [stars] = useState(() => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })));

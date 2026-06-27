@@ -348,7 +348,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
         const cs = getComputedStyle(el);
         applyNodeFixes(el, cs, (elem, props) => {
           for (const k of Object.keys(props)) elem.style.setProperty(k, props[k]);
-        }, (_e, _o) => {});
+        }, () => {});
       }
       await inlineExternalImages(clone);
       await addCardWatermark(wrap);

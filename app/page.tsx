@@ -545,6 +545,12 @@ function HomePageInner() {
   const [loadingMsg, setLoadingMsg] = useState("");
   const [error,      setError]      = useState<string | null>(null);
 
+  // Lock hero height once at mount — prevents iOS Safari from reflowing
+  // when address bar shows/hides during scroll
+  useEffect(() => {
+    document.documentElement.style.setProperty("--hero-height", `${window.innerHeight}px`);
+  }, []);
+
   const usernameTouched = manualUsername.length > 0;
   const usernameValid = isValidGitHubUsername(manualUsername);
 
@@ -596,7 +602,7 @@ function HomePageInner() {
       <Nav />
 
       {/* ══ HERO — full-screen scene, content overlaid at bottom ══════════ */}
-      <section className="relative flex h-[100svh] flex-col items-center justify-end overflow-hidden pb-4 pt-20">
+      <section className="relative flex flex-col items-center justify-end pb-4 pt-20" style={{ height: "var(--hero-height, 100svh)" }}>
         <div
           className={`absolute inset-0 z-[1] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
             ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"

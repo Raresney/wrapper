@@ -150,6 +150,35 @@ export function HeroScene() {
         }}
       />
 
+      {/* ── commit-graph branch lines ── */}
+      <svg className="absolute inset-0 h-full w-full opacity-[0.13]" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
+        <defs>
+          <linearGradient id="bg" x1="0" x2="1">
+            <stop offset="0"   stopColor="var(--violet-glow)" stopOpacity="0" />
+            <stop offset="0.5" stopColor="var(--violet-glow)" stopOpacity="0.55" />
+            <stop offset="1"   stopColor="var(--commit-green)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <g stroke="url(#bg)" strokeWidth="1" fill="none">
+          <path d="M-20 200 C200 180,320 260,520 240 S880 180,1100 220 S1380 260,1500 240"/>
+          <path d="M-20 720 C240 700,380 760,600 740 S960 700,1180 740 S1440 760,1500 740"/>
+          <path d="M200 0 C220 200,180 360,240 540 S280 800,260 920"/>
+          <path d="M1180 0 C1160 220,1200 380,1140 560 S1100 820,1120 920"/>
+        </g>
+        <g fill="var(--commit-green)">
+          <circle cx="520" cy="240" r="2.2"/><circle cx="880" cy="200" r="2.2"/>
+          <circle cx="600" cy="740" r="2.2"/><circle cx="240" cy="540" r="2.2"/>
+          <circle cx="1140" cy="560" r="2.2"/>
+        </g>
+      </svg>
+
+      {/* ── orbit ellipse guide ── */}
+      <svg className="absolute left-1/2 opacity-[0.08]" style={{ top: MOON_ANCHOR, transform: "translate(-50%,-50%)", width: ORBIT_RX*2+40, height: ORBIT_RY*2+40, overflow:"visible" }} aria-hidden>
+        <ellipse cx={ORBIT_RX+20} cy={ORBIT_RY+20} rx={ORBIT_RX} ry={ORBIT_RY}
+          fill="none" stroke="var(--violet-glow)" strokeWidth="1"
+          strokeDasharray="4 10" />
+      </svg>
+
       {/* ── moon glow ── */}
       <div className="absolute left-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.14), transparent 70%)", filter: "blur(32px)" }} />
       <div className="absolute left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.72 0.18 295 / 0.08), transparent 70%)", filter: "blur(12px)" }} />

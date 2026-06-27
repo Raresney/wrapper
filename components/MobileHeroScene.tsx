@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 
 // Portrait-optimised orbit — fits within 375px screen width with comfortable margins
 const ORBIT_RX = 115;
@@ -189,28 +189,28 @@ export function MobileHeroScene() {
         }}
       />
 
-      {/* planet — explicit square dimensions, no stretch */}
-      <motion.div
+      {/* planet — CSS animation (no Framer Motion) avoids iOS compositing-layer flash */}
+      <div
         className="absolute left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
         style={{ top: MOON_ANCHOR }}
-        animate={reduce ? undefined : { rotate: 360 }}
-        transition={{ duration: 240, repeat: Infinity, ease: "linear" }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/moon.png"
-          alt=""
-          width={620}
-          height={620}
-          className="block h-[200px] w-[200px] select-none object-contain"
-          style={{
-            opacity: 0.92,
-            filter:
-              "drop-shadow(0 0 60px rgba(160,120,255,0.38)) drop-shadow(0 0 110px rgba(120,80,220,0.22))",
-          }}
-          draggable={false}
-        />
-      </motion.div>
+        <div style={{ animation: reduce ? "none" : "planet-spin 240s linear infinite" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/moon.png"
+            alt=""
+            width={620}
+            height={620}
+            className="block h-[200px] w-[200px] select-none object-contain"
+            style={{
+              opacity: 0.92,
+              filter:
+                "drop-shadow(0 0 60px rgba(160,120,255,0.38)) drop-shadow(0 0 110px rgba(120,80,220,0.22))",
+            }}
+            draggable={false}
+          />
+        </div>
+      </div>
 
       {/* commit exhaust dots */}
       <div className="absolute left-1/2 z-10" style={{ top: MOON_ANCHOR }}>
@@ -264,7 +264,7 @@ export function MobileHeroScene() {
       ) : (
         <div
           ref={rocketRef}
-          className="absolute left-1/2 z-30 will-change-transform"
+          className="absolute left-1/2 z-30"
           style={{ top: MOON_ANCHOR, transform: INITIAL_ROCKET_TRANSFORM }}
         >
           <MobileRocket />

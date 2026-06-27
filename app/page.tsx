@@ -388,7 +388,7 @@ function Nav() {
           </div>
         </div>
         {/* ThemeSwitch — separate frame, right-aligned, aligned with landing logo height */}
-        <div className="mt-6 flex justify-end">
+        <div className="relative z-0 mt-6 flex justify-end">
           <ThemeSwitch />
         </div>
       </div>

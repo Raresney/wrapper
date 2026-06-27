@@ -8,6 +8,7 @@ import type { AiTone } from "@/types/wrapped";
 import { isValidGitHubUsername } from "@/lib/validation";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
+import SpaceBackground from "@/components/SpaceBackground";
 import { useTheme } from "@/lib/theme-context";
 import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
@@ -577,6 +578,7 @@ function HomePageInner() {
             ready && !worldCup ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
+          <SpaceBackground />
           <HeroScene />
         </div>
 

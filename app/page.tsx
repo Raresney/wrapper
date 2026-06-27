@@ -8,6 +8,7 @@ import type { AiTone } from "@/types/wrapped";
 import { isValidGitHubUsername } from "@/lib/validation";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
+import { MobileHeroScene } from "@/components/MobileHeroScene";
 import SpaceBackground from "@/components/SpaceBackground";
 import { useTheme } from "@/lib/theme-context";
 import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
@@ -516,6 +517,15 @@ function HomePageInner() {
   const [tone,       setTone]       = useState<AiTone>("funny");
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState<string | null>(null);
+  const [isMobilePortrait, setIsMobilePortrait] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobilePortrait(window.innerWidth < window.innerHeight && window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", check);
+    return () => { window.removeEventListener("resize", check); window.removeEventListener("orientationchange", check); };
+  }, []);
 
   const usernameTouched = manualUsername.length > 0;
   const usernameValid = isValidGitHubUsername(manualUsername);
@@ -579,7 +589,7 @@ function HomePageInner() {
           }`}
         >
           <SpaceBackground />
-          <HeroScene />
+          {isMobilePortrait ? <MobileHeroScene /> : <HeroScene />}
         </div>
 
         {/* top fade — covers nav area */}

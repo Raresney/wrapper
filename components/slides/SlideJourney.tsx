@@ -209,7 +209,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
         style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,180,30,0.10), transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(255,120,0,0.12), transparent 55%)" }} />
       <Stars />
       <ChapterHeadingAnchor n={5} title="Refuel Stop" />
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-start gap-6 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-12 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-start gap-6 px-4 pb-10 pt-12 lg:items-center lg:px-8 lg:py-12 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — gas station cat */}
         <div className="hidden h-[80vh] lg:block">
           <GasStationCat />

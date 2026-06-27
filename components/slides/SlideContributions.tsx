@@ -240,7 +240,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <Stars />
       <ChapterHeadingAnchor n={2} title="The Chase" />
-      <div className="relative z-10 grid min-h-screen grid-cols-1 gap-6 px-4 pb-10 pt-16 lg:grid-cols-3 lg:gap-4 lg:px-12 lg:py-10">
+      <div className="relative z-10 grid min-h-screen grid-cols-1 gap-6 px-4 pb-10 pt-12 lg:grid-cols-3 lg:gap-4 lg:px-12 lg:py-10">
         {/* LEFT — chase scene */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
           className="hidden flex-col items-start justify-center lg:flex">

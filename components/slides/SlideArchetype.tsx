@@ -132,7 +132,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
       <Confetti sparse={sparse} />
       <ChapterHeadingAnchor n={7} title="The Reveal" />
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-16 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-12 lg:items-center lg:px-8 lg:py-16 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — disco ball + cats + dance floor */}
         <motion.div initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}

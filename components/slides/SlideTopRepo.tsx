@@ -116,7 +116,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         style={{ background: "radial-gradient(closest-side, rgba(74,222,128,0.25), transparent)" }} />
       <Stars />
       <ChapterHeadingAnchor n={4} title="Home Base" />
-      <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-4 pb-10 pt-16 lg:px-12 lg:py-8">
+      <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-4 pb-10 pt-12 lg:px-12 lg:py-8">
         {/* LEFT — UFO invasion scene */}
         <div className="relative col-span-12 hidden lg:col-span-4 lg:block">
           <div className="relative h-full w-full">

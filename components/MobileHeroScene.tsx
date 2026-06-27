@@ -18,6 +18,15 @@ const DOT_LIFETIME = 1300;
 type CommitDot = { id: number; x: number; y: number; born: number };
 type ShootingStar = { id: number; x: number; y: number; angle: number };
 
+// Same node positions as the desktop rocket (% of 1024×1024 image)
+const ROCKET_NODES: [number, number][] = [
+  [74.7, 18.6],
+  [84.3, 16.1],
+  [91.0, 22.9],
+  [71.3, 27.3],
+  [88.5, 31.2],
+];
+
 function shortestAngleDelta(from: number, to: number) {
   return ((((to - from) % 360) + 540) % 360) - 180;
 }
@@ -38,6 +47,77 @@ function orbitPos(t: number) {
     rotateDeg: (Math.atan2(ty, tx) * 180) / Math.PI,
     behind: y < 0,
   };
+}
+
+function RocketCommitNodes() {
+  const [lit, setLit] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const flash = () => {
+      const idx = Math.floor(Math.random() * ROCKET_NODES.length);
+      setLit(prev => new Set([...prev, idx]));
+      setTimeout(
+        () => setLit(prev => { const n = new Set(prev); n.delete(idx); return n; }),
+        260 + Math.random() * 340,
+      );
+      t = setTimeout(flash, 500 + Math.random() * 1100);
+    };
+    t = setTimeout(flash, 400 + Math.random() * 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <>
+      {ROCKET_NODES.map(([px, py], i) => (
+        <span
+          key={i}
+          className="pointer-events-none absolute rounded-full"
+          style={{
+            left: `${px}%`,
+            top: `${py}%`,
+            width: 6,
+            height: 6,
+            marginLeft: -3,
+            marginTop: -3,
+            background: lit.has(i) ? "oklch(0.88 0.32 145)" : "transparent",
+            boxShadow: lit.has(i)
+              ? "0 0 10px 3px oklch(0.78 0.28 145 / 0.85), 0 0 4px 1px oklch(0.92 0.36 145)"
+              : "none",
+            transition: "background 0.1s ease, box-shadow 0.1s ease",
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+function MobileRocket() {
+  return (
+    <div className="relative grid place-items-center rounded-full" style={{ width: 88, height: 88 }}>
+      <div
+        className="absolute inset-[8%] rounded-full blur-xl opacity-75"
+        style={{
+          background:
+            "radial-gradient(circle, color-mix(in oklab, var(--commit-green) 40%, transparent), transparent 60%)",
+        }}
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/cat-rocket.png"
+        alt="Cat astronaut in cardboard rocket"
+        width={1024}
+        height={1024}
+        className="relative h-full w-full select-none object-contain"
+        style={{
+          filter:
+            "drop-shadow(0 0 20px rgba(190,160,255,0.8)) drop-shadow(0 10px 30px rgba(80,255,160,0.2))",
+        }}
+        draggable={false}
+      />
+      <RocketCommitNodes />
+    </div>
+  );
 }
 
 export function MobileHeroScene() {
@@ -93,7 +173,7 @@ export function MobileHeroScene() {
     <div className="pointer-events-none absolute inset-0 isolate overflow-hidden">
       {/* planet soft glow */}
       <div
-        className="absolute left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        className="absolute left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           top: MOON_ANCHOR,
           background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.18), transparent 70%)",
@@ -109,7 +189,7 @@ export function MobileHeroScene() {
         }}
       />
 
-      {/* planet — fixed 210px, no clamp stretching */}
+      {/* planet — explicit square dimensions, no stretch */}
       <motion.div
         className="absolute left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
         style={{ top: MOON_ANCHOR }}
@@ -122,10 +202,8 @@ export function MobileHeroScene() {
           alt=""
           width={620}
           height={620}
-          className="select-none"
+          className="block h-[200px] w-[200px] select-none object-contain"
           style={{
-            width: 210,
-            height: 210,
             opacity: 0.92,
             filter:
               "drop-shadow(0 0 60px rgba(160,120,255,0.38)) drop-shadow(0 0 110px rgba(120,80,220,0.22))",
@@ -192,36 +270,6 @@ export function MobileHeroScene() {
           <MobileRocket />
         </div>
       )}
-    </div>
-  );
-}
-
-function MobileRocket() {
-  return (
-    <div
-      className="relative grid place-items-center rounded-full"
-      style={{ width: 88, height: 88 }}
-    >
-      <div
-        className="absolute inset-[8%] rounded-full blur-xl opacity-75"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in oklab, var(--commit-green) 40%, transparent), transparent 60%)",
-        }}
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/cat-rocket.png"
-        alt="Cat astronaut in cardboard rocket"
-        width={1024}
-        height={1024}
-        className="relative h-full w-full select-none object-contain"
-        style={{
-          filter:
-            "drop-shadow(0 0 20px rgba(190,160,255,0.8)) drop-shadow(0 10px 30px rgba(80,255,160,0.2))",
-        }}
-        draggable={false}
-      />
     </div>
   );
 }

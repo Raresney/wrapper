@@ -307,7 +307,31 @@ function ThemeSwitch() {
 function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
-      <div className="mx-auto max-w-6xl px-3 pt-4 pointer-events-auto sm:px-5 sm:pt-5">
+      <div className="mx-auto max-w-6xl px-3 pt-3 pointer-events-auto sm:px-5 sm:pt-5">
+        {/* mobile-only tagline bar — above the main nav pill */}
+        <div
+          className="mb-1.5 flex items-center justify-between rounded-full border border-white/[0.07] bg-black/40 px-4 py-1.5 md:hidden"
+          style={{ backdropFilter: "blur(20px) saturate(1.4)" }}
+        >
+          <span className="text-[11px] font-semibold tracking-[-0.01em] text-white/85">
+            Your GitHub story,{" "}
+            <span className="bg-clip-text text-transparent font-bold" style={{ backgroundImage: "linear-gradient(108deg,var(--silver),var(--violet-glow) 60%,var(--commit-green))" }}>
+              unwrapped.
+            </span>
+          </span>
+          <a
+            href="#features"
+            onClick={(e) => {
+              e.preventDefault();
+              const el = document.getElementById("features");
+              if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + 20, behavior: "smooth" });
+              window.history.pushState(null, "", "#features");
+            }}
+            className="pointer-events-auto ml-3 shrink-0 rounded-full border border-violet-300/35 bg-violet-400/10 px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-violet-200/90 transition-colors hover:bg-violet-400/20 hover:text-white"
+          >
+            How it works
+          </a>
+        </div>
         {/* floating glass pill */}
         <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
@@ -598,7 +622,7 @@ function HomePageInner() {
 
         {/* planets landing logo — above top fade, same visibility as planets theme */}
         <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
-          <div className="flex items-center px-6 pt-9">
+          <div className="flex items-center px-6 pt-[88px] sm:pt-9">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo.url} alt="GrindIT" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
               style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />

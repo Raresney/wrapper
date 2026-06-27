@@ -22,6 +22,9 @@ body {
   color: var(--foreground);
 }
 
+/* Slow spin for planet — CSS animation avoids Framer Motion layer-promotion flash on iOS */
+@keyframes planet-spin { to { transform: rotate(360deg); } }
+
 /* Hero scene switching: MobileHeroScene on phones, HeroScene on desktop/landscape.
    Uses raw CSS media queries (not Tailwind) so it works reliably after OAuth redirects. */
 .hero-mobile { display: block; }

@@ -30,6 +30,55 @@ body {
   .slide-card-content {
     zoom: 0.82;
   }
+  /* Hide the full WC pawcup scene on mobile — replaced by WorldCupSlideBackground */
+  .wc-pawcup-scene {
+    display: none !important;
+  }
+  /* Hide space theme mobileHeader wrapper (no w-full = not mobileFooter) in WC mode */
+  .wc-original-card-layer .flex-none.lg\:hidden:not(.w-full) {
+    display: none !important;
+  }
+  /* Directly hide ChapterHeadingMobile by its own classes (some slides render it without the flex-none wrapper) */
+  .wc-original-card-layer .mb-3.flex.flex-col.items-center.lg\:hidden {
+    display: none !important;
+  }
+  /* WC chapter heading mobile wrapper: override absolute positioning to in-flow, centered */
+  .wc-chapter-heading-mobile-wrap > div {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+  }
+  /* ── Bonus slide: show WC center card on mobile ─────────────────────────── */
+  /* Override the global wc-pawcup-scene hide for the bonus slide */
+  .wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) {
+    display: block !important;
+  }
+  /* Make Slide8's own background transparent (WorldCupSlideBackground handles bg) */
+  .wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) .h-screen.w-screen {
+    background: transparent !important;
+    background-image: none !important;
+  }
+  /* Hide Slide8 decorative elements (stars, flags, orbs) but keep data-wc-center-card */
+  .wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) .h-screen.w-screen > *:not([data-wc-center-card]) {
+    display: none !important;
+  }
+  /* Hide WorldCupChapterHeading inside wc-pawcup-scene (we show our own mobile overlay) */
+  .wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) > div > :last-child {
+    display: none !important;
+  }
+  /* Show the data-wc-center-card */
+  .wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) [data-wc-center-card] {
+    display: flex !important;
+  }
+  /* Match bonus card dimensions to other WC mobile cards */
+  .wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) [data-wc-center-card] > div {
+    width: min(300px, 84vw) !important;
+    max-width: min(300px, 84vw) !important;
+    min-height: 65dvh !important;
+    max-height: 76dvh !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+  }
 }
 
 /* Slow spin for planet — CSS animation avoids Framer Motion layer-promotion flash on iOS */
@@ -71,47 +120,54 @@ body {
   pointer-events: none;
 }
 
+/* pointer-events and scrollbar: all viewports */
 .wc-original-card-layer [data-share-card] {
   pointer-events: auto;
-  width: min(400px, 92vw) !important;
-  max-width: min(400px, 92vw) !important;
-  height: min(580px, 84vh) !important;
-  min-height: min(580px, 84vh) !important;
   overflow-y: auto !important;
   scrollbar-width: none !important;
-}
-
-/* per-slide vertical nudges — only slides that differ from 0 */
-.wc-original-card-layer[data-wc-slide="intro"] [data-share-card] {
-  transform: translateY(6px) !important;
-}
-.wc-original-card-layer[data-wc-slide="archetype"] [data-share-card] {
-  transform: translateY(18px) !important;
-}
-
-.wc-original-card-layer[data-wc-slide="intro"] main > .relative.z-10.lg\:grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.lg\:grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
-  transform: translateY(10px) !important;
-}
-.wc-original-card-layer[data-wc-slide="archetype"] main > .relative.z-10.lg\:grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.lg\:grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
-  transform: translateY(20px) !important;
 }
 
 .wc-original-card-layer [data-share-card]::-webkit-scrollbar {
   display: none !important;
 }
 
-.wc-original-card-layer [data-share-card] > div[style*="height: 500"],
-.wc-original-card-layer [data-share-card] > div[style*="height: 580"],
-.wc-original-card-layer [data-share-card] > div[style*="height: min(580px, 84vh)"],
-.wc-original-card-layer [data-share-card][style*="height: 500"],
-.wc-original-card-layer [data-share-card][style*="height: 564"],
-.wc-original-card-layer [data-share-card][style*="height: min(580px, 84vh)"] {
-  height: 100% !important;
-  min-height: 100% !important;
+/* card sizing, nudges, height fixes: desktop only */
+@media (min-width: 1024px) {
+  .wc-original-card-layer [data-share-card] {
+    width: min(400px, 92vw) !important;
+    max-width: min(400px, 92vw) !important;
+    height: min(580px, 84vh) !important;
+    min-height: min(580px, 84vh) !important;
+  }
+
+  /* per-slide vertical nudges — only slides that differ from 0 */
+  .wc-original-card-layer[data-wc-slide="intro"] [data-share-card] {
+    transform: translateY(6px) !important;
+  }
+  .wc-original-card-layer[data-wc-slide="archetype"] [data-share-card] {
+    transform: translateY(18px) !important;
+  }
+
+  .wc-original-card-layer[data-wc-slide="intro"] main > .relative.z-10.lg\:grid > :has([data-share-card]),
+  .wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.lg\:grid > :has([data-share-card]),
+  .wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
+    transform: translateY(10px) !important;
+  }
+  .wc-original-card-layer[data-wc-slide="archetype"] main > .relative.z-10.lg\:grid > :has([data-share-card]),
+  .wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.lg\:grid > :has([data-share-card]),
+  .wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
+    transform: translateY(20px) !important;
+  }
+
+  .wc-original-card-layer [data-share-card] > div[style*="height: 500"],
+  .wc-original-card-layer [data-share-card] > div[style*="height: 580"],
+  .wc-original-card-layer [data-share-card] > div[style*="height: min(580px, 84vh)"],
+  .wc-original-card-layer [data-share-card][style*="height: 500"],
+  .wc-original-card-layer [data-share-card][style*="height: 564"],
+  .wc-original-card-layer [data-share-card][style*="height: min(580px, 84vh)"] {
+    height: 100% !important;
+    min-height: 100% !important;
+  }
 }
 
 .wc-original-card-layer [src="/wrapped/slide4-ufo.png"],
@@ -138,36 +194,38 @@ body {
   display: none !important;
 }
 
-.wc-original-card-layer main > .relative.z-10.lg\:grid,
-.wc-original-card-layer > div > .relative.z-10.lg\:grid,
-.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid {
-  display: flex !important;
-  min-height: 100dvh !important;
-  height: 100dvh !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 4rem 1rem 2rem !important;
-}
+@media (min-width: 1024px) {
+  .wc-original-card-layer main > .relative.z-10.lg\:grid,
+  .wc-original-card-layer > div > .relative.z-10.lg\:grid,
+  .wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid {
+    display: flex !important;
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 4rem 1rem 2rem !important;
+  }
 
-.wc-original-card-layer main > .relative.z-10.lg\:grid > :not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.lg\:grid > :not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :not(:has([data-share-card])) {
-  display: none !important;
-}
+  .wc-original-card-layer main > .relative.z-10.lg\:grid > :not(:has([data-share-card])),
+  .wc-original-card-layer > div > .relative.z-10.lg\:grid > :not(:has([data-share-card])),
+  .wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :not(:has([data-share-card])) {
+    display: none !important;
+  }
 
-.wc-original-card-layer main > .relative.z-10.lg\:grid > :has([data-share-card]),
-.wc-original-card-layer > div > .relative.z-10.lg\:grid > :has([data-share-card]),
-.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
-  display: flex !important;
-  min-height: 0 !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
+  .wc-original-card-layer main > .relative.z-10.lg\:grid > :has([data-share-card]),
+  .wc-original-card-layer > div > .relative.z-10.lg\:grid > :has([data-share-card]),
+  .wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
+    display: flex !important;
+    min-height: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 
-.wc-original-card-layer main > .relative.z-10.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])) {
-  display: none !important;
+  .wc-original-card-layer main > .relative.z-10.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
+  .wc-original-card-layer > div > .relative.z-10.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
+  .wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])) {
+    display: none !important;
+  }
 }
 
 /* ── TV float (CSS, off main thread) ── */

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/theme-context";
 import { WorldCupSlide } from "@/components/pawcup/WorldCupTheme";
+import WorldCupSlideBackground from "@/components/WorldCupSlideBackground";
+import WorldCupChapterHeading from "@/components/pawcup/WorldCupChapterHeading";
 import { determineAward } from "@/lib/wc-award";
 import SlideIntro         from "@/components/slides/SlideIntro";
 import SlideContributions from "@/components/slides/SlideContributions";
@@ -446,6 +448,14 @@ export default function WrappedPage() {
                     ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
                   }`}
                 >
+                  {/* Mobile-only: stadium background (no cats/decorations) — wc-pawcup-scene is hidden on mobile via CSS */}
+                  <div className="lg:hidden absolute inset-0 z-[5]">
+                    <WorldCupSlideBackground />
+                  </div>
+                  {/* Mobile-only: WC chapter heading centered above card (wc-pawcup-scene is hidden on mobile) */}
+                  <div className="wc-chapter-heading-mobile-wrap lg:hidden absolute inset-x-0 z-40 flex justify-center" style={{ top: "64px" }}>
+                    <WorldCupChapterHeading index={normalizedSlideState.index} />
+                  </div>
                   <div className="wc-pawcup-scene absolute inset-0">
                     <WorldCupSlide index={normalizedSlideState.index} profile={profile} wcSpeech={wcSpeech} wcSpeechLoading={wcSpeechLoading} />
                   </div>

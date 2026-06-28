@@ -336,7 +336,7 @@ export default function WrappedPage() {
 
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden"
-      style={{ background: "var(--space-deep)" }}
+      style={{ background: "#080612" }}
     >
       {/* world cup decorative layer â€" renders behind all content */}
       {/* ambient glow */}

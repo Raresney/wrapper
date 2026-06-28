@@ -376,7 +376,7 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
   return (
     <SlideShell
       overlay={<ChapterHeadingAnchor n={1} title="Liftoff" />}
-      mobileBg={<SpaceBackground />}
+      mobileBg={<SpaceBackground accent={ACCENT} />}
       mobileHeader={<ChapterHeadingMobile n={1} title="Liftoff" />}
       mobileFooter={
         introVibeLine ? (

@@ -103,38 +103,58 @@ function formatNum(n: number): string {
 
 function WorldCupMiniNewspaper({ username, caption }: { username: string; caption?: string }) {
   return (
-    <div className="relative overflow-hidden rounded-[3px] border border-[#8a7a58] bg-[#f3ecdc] p-2 text-[#22170f] shadow-[0_16px_32px_rgba(0,0,0,0.35)]">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-multiply"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "120px",
-        }}
-      />
-      <div className="relative">
-        <div className="flex items-center justify-between border-b border-zinc-900/60 pb-1 text-[4.5px] font-bold tracking-[0.18em] text-zinc-600">
-          <span>FINAL EDITION</span>
-          <span>PAW POST</span>
-        </div>
-        <div className="mt-1 text-center font-serif text-[15px] font-black leading-none tracking-tight text-zinc-900">
-          CHAMPIONS!
-        </div>
-        <p className="mt-1 text-center text-[9.5px] font-semibold italic leading-snug text-zinc-800">
-          {caption ?? "Purple Paws FC lift the trophy and own the headlines."}
-        </p>
-        <div className="mt-1.5 grid grid-cols-[1fr_auto] gap-1 border-t border-zinc-700/35 pt-1.5">
-          <div>
-            <p className="text-[5.5px] font-black uppercase tracking-[0.16em] text-zinc-800">By @{username}</p>
-            <div className="mt-1 flex flex-col gap-[2px]">
-              {[92, 100, 86].map((w, i) => (
-                <div key={i} className="h-[2px] rounded-[1px] bg-zinc-700/30" style={{ width: `${w}%` }} />
-              ))}
-            </div>
+    <div
+      className="relative rounded-[10px] p-[7px] shadow-[0_20px_38px_rgba(0,0,0,0.42)]"
+      style={{
+        background: "linear-gradient(135deg, #6d4621 0%, #8b5a2b 20%, #4d2f15 52%, #9f6d36 82%, #5f3a1d 100%)",
+        boxShadow: "0 20px 38px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,235,205,0.3), inset 0 -2px 0 rgba(45,24,10,0.45)",
+      }}
+    >
+      <div className="absolute inset-[7px] rounded-[7px] border border-[#2f2116]/55" />
+      <div className="relative overflow-hidden rounded-[5px] border border-[#8a7a58] bg-[#f3ecdc] p-2 text-[#22170f] shadow-[inset_0_0_0_1px_rgba(255,248,230,0.4)]">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-multiply"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            backgroundSize: "120px",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 rounded-[5px]"
+          style={{
+            background:
+              "linear-gradient(140deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.10) 22%, rgba(255,255,255,0.02) 45%, rgba(160,220,255,0.08) 100%)",
+            boxShadow: "inset 0 0 0 1px rgba(210,240,255,0.26), inset 0 10px 18px rgba(255,255,255,0.08)",
+            backdropFilter: "blur(1px)",
+            WebkitBackdropFilter: "blur(1px)",
+          }}
+        />
+        <div className="pointer-events-none absolute -left-1 top-0 h-full w-6 -skew-x-[18deg] bg-gradient-to-r from-white/28 via-white/10 to-transparent" />
+        <div className="relative">
+          <div className="flex items-center justify-between border-b border-zinc-900/60 pb-1 text-[4.5px] font-bold tracking-[0.18em] text-zinc-600">
+            <span>FINAL EDITION</span>
+            <span>PAW POST</span>
           </div>
-          <div className="self-start rounded-[2px] border border-zinc-900/70 px-1.5 py-1 text-center">
-            <div className="text-[5px] font-bold tracking-[0.16em] text-zinc-600">FT</div>
-            <div className="text-[10px] font-black leading-none text-zinc-900">2-1</div>
+          <div className="mt-1 text-center font-serif text-[16px] font-black leading-none tracking-tight text-zinc-900">
+            CHAMPIONS!
+          </div>
+          <p className="mt-1 text-center text-[10.5px] font-semibold italic leading-snug text-zinc-800">
+            {caption ?? "Purple Paws FC lift the trophy and own the headlines."}
+          </p>
+          <div className="mt-1.5 grid grid-cols-[1fr_auto] gap-1 border-t border-zinc-700/35 pt-1.5">
+            <div>
+              <p className="text-[7px] font-black uppercase tracking-[0.12em] text-zinc-800">By @{username}</p>
+              <div className="mt-1 flex flex-col gap-[2px]">
+                {[92, 100, 86].map((w, i) => (
+                  <div key={i} className="h-[2px] rounded-[1px] bg-zinc-700/30" style={{ width: `${w}%` }} />
+                ))}
+              </div>
+            </div>
+            <div className="self-start rounded-[2px] border border-zinc-900/70 px-1.5 py-1 text-center">
+              <div className="text-[5.5px] font-bold tracking-[0.14em] text-zinc-600">FT</div>
+              <div className="text-[11px] font-black leading-none text-zinc-900">2-1</div>
+            </div>
           </div>
         </div>
       </div>
@@ -920,7 +940,7 @@ export default function SlideShare({
           transition={{ duration: 0.7, delay: 1.2 }}
           className="absolute inset-x-0 bottom-[58px] z-20 flex justify-center px-4 lg:hidden"
         >
-          <div className="w-[min(260px,72vw)]">
+          <div className="w-[min(236px,66vw)]">
             <WorldCupMiniNewspaper username={flat.username} caption={shareCaption} />
           </div>
         </motion.div>

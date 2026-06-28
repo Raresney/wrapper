@@ -466,9 +466,9 @@ export default function WrappedPage() {
                     {normalizedSlideState.current === "archetype"
                       ? <SlideArchetype profile={profile} sparse />
                       : normalizedSlideState.current === "intro"
-                        ? <SlideIntro profile={profile} mobileFooterLabel="Champion's Inscription" />
+                        ? <SlideIntro profile={profile} mobileFooterVariant="worldcup-inscription" />
                       : normalizedSlideState.current === "share"
-                        ? <SlideShare profile={profile} showStartOver={false} />
+                        ? <SlideShare profile={profile} showStartOver={false} mobileCaptionVariant="worldcup-newspaper" />
                         : <CurrentSlide profile={profile} />}
                   </div>
                 </div>

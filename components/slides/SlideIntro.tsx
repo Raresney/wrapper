@@ -332,13 +332,62 @@ function TransmissionLine({ message, label = "Incoming transmission" }: { messag
   );
 }
 
+function WorldCupInscriptionLine({ message }: { message: string }) {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    if (!message) { queueMicrotask(() => setDisplayedText("")); return; }
+    queueMicrotask(() => setDisplayedText(""));
+    let tick: ReturnType<typeof setInterval> | null = null;
+    const start = setTimeout(() => {
+      let i = 0;
+      tick = setInterval(() => {
+        i++;
+        setDisplayedText(message.slice(0, i));
+        if (i >= message.length) { clearInterval(tick!); tick = null; }
+      }, 28);
+    }, 1900);
+    return () => { clearTimeout(start); if (tick) clearInterval(tick); };
+  }, [message]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
+      className="mt-2 w-full max-w-[300px]"
+    >
+      <div
+        className="relative overflow-hidden rounded-md px-4 py-2.5 text-center"
+        style={{
+          background: "linear-gradient(160deg, #f8e8ad 0%, #e6c259 40%, #b5852e 100%)",
+          border: "1px solid rgba(110,72,18,0.6)",
+          boxShadow: "0 12px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 5px rgba(110,72,18,0.55)",
+        }}
+      >
+        <div className="pointer-events-none absolute -inset-y-4 -left-1/3 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shine" />
+        <div className="text-[7px] font-black uppercase tracking-[0.24em] text-amber-950/70">★ Champion&apos;s Inscription ★</div>
+        <p
+          className="mt-1 min-h-[2.3em] font-serif text-[11.5px] font-semibold italic leading-snug text-amber-950"
+          style={{ textShadow: "0 1px 0 rgba(255,255,255,0.4)" }}
+        >
+          {displayedText}
+          <span className="animate-cursor-blink ml-[1px] inline-block w-[1.5px] align-middle bg-amber-950/70" style={{ height: "0.9em" }} />
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Slide ──────────────────────────────────────────────────────────────────
 export default function SlideIntro({
   profile,
   mobileFooterLabel = "Incoming transmission",
+  mobileFooterVariant = "transmission",
 }: {
   profile: WrappedProfile;
   mobileFooterLabel?: string;
+  mobileFooterVariant?: "transmission" | "worldcup-inscription";
 }) {
   const flat = mapToFlat(profile);
   const ageLabel = formatGitHubAge(profile.metrics.githubAge);
@@ -387,7 +436,9 @@ export default function SlideIntro({
       mobileFooter={
         introVibeLine ? (
           <div className="mt-3 flex justify-center px-4">
-            <TransmissionLine message={introVibeLine} label={mobileFooterLabel} />
+            {mobileFooterVariant === "worldcup-inscription"
+              ? <WorldCupInscriptionLine message={introVibeLine} />
+              : <TransmissionLine message={introVibeLine} label={mobileFooterLabel} />}
           </div>
         ) : undefined
       }

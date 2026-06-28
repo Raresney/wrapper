@@ -114,8 +114,8 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
       <div
         className="absolute"
         style={{
-          top: "8%",
-          left: "10%",
+          top: "14%",
+          left: "3%",
           width: "70px",
           height: "70px",
           animation: "sb-float-a 14s ease-in-out infinite",
@@ -154,7 +154,7 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
       <div
         className="absolute"
         style={{
-          top: "14%",
+          top: "20%",
           right: "3%",
           width: "36px",
           height: "36px",

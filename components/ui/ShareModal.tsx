@@ -16,6 +16,15 @@ const ANIM_CSS = `
 
 const SP = [0.32, 0.72, 0, 1] as const;
 
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
 function Icon({ d, size = 13 }: { d: string; size?: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="none"
@@ -31,6 +40,9 @@ const ACTIONS = [
   { id: "x",        label: "Post on X", accent: "#60a5fa", icon: "M4 4l16 16M20 4L4 20" },
   { id: "linkedin", label: "LinkedIn",  accent: "#0a66c2", icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4" },
 ] as const;
+
+// Native-share action, shown inline in the mobile grid (desktop uses the full-width button).
+const SHARE_ACTION = { id: "share", label: "Share", accent: "#a78bfa", icon: "M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13" } as const;
 
 // Funny render-flavoured copy, in the same spirit as the landing-page loader.
 const RENDER_MESSAGES = [
@@ -93,6 +105,9 @@ export default function ShareModal({
   const [captureKey, setCaptureKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const blobRef = useRef<Blob | null>(null);
+  // Holds the in-flight hi-res capture so a button pressed before it resolves can
+  // await the same render instead of kicking off a second (slow) one.
+  const hiPromiseRef = useRef<Promise<Blob | null> | null>(null);
 
   // Track viewport so the action grid and share handlers can branch on mobile.
   useEffect(() => {
@@ -154,29 +169,33 @@ export default function ShareModal({
     if (!open) return;
     let alive = true;
     blobRef.current = null;
+    hiPromiseRef.current = null;
+    // Warm the screenshot module so the first capture doesn't pay the dynamic-import
+    // cost (the main reason the first button press felt slow).
+    import("modern-screenshot").catch(() => {});
     const t = setTimeout(async () => {
       if (!alive) return;
       setBusy(true);
-      setPreview(null); // show ScanLoader while re-rendering
+      setPreview(null); // show ScanLoader while rendering
       setFailed(false);
-      const prev = await capture(1.5);
+      // Single full-quality render reused for both the preview and the export blob.
+      // (Previously we rendered twice — at 1.5 then 2.5 — which doubled the costly
+      // off-screen iframe work on mobile.)
+      const p = capture(2.5);
+      hiPromiseRef.current = p;
+      const blob = await p;
       if (!alive) return;
-      const hiPromise = capture(2.5);
-      if (prev) {
-        const dataUrl = await new Promise<string>((res, rej) => {
-          const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej;
-          r.readAsDataURL(prev);
-        });
+      blobRef.current = blob;
+      hiPromiseRef.current = null;
+      if (blob) {
+        const dataUrl = await blobToDataUrl(blob);
         if (!alive) return;
         setPreview(dataUrl);
       } else {
         setPreview(null);
       }
-      setFailed(!prev);
+      setFailed(!blob);
       setBusy(false);
-      const hi = await hiPromise;
-      if (!alive) return;
-      blobRef.current = hi;
     }, 80);
     return () => { alive = false; clearTimeout(t); };
   }, [open, scope, capture, captureKey]);
@@ -191,6 +210,13 @@ export default function ShareModal({
   const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2400); };
   const getBlob = async () => {
     if (blobRef.current) return blobRef.current;
+    // Reuse the render already in flight from the preview effect rather than
+    // starting a second one — this is what made the first press slow.
+    if (hiPromiseRef.current) {
+      const b = await hiPromiseRef.current;
+      if (b) blobRef.current = b;
+      return b;
+    }
     setBusy(true); const b = await capture(); setBusy(false); blobRef.current = b; return b;
   };
   const dl = (blob: Blob) => {
@@ -229,7 +255,14 @@ export default function ShareModal({
     if (!isMobile) { const b = await getBlob(); if (b) dl(b); }
     window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
-  const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn };
+  const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn, share: onNative };
+
+  // Mobile drops Save (web can't write to the gallery) and instead shows the native
+  // Share button inline next to Copy / X / LinkedIn. Desktop keeps Save + the
+  // full-width Share button above (when supported).
+  const gridActions = isMobile
+    ? [...ACTIONS.filter((a) => a.id !== "download"), ...(canNativeShare ? [SHARE_ACTION] : [])]
+    : ACTIONS;
 
   if (!mounted) return null;
 
@@ -367,8 +400,8 @@ export default function ShareModal({
               </div>
             </div>
 
-            {/* native share */}
-            {canNativeShare && (
+            {/* native share — full-width on desktop; on mobile it lives in the grid */}
+            {canNativeShare && !isMobile && (
               <div className="mt-3 px-4">
                 <motion.button onClick={onNative} disabled={busy}
                   className="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full py-2.5 text-[12px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-35"
@@ -385,7 +418,7 @@ export default function ShareModal({
             {/* Mobile: drop the Save button (web can't write to the gallery); the
                 native Share… button above handles saving to Photos. */}
             <div className="grid grid-cols-2 gap-2 p-4 pt-3">
-              {ACTIONS.filter((a) => !(isMobile && a.id === "download")).map(({ id, label, icon, accent }, i) => (
+              {gridActions.map(({ id, label, icon, accent }, i) => (
                 <motion.button key={id} onClick={handlers[id]} disabled={busy}
                   className="group flex flex-col cursor-pointer items-center gap-[9px] rounded-[13px] py-3.5 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-25"
                   style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)" }}

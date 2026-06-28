@@ -222,15 +222,11 @@ export default function ShareModal({
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
   const onLinkedIn = async () => {
-    if (isMobile) {
-      // Mobile: share-offsite opens the LinkedIn app (universal link) and creates a
-      // post with the grindit.dev link preview. LinkedIn forbids prefilled post text
-      // from the web, so the caption can't be injected here — platform limitation.
-      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://www.grindit.dev")}`, "_blank", "noopener");
-      return;
-    }
-    // Desktop: download the image to attach, then open the composer with the caption.
-    const b = await getBlob(); if (b) dl(b);
+    // Same format as X: open the composer with the prefilled caption (no image).
+    // The linkedin.com universal link opens the app directly when installed, so the
+    // user posts from their logged-in account instead of a fresh Chrome tab.
+    // Desktop also downloads the image first so it can be attached manually.
+    if (!isMobile) { const b = await getBlob(); if (b) dl(b); }
     window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
   const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn };

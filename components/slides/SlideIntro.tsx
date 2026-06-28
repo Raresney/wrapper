@@ -283,7 +283,7 @@ function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: s
 }
 
 // ── cosmic transmission line carrying the personalized intro message ─────────
-function TransmissionLine({ message }: { message: string }) {
+function TransmissionLine({ message, label = "Incoming transmission" }: { message: string; label?: string }) {
   const [displayedText, setDisplayedText] = useState("");
 
   useEffect(() => {
@@ -319,7 +319,7 @@ function TransmissionLine({ message }: { message: string }) {
           <motion.span className="h-1.5 w-1.5 rounded-full" style={{ background: "#4ade80", boxShadow: "0 0 6px #4ade80" }}
             animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} />
           <span className="text-[9px] font-medium uppercase tracking-[0.28em]" style={{ color: `${ACCENT}aa` }}>
-            Incoming transmission
+            {label}
           </span>
         </div>
         <p className="mt-1 min-h-[2em] font-mono text-[11px] leading-relaxed text-zinc-200">
@@ -333,7 +333,13 @@ function TransmissionLine({ message }: { message: string }) {
 }
 
 // ── Slide ──────────────────────────────────────────────────────────────────
-export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
+export default function SlideIntro({
+  profile,
+  mobileFooterLabel = "Incoming transmission",
+}: {
+  profile: WrappedProfile;
+  mobileFooterLabel?: string;
+}) {
   const flat = mapToFlat(profile);
   const ageLabel = formatGitHubAge(profile.metrics.githubAge);
   const wrappedLabel = formatWrappedLabel(profile.period.type);
@@ -381,7 +387,7 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
       mobileFooter={
         introVibeLine ? (
           <div className="mt-3 flex justify-center px-4">
-            <TransmissionLine message={introVibeLine} />
+            <TransmissionLine message={introVibeLine} label={mobileFooterLabel} />
           </div>
         ) : undefined
       }

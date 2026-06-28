@@ -42,11 +42,17 @@ body {
   .wc-original-card-layer .mb-3.flex.flex-col.items-center.lg\:hidden {
     display: none !important;
   }
+  .wc-original-card-layer [data-space-chapter-heading] {
+    display: none !important;
+  }
   /* WC chapter heading mobile wrapper: override absolute positioning to in-flow, centered */
   .wc-chapter-heading-mobile-wrap > div {
     position: static !important;
     left: auto !important;
     top: auto !important;
+  }
+  .wc-chapter-heading-mobile-wrap [data-wc-chapter-heading] {
+    margin-top: -10px !important;
   }
   /* ── Bonus slide: show WC center card on mobile ─────────────────────────── */
   /* Override the global wc-pawcup-scene hide for the bonus slide */
@@ -74,9 +80,9 @@ body {
   .wc-pawcup-scene:has(+ .wc-original-card-layer[data-wc-slide="bonus"]) [data-wc-center-card] > div {
     width: min(300px, 84vw) !important;
     max-width: min(300px, 84vw) !important;
-    min-height: 65dvh !important;
-    max-height: 76dvh !important;
-    overflow-y: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
     scrollbar-width: none !important;
   }
 }
@@ -118,6 +124,10 @@ body {
 
 .wc-original-card-layer {
   pointer-events: none;
+}
+
+.wc-original-card-layer [data-space-chapter-heading] {
+  display: none !important;
 }
 
 /* pointer-events and scrollbar: all viewports */

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { captureElement, captureDesktopElement } from "@/lib/captureElement";
+import { captureElement } from "@/lib/captureElement";
 
 type Scope = "card" | "slide";
 type ShareNav = Navigator & { canShare?: (d?: ShareData) => boolean; share?: (d: ShareData) => Promise<void> };
@@ -86,24 +86,27 @@ export default function ShareModal({
   }, [open]);
 
   const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNav).canShare === "function";
-  const caption = `Make yours:\n\nhttps://www.grindit.dev`;
+  // Full caption (with URL) — used when opening browser compose (no image attached)
+  const captionText = worldCup
+    ? `@${username} at the World Cup ⚽🐾\n\nMake yours:\nhttps://www.grindit.dev\n\n#WorldCup #GrindIT`
+    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱\n\nMake yours:\nhttps://www.grindit.dev\n\n#GrindIT`;
+  // Caption without URL — used when image file is attached via native share (URL blocks image attachment on X/LinkedIn)
+  const captionNative = worldCup
+    ? `@${username} at the World Cup ⚽🐾\n\n#WorldCup #GrindIT`
+    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱\n\n#GrindIT`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
     if (scope === "card") {
-      if (isMobile)
-        return await captureDesktopElement(slide, { cropToSelector: "[data-share-card]", scale });
       const card = document.querySelector("[data-share-card]") as HTMLElement | null;
       if (!card) return null;
       const accent    = (card as HTMLElement & { dataset: DOMStringMap }).dataset.accent ?? "#a78bfa";
       const wrapperBg = `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
       return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
     }
-    if (isMobile)
-      return await captureDesktopElement(slide, { cropToSelector: null, scale });
+    // Full slide — desktop only (toggle hidden on mobile)
     return await captureElement(slide, { scale });
   }, [scope, slideRef]);
 
@@ -160,7 +163,7 @@ export default function ShareModal({
     const file = new File([blob], filename, { type: "image/png" });
     const nav = navigator as ShareNav;
     if (nav.share && nav.canShare?.({ files: [file] })) {
-      try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); } catch { /* cancelled */ }
+      try { await nav.share({ files: [file], text: captionNative, title: "GitHub Wrapped" }); } catch { /* cancelled */ }
     } else { dl(blob); flash("Downloaded instead."); }
   };
   const onDownload = async () => {
@@ -191,12 +194,12 @@ export default function ShareModal({
         const file = new File([b], filename, { type: "image/png" });
         const nav = navigator as ShareNav;
         if (nav.share && nav.canShare?.({ files: [file] })) {
-          try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); return; }
+          try { await nav.share({ files: [file], text: captionNative, title: "GitHub Wrapped" }); return; }
           catch { /* user cancelled or share failed — fall through */ }
         }
       }
     }
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(caption)}`, "_blank", "noopener");
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
   const onLinkedIn = async () => {
     const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
@@ -206,12 +209,12 @@ export default function ShareModal({
         const file = new File([b], filename, { type: "image/png" });
         const nav = navigator as ShareNav;
         if (nav.share && nav.canShare?.({ files: [file] })) {
-          try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); return; }
+          try { await nav.share({ files: [file], text: captionNative, title: "GitHub Wrapped" }); return; }
           catch { /* user cancelled or share failed — fall through */ }
         }
       }
     }
-    window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(caption)}`, "_blank", "noopener");
+    window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
   const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn };
 
@@ -323,8 +326,8 @@ export default function ShareModal({
               </div>
             </div>
 
-            {/* ── scope toggle ── */}
-            <div className="mt-4 px-4">
+            {/* ── scope toggle — desktop only; mobile keeps card always ── */}
+            <div className="mt-4 px-4 hidden lg:block">
               <div className="relative flex items-center rounded-full py-[3px]"
                    style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.07)" }}>
                 {/* sliding pill — pure CSS transform, no layout recalc */}

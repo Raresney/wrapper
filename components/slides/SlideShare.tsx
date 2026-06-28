@@ -101,6 +101,47 @@ function formatNum(n: number): string {
   return n.toString();
 }
 
+function WorldCupMiniNewspaper({ username, caption }: { username: string; caption?: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-[3px] border border-[#8a7a58] bg-[#f3ecdc] p-2 text-[#22170f] shadow-[0_16px_32px_rgba(0,0,0,0.35)]">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-multiply"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "120px",
+        }}
+      />
+      <div className="relative">
+        <div className="flex items-center justify-between border-b border-zinc-900/60 pb-1 text-[4.5px] font-bold tracking-[0.18em] text-zinc-600">
+          <span>FINAL EDITION</span>
+          <span>PAW POST</span>
+        </div>
+        <div className="mt-1 text-center font-serif text-[15px] font-black leading-none tracking-tight text-zinc-900">
+          CHAMPIONS!
+        </div>
+        <p className="mt-1 text-center text-[9.5px] font-semibold italic leading-snug text-zinc-800">
+          {caption ?? "Purple Paws FC lift the trophy and own the headlines."}
+        </p>
+        <div className="mt-1.5 grid grid-cols-[1fr_auto] gap-1 border-t border-zinc-700/35 pt-1.5">
+          <div>
+            <p className="text-[5.5px] font-black uppercase tracking-[0.16em] text-zinc-800">By @{username}</p>
+            <div className="mt-1 flex flex-col gap-[2px]">
+              {[92, 100, 86].map((w, i) => (
+                <div key={i} className="h-[2px] rounded-[1px] bg-zinc-700/30" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+          </div>
+          <div className="self-start rounded-[2px] border border-zinc-900/70 px-1.5 py-1 text-center">
+            <div className="text-[5px] font-bold tracking-[0.16em] text-zinc-600">FT</div>
+            <div className="text-[10px] font-black leading-none text-zinc-900">2-1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type PlanetPalette = { a: string; b: string; glow: string };
 
 type PlanetSpec = {
@@ -657,9 +698,11 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
 export default function SlideShare({
   profile,
   showStartOver = true,
+  mobileCaptionVariant = "planet",
 }: {
   profile: WrappedProfile;
   showStartOver?: boolean;
+  mobileCaptionVariant?: "planet" | "worldcup-newspaper";
 }) {
   const flat = mapToFlat(profile);
   const ageLabel = formatGitHubAge(profile.metrics.githubAge);
@@ -719,6 +762,7 @@ export default function SlideShare({
   const RARITY_RANK: Record<string, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
   const grade = badgesEarned[0]?.rarity ?? "rare";
   const stars = RARITY_RANK[grade] ?? 3;
+  const showWorldCupMiniNewspaper = mobileCaptionVariant === "worldcup-newspaper";
 
   const startOver = () => {
     try { sessionStorage.removeItem("wrappedProfile"); } catch {}
@@ -829,34 +873,36 @@ export default function SlideShare({
             </div>
           </SlideCard>
 
-          {/* mobile: planet caption below the card */}
+          {/* mobile footer below the card */}
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1.2 }}
-            className="flex-none mt-2 w-[min(300px,84vw)] lg:hidden"
+            className="flex-none mt-1.5 w-[min(300px,84vw)] pb-2 lg:hidden"
           >
-            <div className="rounded-2xl p-[2px]" style={{
-              background: `${palette.a}80`,
-              boxShadow: `0 0 28px ${palette.a}70, 0 0 56px ${palette.a}38, 0 10px 44px rgba(0,0,0,0.55)`,
-            }}>
-              <div className="rounded-[calc(0.75rem-2px)] px-3 py-2 text-center" style={{
-                background: `linear-gradient(160deg, rgba(5,3,18,0.97), rgba(10,6,26,0.95))`,
-                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.07)`,
+            {showWorldCupMiniNewspaper ? null : (
+              <div className="rounded-2xl p-[2px]" style={{
+                background: `${palette.a}80`,
+                boxShadow: `0 0 28px ${palette.a}70, 0 0 56px ${palette.a}38, 0 10px 44px rgba(0,0,0,0.55)`,
               }}>
-                <p className="text-[8px] uppercase tracking-[0.28em]" style={{ color: palette.a }}>
-                  {ARCHETYPE_PLANET_TYPES[profile.archetypeBlend.primary.id] ?? "Planet"}
-                </p>
-                <p className="mt-0.5 text-sm italic" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "serif" }}>@{flat.username}</p>
-                {shareCaption && (
-                  <>
-                    <div className="mx-auto my-1.5 h-px w-6"
-                      style={{ background: `linear-gradient(90deg, transparent, ${palette.a}75, transparent)` }} />
-                    <p className="text-[10px] leading-snug" style={{ color: "rgba(212,212,228,0.80)" }}>{shareCaption}</p>
-                  </>
-                )}
+                <div className="rounded-[calc(0.75rem-2px)] px-3 py-2 text-center" style={{
+                  background: `linear-gradient(160deg, rgba(5,3,18,0.97), rgba(10,6,26,0.95))`,
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.07)`,
+                }}>
+                  <p className="text-[8px] uppercase tracking-[0.28em]" style={{ color: palette.a }}>
+                    {ARCHETYPE_PLANET_TYPES[profile.archetypeBlend.primary.id] ?? "Planet"}
+                  </p>
+                  <p className="mt-0.5 text-sm italic" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "serif" }}>@{flat.username}</p>
+                  {shareCaption && (
+                    <>
+                      <div className="mx-auto my-1.5 h-px w-6"
+                        style={{ background: `linear-gradient(90deg, transparent, ${palette.a}75, transparent)` }} />
+                      <p className="text-[10px] leading-snug" style={{ color: "rgba(212,212,228,0.80)" }}>{shareCaption}</p>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </motion.div>
         </motion.div>
 
@@ -867,6 +913,18 @@ export default function SlideShare({
           </PlanetStage>
         </motion.div>
       </div>
+      {showWorldCupMiniNewspaper && (
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 1.2 }}
+          className="absolute inset-x-0 bottom-[58px] z-20 flex justify-center px-4 lg:hidden"
+        >
+          <div className="w-[min(260px,72vw)]">
+            <WorldCupMiniNewspaper username={flat.username} caption={shareCaption} />
+          </div>
+        </motion.div>
+      )}
 
     </main>
     <BadgePopover

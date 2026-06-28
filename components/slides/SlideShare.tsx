@@ -832,25 +832,25 @@ export default function SlideShare({
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1.2 }}
-            className="flex-none mt-3 w-[min(405px,92vw)] lg:hidden"
+            className="flex-none mt-2 w-[min(300px,84vw)] lg:hidden"
           >
-            <div className="rounded-[1.5rem] p-[2px]" style={{
+            <div className="rounded-2xl p-[2px]" style={{
               background: `${palette.a}80`,
               boxShadow: `0 0 28px ${palette.a}70, 0 0 56px ${palette.a}38, 0 10px 44px rgba(0,0,0,0.55)`,
             }}>
-              <div className="rounded-[calc(1.5rem-2px)] px-4 py-3 text-center" style={{
+              <div className="rounded-[calc(0.75rem-2px)] px-3 py-2 text-center" style={{
                 background: `linear-gradient(160deg, rgba(5,3,18,0.97), rgba(10,6,26,0.95))`,
                 boxShadow: `inset 0 1px 0 rgba(255,255,255,0.07)`,
               }}>
-                <p className="text-[9px] uppercase tracking-[0.28em]" style={{ color: palette.a }}>
+                <p className="text-[8px] uppercase tracking-[0.28em]" style={{ color: palette.a }}>
                   {ARCHETYPE_PLANET_TYPES[profile.archetypeBlend.primary.id] ?? "Planet"}
                 </p>
-                <p className="mt-0.5 text-base italic" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "serif" }}>@{flat.username}</p>
+                <p className="mt-0.5 text-sm italic" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "serif" }}>@{flat.username}</p>
                 {shareCaption && (
                   <>
-                    <div className="mx-auto my-2 h-px w-8"
+                    <div className="mx-auto my-1.5 h-px w-6"
                       style={{ background: `linear-gradient(90deg, transparent, ${palette.a}75, transparent)` }} />
-                    <p className="text-[11px] leading-snug" style={{ color: "rgba(212,212,228,0.80)" }}>{shareCaption}</p>
+                    <p className="text-[10px] leading-snug" style={{ color: "rgba(212,212,228,0.80)" }}>{shareCaption}</p>
                   </>
                 )}
               </div>

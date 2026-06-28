@@ -152,14 +152,14 @@ const cardItem = {
 function StatBox({ label, value, accent }: { label: string; value: number | string; accent: string }) {
   return (
     <div
-      className="rounded-xl px-2 py-1.5 lg:px-2.5 lg:py-2"
+      className="rounded-lg px-1.5 py-1 lg:px-2.5 lg:py-2"
       style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}28` }}
     >
-      <div className="text-[9px] uppercase tracking-[0.18em]" style={{ color: `${ACCENT}70` }}>
+      <div className="text-[8px] uppercase tracking-[0.15em]" style={{ color: `${ACCENT}70` }}>
         {label}
       </div>
       <div
-        className="text-base lg:text-xl font-bold tabular-nums"
+        className="text-sm lg:text-xl font-bold tabular-nums"
         style={{ color: accent, textShadow: `0 0 12px ${accent}80` }}
       >
         {value}
@@ -178,8 +178,8 @@ function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: s
       className="relative mt-0 w-full max-w-[380px] text-white"
     >
       <SlideCard accentColor={ACCENT}>
-        <div className="absolute top-4 right-4 z-20 pointer-events-none">
-          <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+        <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+          <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
             <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
           </span>
         </div>
@@ -198,7 +198,7 @@ function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: s
         </motion.div>
 
         {flat.bio && (
-          <motion.p variants={cardItem} className="mt-3 text-sm leading-relaxed text-white/60">
+          <motion.p variants={cardItem} className="mt-2 text-xs lg:text-sm leading-relaxed text-white/60">
             {flat.bio}
           </motion.p>
         )}

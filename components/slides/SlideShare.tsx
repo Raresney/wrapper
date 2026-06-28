@@ -798,30 +798,30 @@ export default function SlideShare({
               <p className="mt-2 text-xs lg:text-sm font-semibold leading-snug" style={{ color: palette.a }}>&ldquo;{roastLine}&rdquo;</p>
             )}
             <p className="mt-2 whitespace-pre-line text-xs lg:text-sm italic leading-relaxed text-zinc-300">{narrativeText}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-1 lg:gap-2">
               {badgesEarned.map((b) => (
                 <button key={b.id} type="button"
                   onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
                   aria-haspopup="dialog"
                   aria-label={`${b.label} badge — show what it means`}
-                  className="inline-flex cursor-pointer items-center gap-1 lg:gap-1.5 rounded-full border px-2.5 py-1 lg:px-3.5 lg:py-1.5 text-xs lg:text-sm text-zinc-100 whitespace-nowrap transition-transform duration-150 hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  className="inline-flex cursor-pointer items-center gap-0.5 lg:gap-1.5 rounded-full border px-2 py-0.5 lg:px-3.5 lg:py-1.5 text-[10px] lg:text-sm text-zinc-100 whitespace-nowrap transition-transform duration-150 hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   style={{ borderColor: `${b.color}55`, background: `${b.color}14`, boxShadow: `0 0 12px ${b.color}44` }}>
                   <span style={{ color: b.color }}><Glyph name={b.icon as GlyphName} size={14} /></span>
                   {b.label}
                 </button>
               ))}
             </div>
-            <div className="mt-3 grid grid-cols-4 gap-1.5">
+            <div className="mt-2 grid grid-cols-4 gap-1">
               {[
                 { n: formatNum(flat.totalCommits), l: "commits" },
                 { n: formatNum(flat.totalLinesOfCode), l: "lines" },
                 { n: formatNum(flat.pullRequests.merged), l: "PRs" },
                 { n: formatNum(flat.totalRepos), l: "repos" },
               ].map((s) => (
-                <div key={s.l} className="rounded-lg border px-2 py-1.5 text-center"
+                <div key={s.l} className="rounded-md border px-1 py-1 text-center"
                   style={{ borderColor: "rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.04)" }}>
-                  <p className="text-sm font-semibold text-zinc-50">{s.n}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-zinc-400">{s.l}</p>
+                  <p className="text-xs lg:text-sm font-semibold text-zinc-50">{s.n}</p>
+                  <p className="text-[8px] uppercase tracking-widest text-zinc-400">{s.l}</p>
                 </div>
               ))}
             </div>

@@ -152,14 +152,14 @@ const cardItem = {
 function StatBox({ label, value, accent }: { label: string; value: number | string; accent: string }) {
   return (
     <div
-      className="rounded-xl px-2.5 py-2"
+      className="rounded-xl px-2 py-1.5 lg:px-2.5 lg:py-2"
       style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}28` }}
     >
       <div className="text-[9px] uppercase tracking-[0.18em]" style={{ color: `${ACCENT}70` }}>
         {label}
       </div>
       <div
-        className="text-xl font-bold tabular-nums"
+        className="text-base lg:text-xl font-bold tabular-nums"
         style={{ color: accent, textShadow: `0 0 12px ${accent}80` }}
       >
         {value}
@@ -188,12 +188,12 @@ function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: s
           <img
             src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`}
             alt={flat.username}
-            className="h-10 w-10 rounded-full border-2 shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+            className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border-2 shadow-[0_0_20px_rgba(139,92,246,0.4)]"
             style={{ borderColor: `${ACCENT}80` }}
           />
           <div>
-            <div className="text-base font-bold">@{flat.username}</div>
-            <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
+            <div className="text-sm lg:text-base font-bold">@{flat.username}</div>
+            <div className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
           </div>
         </motion.div>
 
@@ -208,7 +208,7 @@ function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: s
             Total commits
           </div>
           <div
-            className="text-4xl font-black tracking-tight"
+            className="text-2xl lg:text-4xl font-black tracking-tight"
             style={{
               background: "linear-gradient(90deg,#c4b5fd,#a78bfa,#818cf8)",
               WebkitBackgroundClip: "text",

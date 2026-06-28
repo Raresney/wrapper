@@ -99,17 +99,17 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
             <ChapterHeadingMobile n={6} title="Trophy Haul" />
           </div>
           <SlideCard accentColor={ACCENT} compact>
-            <div className="absolute top-4 right-4 z-20 pointer-events-none">
-              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+              <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
               </span>
             </div>
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-2 lg:gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={flat.avatarUrl || avatarUrl(flat.username)} alt={`@${flat.username}`} className="size-10 rounded-full border border-white/10 bg-white/5" width={40} height={40} />
+              <img src={flat.avatarUrl || avatarUrl(flat.username)} alt={`@${flat.username}`} className="size-8 lg:size-10 rounded-full border border-white/10 bg-white/5" width={32} height={32} />
               <div className="min-w-0">
-                <div className="truncate text-base font-bold">@{flat.username}</div>
-                <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
+                <div className="truncate text-sm lg:text-base font-bold">@{flat.username}</div>
+                <div className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
@@ -209,7 +209,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
         </motion.div>
       </div>
 
-      <style>{`main .bg-gradient-to-br.text-transparent { font-size: 44px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }`}</style>
+      <style>{`main .bg-gradient-to-br.text-transparent { font-size: 44px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; } @media (max-width: 1023px) { main .bg-gradient-to-br.text-transparent { font-size: 28px; } }`}</style>
     </main>
     <BadgePopover
       badge={openBadge?.badge ?? null}

@@ -24,7 +24,7 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
         ref={ref}
         data-share-card
         data-accent={accentColor}
-        className={`relative flex flex-col overflow-hidden rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(340px,88vw)] flex-1 min-h-0 lg:max-h-none lg:w-[min(380px,92vw)] lg:h-[min(580px,84vh)] lg:flex-none ${className}`}
+        className={`relative flex flex-col overflow-hidden rounded-2xl lg:rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(300px,84vw)] h-auto lg:max-h-none lg:w-[min(380px,92vw)] lg:h-[min(580px,84vh)] lg:flex-none ${className}`}
         style={{
           ...(sizeStyle?.width  && { width:  sizeStyle.width }),
           ...(sizeStyle?.height && { height: sizeStyle.height }),
@@ -50,7 +50,7 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
         />
 
         {/* scrollable content area */}
-        <div className="relative flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-5 pb-5 pt-5">
+        <div className="relative flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 pb-3 pt-3 lg:px-5 lg:pb-5 lg:pt-5">
           {children}
         </div>
 

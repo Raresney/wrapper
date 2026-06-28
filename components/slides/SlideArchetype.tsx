@@ -106,7 +106,7 @@ function DanceFloor({ sparse = false }: { sparse?: boolean }) {
 function StatItem({ label, value }: { label: string; value: number }) {
   return (
     <div className="px-2">
-      <div className="text-lg font-black tabular-nums"><CountUpInner value={value} /></div>
+      <div className="text-base lg:text-lg font-black tabular-nums"><CountUpInner value={value} /></div>
       <div className="text-[10px] uppercase tracking-wider text-white/50">{label}</div>
     </div>
   );
@@ -161,18 +161,18 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
             <ChapterHeadingMobile n={7} title="The Reveal" />
           </div>
           <SlideCard accentColor={ACCENT} compact>
-            <div className="absolute top-4 right-4 z-20 pointer-events-none">
-              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+              <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 lg:gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}
-                alt={flat.username} className="h-10 w-10 rounded-full border border-white/10 bg-white/5" width={40} height={40} />
+                alt={flat.username} className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border border-white/10 bg-white/5" width={32} height={32} />
               <div className="min-w-0">
-                <div className="truncate text-base font-bold">@{flat.username}</div>
-                <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
+                <div className="truncate text-sm lg:text-base font-bold">@{flat.username}</div>
+                <div className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
               </div>
             </div>
             <div className="mt-3 flex">
@@ -184,7 +184,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, type: "spring", stiffness: 180, damping: 18 }}
               className="mt-3 flex items-baseline gap-2">
-              <div className="leading-none" style={{ fontSize: 44, fontWeight: 900, background: "linear-gradient(90deg,#ff3ea5,#a855f7,#22d3ee,#facc15,#ff3ea5)", backgroundSize: "300% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "arc7 6s linear infinite", letterSpacing: "-0.03em" }}>
+              <div className="leading-none text-[28px] lg:text-[44px]" style={{ fontWeight: 900, background: "linear-gradient(90deg,#ff3ea5,#a855f7,#22d3ee,#facc15,#ff3ea5)", backgroundSize: "300% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "arc7 6s linear infinite", letterSpacing: "-0.03em" }}>
                 <CountUpInner value={flat.traitBadges.length} />
               </div>
               <span className="text-[13px] text-white/55">of {flat.traitBadgesTotal} badges</span>
@@ -266,7 +266,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
                   initial={{ opacity: 0, scale: 0.4 }}
                   animate={{ opacity: [0, 0.9, 0], scale: [0.4, 1.6, 2.1] }}
                   transition={{ delay: 1.35, duration: 1.1, ease: "easeOut" }} />
-                <motion.div className="relative text-2xl font-black"
+                <motion.div className="relative text-xl lg:text-2xl font-black"
                   style={{ background: "linear-gradient(90deg,#facc15,#ff3ea5,#a855f7,#22d3ee)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "arc7b 5s linear infinite", letterSpacing: "0.02em" }}
                   initial={{ opacity: 0, scale: 0.7, filter: "blur(8px)" }}
                   animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}

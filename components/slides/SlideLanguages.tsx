@@ -264,19 +264,19 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
           <motion.div variants={stagger} initial="hidden" animate="show"
             className="flex flex-col flex-1 min-h-0 w-[min(380px,92vw)]">
             <SlideCard accentColor={ACCENT} compact className="text-white">
-              <div className="absolute top-4 right-4 z-20 pointer-events-none">
-                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+              <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+                <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                   <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
                 </span>
               </div>
-              <motion.div variants={item} className="flex items-center gap-3">
+              <motion.div variants={item} className="flex items-center gap-2 lg:gap-3">
                 <div className="rounded-full flex-shrink-0 overflow-hidden"
-                  style={{ width: 40, height: 40, background: flat.avatarUrl ? `url(${flat.avatarUrl}) center/cover` : "linear-gradient(135deg, #6366f1, #a855f7)", border: `1px solid ${ACCENT}40` }}>
-                  {!flat.avatarUrl && <div className="w-full h-full flex items-center justify-center text-white font-bold text-base">{flat.username.charAt(0).toUpperCase()}</div>}
+                  style={{ width: 32, height: 32, background: flat.avatarUrl ? `url(${flat.avatarUrl}) center/cover` : "linear-gradient(135deg, #6366f1, #a855f7)", border: `1px solid ${ACCENT}40` }}>
+                  {!flat.avatarUrl && <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">{flat.username.charAt(0).toUpperCase()}</div>}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-white font-bold text-base truncate">@{flat.username}</div>
-                  <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
+                  <div className="text-white font-bold text-sm lg:text-base truncate">@{flat.username}</div>
+                  <div className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
                 </div>
               </motion.div>
 
@@ -291,7 +291,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
               {hasLangs ? (
                 <>
                   <motion.div variants={item} className="mt-2 flex items-baseline gap-2">
-                    <span style={{ fontSize: 34, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.03em", color: topLang.color, textShadow: `0 0 20px ${topLang.color}80` }}>
+                    <span className="text-[22px] lg:text-[34px]" style={{ fontWeight: 900, lineHeight: 1, letterSpacing: "-0.03em", color: topLang.color, textShadow: `0 0 20px ${topLang.color}80` }}>
                       {topLang.name}
                     </span>
                     <span className="font-mono text-sm text-white/50">{topLang.percentage}%</span>

@@ -151,17 +151,17 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
           </div>
           <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="flex flex-col flex-1 min-h-0 w-full max-w-[380px]">
             <SlideCard accentColor={ACCENT} compact className="text-white">
-              <div className="absolute top-4 right-4 z-20 pointer-events-none">
-                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+              <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+                <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                   <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
                 </span>
               </div>
-              <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-3">
+              <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-2 lg:gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border border-white/15 bg-white/5 object-cover" />
+                <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border border-white/15 bg-white/5 object-cover" />
                 <div className="min-w-0">
-                  <div className="truncate text-base font-bold">@{flat.username}</div>
-                  <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
+                  <div className="truncate text-sm lg:text-base font-bold">@{flat.username}</div>
+                  <div className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
                 </div>
               </motion.div>
               <motion.div {...fadeUp} transition={{ delay: 0.35 }} className="mt-3">
@@ -173,7 +173,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
 
               <motion.div {...fadeUp} transition={{ delay: 0.4 }} className="mt-2 flex items-start justify-between gap-3">
                 <div className="leading-none">
-                  <div style={{ fontSize: 40, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.04em", background: "linear-gradient(120deg,#7cff8a 0%,#22d3ee 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+                  <div className="text-[26px] lg:text-[40px]" style={{ fontWeight: 900, lineHeight: 1, letterSpacing: "-0.04em", background: "linear-gradient(120deg,#7cff8a 0%,#22d3ee 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
                     <CountUp value={flat.totalCommits} />
                   </div>
                   <div className="mt-1 text-[11px] uppercase tracking-wider text-white/45">commits fired</div>
@@ -194,7 +194,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                 <>
                   <motion.div {...fadeUp} transition={{ delay: 0.55 }} className="mt-3">
                     <div className="mb-1 text-[10px] uppercase tracking-wider text-white/40">Top repository</div>
-                    <span className="truncate font-mono text-[20px] font-bold" style={{ background: "linear-gradient(120deg,#7cff8a,#22d3ee)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{top.name}</span>
+                    <span className="truncate font-mono text-[14px] lg:text-[20px] font-bold" style={{ background: "linear-gradient(120deg,#7cff8a,#22d3ee)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{top.name}</span>
                   </motion.div>
                   {top.description && (
                     <motion.p {...fadeUp} transition={{ delay: 0.45 }} className="mt-1 line-clamp-2 text-[12px] leading-snug text-white/55">{top.description}</motion.p>

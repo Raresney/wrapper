@@ -223,18 +223,18 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
             className="flex flex-col flex-1 min-h-0 w-[min(380px,92vw)]">
             <SlideCard accentColor={ACCENT} compact className="text-white">
-            <div className="absolute top-4 right-4 z-20 pointer-events-none">
-              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+              <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 lg:gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}
-                alt={flat.username} className="h-10 w-10 rounded-full border border-white/10 bg-white/5" width={40} height={40} />
+                alt={flat.username} className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border border-white/10 bg-white/5" width={32} height={32} />
               <div className="min-w-0 flex-1">
-                <div className="truncate text-base font-bold text-white">@{flat.username}</div>
-                <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
+                <div className="truncate text-sm lg:text-base font-bold text-white">@{flat.username}</div>
+                <div className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
               </div>
             </div>
             <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
@@ -245,7 +245,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
               <span className="text-[10px] font-medium uppercase tracking-wider text-white/70">Coding rhythm</span>
             </div>
             <div className="mt-3">
-              <style>{`.s5h span { font-size: 44px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }`}</style>
+              <style>{`.s5h span { font-size: 44px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; } @media (max-width: 1023px) { .s5h span { font-size: 28px; } }`}</style>
               <div className="s5h">
                 <CountUp value={loc > 0 ? loc : flat.totalCommits} className="block bg-gradient-to-br from-amber-300 via-yellow-200 to-orange-400 bg-clip-text text-transparent tabular-nums" />
               </div>

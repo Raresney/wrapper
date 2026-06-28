@@ -257,6 +257,13 @@ export default function WrappedPage() {
   // false→true firing an unnecessary second request on page refresh).
   const profileRef = useRef<WrappedProfile | null>(null);
   useEffect(() => { profileRef.current = profile; }, [profile]);
+
+  useEffect(() => {
+    const setAppH = () => document.documentElement.style.setProperty("--app-h", `${window.innerHeight}px`);
+    setAppH();
+    window.addEventListener("resize", setAppH);
+    return () => window.removeEventListener("resize", setAppH);
+  }, []);
   const didInitTheme = useRef(false);
   useEffect(() => {
     if (!didInitTheme.current) { didInitTheme.current = true; return; }
@@ -341,7 +348,7 @@ export default function WrappedPage() {
   const CurrentSlide = SLIDE_COMPONENTS[normalizedSlideState.current];
 
   return (
-    <div className="relative h-[100dvh] w-screen overflow-hidden"
+    <div className="relative h-[var(--app-h)] w-screen overflow-hidden"
       style={{ background: "#080612" }}
     >
       {/* world cup decorative layer â€" renders behind all content */}
@@ -394,8 +401,8 @@ export default function WrappedPage() {
       </div>
 
       {/* slide */}
-      {/* mobile: h-[100dvh] pins the area to exactly the viewport so bg fills edge-to-edge and the progress bar stays anchored at the bottom; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
-      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
+      {/* mobile: h-[var(--app-h)] pins the area to exactly the viewport so bg fills edge-to-edge and the progress bar stays anchored at the bottom; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
+      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[var(--app-h)] z-10 bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
         onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={e => {
           const d = e.changedTouches[0].clientX - touchStartX.current;

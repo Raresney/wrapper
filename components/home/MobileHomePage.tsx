@@ -82,23 +82,17 @@ export function MobileHomePage() {
       <MobileNav />
 
       <section className="relative flex flex-col items-center justify-end pb-4 pt-20" style={{ height: "var(--hero-height, 100svh)" }}>
-        {/* Theme background — switches between space and WorldCup */}
+        {/* Theme background — WC always visible underneath; Space fades in on top */}
         <div className="absolute inset-0">
-          <div
-            className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
-              ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
-            }`}
-            style={{ transitionDelay: ready && !worldCup && !animate ? "60ms" : "0ms" }}
-          >
-            <SpaceBackground />
-          </div>
-          <div
-            className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
-              ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
-          >
-            <WorldCupMobileBackground />
-          </div>
+          <WorldCupMobileBackground />
+        </div>
+        <div
+          className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+            ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+          style={{ transitionDelay: ready && !worldCup && !animate ? "60ms" : "0ms" }}
+        >
+          <SpaceBackground />
         </div>
 
         {/* Hero scene — space theme only, opacity-based to avoid bounding-box flash on mount */}

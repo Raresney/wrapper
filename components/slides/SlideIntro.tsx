@@ -309,9 +309,9 @@ function TransmissionLine({ message }: { message: string }) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
-      className="mt-4 w-full max-w-[380px]"
+      className="mt-2 w-full max-w-[300px]"
     >
-      <div className="relative overflow-hidden rounded-2xl px-4 py-3"
+      <div className="relative overflow-hidden rounded-xl px-3 py-2"
         style={{
           border: `1px solid ${ACCENT}66`,
           background: `linear-gradient(160deg, rgba(24,16,46,0.94), rgba(10,7,22,0.96))`,
@@ -324,7 +324,7 @@ function TransmissionLine({ message }: { message: string }) {
             Incoming transmission
           </span>
         </div>
-        <p className="mt-1.5 min-h-[2em] font-mono text-[12.5px] leading-relaxed text-zinc-200">
+        <p className="mt-1 min-h-[2em] font-mono text-[11px] leading-relaxed text-zinc-200">
           {displayedText}
           <motion.span className="ml-0.5 inline-block w-[7px]" style={{ color: ACCENT }}
             animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}>▋</motion.span>

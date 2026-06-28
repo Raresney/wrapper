@@ -257,18 +257,18 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
             className="flex flex-col flex-1 min-h-0 w-full max-w-[380px]">
             <SlideCard accentColor={ACCENT} compact className="text-white">
-              <div className="absolute top-4 right-4 z-20 pointer-events-none">
-                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+              <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+                <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                   <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
                 </span>
               </div>
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-2 lg:gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-10 w-10 rounded-full border"
+                <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${flat.username}`} alt={flat.username} className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border"
                   style={{ borderColor: `${ACCENT}55` }} />
                 <div>
-                  <div className="text-base font-bold text-white">@{flat.username}</div>
-                  <div className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
+                  <div className="text-sm lg:text-base font-bold text-white">@{flat.username}</div>
+                  <div className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</div>
                 </div>
               </motion.div>
 
@@ -277,9 +277,9 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                   <>
                     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
                       <div className="flex items-baseline justify-between">
-                        <span className="text-sm text-white/60">Pull requests merged</span>
+                        <span className="text-xs lg:text-sm text-white/60">Pull requests merged</span>
                         <div className="text-right">
-                          <span className="text-xl font-bold text-white">{prsMerged}</span>
+                          <span className="text-base lg:text-xl font-bold text-white">{prsMerged}</span>
                           {prsOpened > 100 && (
                             <span className="ml-1.5 text-[11px] text-white/35">of {prsOpened} opened</span>
                           )}

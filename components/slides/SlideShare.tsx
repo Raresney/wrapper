@@ -755,14 +755,14 @@ export default function SlideShare({
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={8} title="Your Planet" />
           </div>
-          <SlideCard ref={cardRef} accentColor={palette.a} compact sizeStyle={{ width: "min(405px, 92vw)" }}>
-            <div className="absolute top-4 right-4 z-20 pointer-events-none">
-              <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+          <SlideCard ref={cardRef} accentColor={palette.a} compact>
+            <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
+              <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>G</span>rind<span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>IT</span>
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative flex-shrink-0 h-10 w-10 overflow-hidden rounded-full text-base font-bold text-white flex items-center justify-center"
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="relative flex-shrink-0 h-8 w-8 lg:h-10 lg:w-10 overflow-hidden rounded-full text-sm font-bold text-white flex items-center justify-center"
                 style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 16px ${palette.glow}` }}>
                 {flat.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -770,13 +770,13 @@ export default function SlideShare({
                 ) : flat.username.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1">
-                <p className="text-base font-bold text-zinc-100">@{flat.username}</p>
-                <p className="text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</p>
+                <p className="text-sm lg:text-base font-bold text-zinc-100">@{flat.username}</p>
+                <p className="text-[9px] lg:text-[10px] text-white/50">{ageLabel}, {wrappedLabel}</p>
               </div>
             </div>
             <div className="mt-3 flex items-center justify-start gap-10">
-              <h1 className="font-extrabold leading-tight"
-                style={{ fontSize: 28, background: `linear-gradient(90deg, ${palette.b}, ${palette.a})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-0.02em" }}>
+              <h1 className="font-extrabold leading-tight text-[18px] lg:text-[28px]"
+                style={{ background: `linear-gradient(90deg, ${palette.b}, ${palette.a})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-0.02em" }}>
                 {archetype}
               </h1>
               <div className="flex flex-col items-center gap-1 flex-shrink-0">
@@ -795,16 +795,16 @@ export default function SlideShare({
               </div>
             </div>
             {roastLine && (
-              <p className="mt-2 text-sm font-semibold leading-snug" style={{ color: palette.a }}>&ldquo;{roastLine}&rdquo;</p>
+              <p className="mt-2 text-xs lg:text-sm font-semibold leading-snug" style={{ color: palette.a }}>&ldquo;{roastLine}&rdquo;</p>
             )}
-            <p className="mt-2 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">{narrativeText}</p>
+            <p className="mt-2 whitespace-pre-line text-xs lg:text-sm italic leading-relaxed text-zinc-300">{narrativeText}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {badgesEarned.map((b) => (
                 <button key={b.id} type="button"
                   onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
                   aria-haspopup="dialog"
                   aria-label={`${b.label} badge — show what it means`}
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm text-zinc-100 whitespace-nowrap transition-transform duration-150 hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  className="inline-flex cursor-pointer items-center gap-1 lg:gap-1.5 rounded-full border px-2.5 py-1 lg:px-3.5 lg:py-1.5 text-xs lg:text-sm text-zinc-100 whitespace-nowrap transition-transform duration-150 hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   style={{ borderColor: `${b.color}55`, background: `${b.color}14`, boxShadow: `0 0 12px ${b.color}44` }}>
                   <span style={{ color: b.color }}><Glyph name={b.icon as GlyphName} size={14} /></span>
                   {b.label}

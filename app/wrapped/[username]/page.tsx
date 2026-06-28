@@ -453,15 +453,20 @@ export default function WrappedPage() {
                     <WorldCupSlideBackground />
                   </div>
                   {/* Mobile-only: WC chapter heading centered above card (wc-pawcup-scene is hidden on mobile) */}
-                  <div className="wc-chapter-heading-mobile-wrap lg:hidden absolute inset-x-0 z-40 flex justify-center" style={{ top: "64px" }}>
+                  <div className="wc-chapter-heading-mobile-wrap lg:hidden absolute inset-x-0 z-40 flex justify-center" style={{ top: "18px" }}>
                     <WorldCupChapterHeading index={normalizedSlideState.index} />
                   </div>
                   <div className="wc-pawcup-scene absolute inset-0">
                     <WorldCupSlide index={normalizedSlideState.index} profile={profile} wcSpeech={wcSpeech} wcSpeechLoading={wcSpeechLoading} />
                   </div>
-                  <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={normalizedSlideState.current}>
+                  <div
+                    className="wc-original-card-layer absolute inset-x-0 bottom-0 top-[76px] z-30 sm:top-[88px] lg:inset-0"
+                    data-wc-slide={normalizedSlideState.current}
+                  >
                     {normalizedSlideState.current === "archetype"
                       ? <SlideArchetype profile={profile} sparse />
+                      : normalizedSlideState.current === "intro"
+                        ? <SlideIntro profile={profile} mobileFooterLabel="Champion's Inscription" />
                       : normalizedSlideState.current === "share"
                         ? <SlideShare profile={profile} showStartOver={false} />
                         : <CurrentSlide profile={profile} />}

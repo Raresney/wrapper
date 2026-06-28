@@ -70,10 +70,10 @@ export default function Slide8({ profile, speech, speechLoading }: {
       <FlagColumn items={LEFT} side="left" />
       <FlagColumn items={RIGHT} side="right" />
 
-      <div data-wc-center-card className="absolute inset-0 z-20 flex items-center justify-center px-4 pointer-events-none">
+      <div data-wc-center-card className="absolute inset-0 z-20 flex items-start justify-center px-4 pt-[96px] pointer-events-none sm:pt-[108px] lg:items-center lg:pt-0">
         {award && profile ? (
           <div
-            className="relative w-[430px] min-h-[540px] max-w-[90vw] overflow-hidden rounded-3xl pointer-events-auto"
+            className="relative w-[min(286px,82vw)] max-w-[82vw] overflow-hidden rounded-[26px] pointer-events-auto sm:w-[min(300px,84vw)] sm:max-w-[84vw] lg:w-[430px] lg:max-w-[90vw] lg:rounded-3xl"
             style={{
               background: "rgba(10,4,24,0.94)",
               border: `1px solid ${award.border}`,
@@ -93,10 +93,10 @@ export default function Slide8({ profile, speech, speechLoading }: {
               style={{ background: award.glow }}
             />
 
-            <div className="relative p-6 pb-5">
+            <div className="relative px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5 lg:p-6 lg:pb-5">
               {/* GrindIT logo — top right */}
-              <div className="absolute top-5 right-5 pointer-events-none">
-                <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
+              <div className="absolute right-4 top-4 pointer-events-none sm:right-5 sm:top-5">
+                <span className="text-[16px] font-bold tracking-tight sm:text-[18px] lg:text-[20px]" style={{ color: "rgba(255,255,255,0.85)" }}>
                   <span style={{ color: award.color, textShadow: `0 0 14px ${award.color}aa` }}>G</span>rind<span style={{ color: award.color, textShadow: `0 0 14px ${award.color}aa` }}>IT</span>
                 </span>
               </div>
@@ -104,13 +104,13 @@ export default function Slide8({ profile, speech, speechLoading }: {
               {/* header row */}
               <div>
                 <div
-                  className="text-[9px] font-black tracking-[0.55em] mb-0.5"
+                  className="mb-0.5 text-[7px] font-black tracking-[0.42em] sm:text-[8px] lg:text-[9px] lg:tracking-[0.55em]"
                   style={{ color: `${award.color}99` }}
                 >
                   WORLD CUP 2026
                 </div>
                 <div
-                  className="text-[11px] font-semibold tracking-[0.22em]"
+                  className="text-[9px] font-semibold tracking-[0.16em] sm:text-[10px] lg:text-[11px] lg:tracking-[0.22em]"
                   style={{ color: `${award.color}77` }}
                 >
                   INDIVIDUAL AWARD
@@ -118,10 +118,10 @@ export default function Slide8({ profile, speech, speechLoading }: {
               </div>
 
               {/* award name + badge aligned */}
-              <div className="mt-4 flex items-center justify-between gap-3">
+              <div className="mt-3 flex items-center justify-between gap-2.5 sm:mt-4 sm:gap-3">
                 <div>
                   <div
-                    className="text-[30px] font-black leading-none tracking-tight"
+                    className="text-[22px] font-black leading-none tracking-tight sm:text-[24px] lg:text-[30px]"
                     style={{
                       color: award.color,
                       textShadow: `0 0 40px ${award.glow}`,
@@ -129,13 +129,13 @@ export default function Slide8({ profile, speech, speechLoading }: {
                   >
                     {award.name}
                   </div>
-                  <div className="mt-1 text-[11px] font-semibold tracking-[0.25em] text-white/50 uppercase">
+                  <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/50 sm:text-[10px] lg:text-[11px] lg:tracking-[0.25em]">
                     {award.subtitle}
                   </div>
                 </div>
                 {/* award icon — aligned with title */}
                 <div
-                  className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl"
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 lg:h-14 lg:w-14 lg:rounded-2xl"
                   style={{
                     background: `${award.color}18`,
                     border: `1px solid ${award.border}`,
@@ -143,13 +143,13 @@ export default function Slide8({ profile, speech, speechLoading }: {
                     boxShadow: `0 0 24px ${award.glow}`,
                   }}
                 >
-                  <AwardIcon id={award.id} className="h-8 w-8" />
+                  <AwardIcon id={award.id} className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8" />
                 </div>
               </div>
 
               {/* recipient */}
               <div
-                className="mt-4 flex items-center gap-3 rounded-xl px-4 py-2.5"
+                className="mt-3 flex items-center gap-2.5 rounded-lg px-3 py-2 sm:mt-4 sm:gap-3 sm:rounded-xl sm:px-4 sm:py-2.5"
                 style={{
                   background: `${award.color}0d`,
                   border: `1px solid ${award.border}`,
@@ -160,28 +160,28 @@ export default function Slide8({ profile, speech, speechLoading }: {
                   <img
                     src={profile.user.avatarUrl}
                     alt={profile.user.login}
-                    className="h-9 w-9 rounded-full ring-2"
+                    className="h-8 w-8 rounded-full ring-2 sm:h-9 sm:w-9"
                     style={{ "--tw-ring-color": award.color } as React.CSSProperties}
                     draggable={false}
                   />
                 )}
                 <div>
-                  <div className="text-[10px] tracking-[0.3em] text-white/40">AWARDED TO</div>
-                  <div className="text-[15px] font-bold text-white">@{profile.user.login}</div>
+                  <div className="text-[8px] tracking-[0.22em] text-white/40 sm:text-[9px] lg:text-[10px] lg:tracking-[0.3em]">AWARDED TO</div>
+                  <div className="text-[13px] font-bold text-white sm:text-[14px] lg:text-[15px]">@{profile.user.login}</div>
                 </div>
               </div>
 
               {/* key stat */}
               <div
-                className="mt-3 rounded-xl px-4 py-3 text-center"
+                className="mt-3 rounded-lg px-3 py-2.5 text-center sm:rounded-xl sm:px-4 sm:py-3"
                 style={{
                   background: `linear-gradient(135deg, ${award.color}12, transparent)`,
                   border: `1px solid ${award.border}`,
                 }}
               >
-                <div className="text-[8px] tracking-[0.4em] text-white/35 mb-1">KEY STAT</div>
+                <div className="mb-1 text-[7px] tracking-[0.28em] text-white/35 sm:text-[8px] lg:tracking-[0.4em]">KEY STAT</div>
                 <div
-                  className="text-[17px] font-black leading-tight"
+                  className="text-[14px] font-black leading-tight sm:text-[15px] lg:text-[17px]"
                   style={{ color: award.color }}
                 >
                   {award.keyStat(profile)}
@@ -189,23 +189,23 @@ export default function Slide8({ profile, speech, speechLoading }: {
               </div>
 
               {/* LLM speech */}
-              <div className="mt-4 min-h-[72px]">
+              <div className="mt-3 min-h-[56px] sm:mt-4 sm:min-h-[64px] lg:min-h-[72px]">
                 {speechLoading ? (
                   <div className="flex items-center gap-2">
                     <div
                       className="h-1.5 w-1.5 rounded-full animate-pulse"
                       style={{ background: award.color }}
                     />
-                    <span className="text-[10px] tracking-widest text-white/30">
+                    <span className="text-[9px] tracking-[0.18em] text-white/30 sm:text-[10px] lg:tracking-widest">
                       PRESENTING AWARD…
                     </span>
                   </div>
                 ) : speech ? (
-                  <p className="text-[12px] leading-relaxed text-white/70 italic">
+                  <p className="text-[10px] leading-relaxed text-white/70 italic sm:text-[11px] lg:text-[12px]">
                     &ldquo;{speech}&rdquo;
                   </p>
                 ) : (
-                  <p className="text-[12px] leading-relaxed text-white/50 italic">
+                  <p className="text-[10px] leading-relaxed text-white/50 italic sm:text-[11px] lg:text-[12px]">
                     &ldquo;A performance for the ages. World Cup 2026 crowns its newest legend.&rdquo;
                   </p>
                 )}

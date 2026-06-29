@@ -55,9 +55,10 @@ export async function POST(request: Request) {
   const rawDataWithTone = rawData as GitHubRawData & { tone?: unknown };
   const { searchParams } = new URL(request.url);
   const tone = parseTone(searchParams.get("tone") ?? rawDataWithTone.tone);
+  const clientToday = searchParams.get("clientToday") ?? undefined;
 
   try {
-    const metrics = calculateMetrics(rawData);
+    const metrics = calculateMetrics(rawData, clientToday);
     const achievements = calculateAchievements(rawData, metrics);
     const archetypeBlend = calculateArchetypeBlend(rawData, metrics);
     const insights = selectInsights(rawData, metrics, achievements);

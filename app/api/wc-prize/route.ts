@@ -324,7 +324,7 @@ export async function POST(request: NextRequest) {
 
   if (!apiKey) {
     return NextResponse.json(
-      { speech: getFallback(awardName, username, keyStat) },
+      { speech: getFallback(awardName, username, keyStat), isFallback: true },
       { status: 200 },
     );
   }
@@ -379,8 +379,9 @@ export async function POST(request: NextRequest) {
     console.log("[wc-prize] attempt 3 (fallback model):", speech ? "OK" : "FAILED");
   }
 
+  const isFallback = !speech;
   return NextResponse.json(
-    { speech: speech ?? getFallback(awardName, username, keyStat) },
+    { speech: speech ?? getFallback(awardName, username, keyStat), isFallback },
     { status: 200 },
   );
 }

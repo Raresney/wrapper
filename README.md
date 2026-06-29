@@ -94,7 +94,7 @@ lib/
   theme-context.tsx         # React context for active theme (default / World Cup)
   groq.ts                   # Groq API client for narrative generation
   fallbackNarrative.ts      # Static fallback if Groq is unavailable
-  captureElement.ts         # DOM → PNG screenshot helpers (captureElement, captureDesktopElement)
+  captureElement.ts         # DOM → PNG screenshot helper (captureElement)
   datetime.ts               # Date utility helpers
   validation.ts             # Input validation (username, period, tone)
   rate-limit.ts             # Simple in-memory rate limiter for API routes
@@ -255,14 +255,20 @@ Every slide is wrapped in `<SlideCard>` which sets `data-share-card` on the root
 
 | Action | Behaviour |
 |---|---|
-| **Save** | Downloads PNG via `captureElement` / `captureDesktopElement` |
+| **Save** | Downloads PNG via `captureElement` |
 | **Copy** | Copies PNG to clipboard |
 | **Post on X** | Opens `twitter.com/intent/tweet` with caption |
 | **LinkedIn** | Opens LinkedIn share with caption |
 
 Caption is built from `username`, `isWorldCup`, and optionally `NEXT_PUBLIC_APP_URL` (for the recap link).
 
-`captureElement` is client-side only (uses `modern-screenshot`). It targets `[data-share-card]`. On mobile (<1024px wide) `captureDesktopElement` is used instead (scales the card first).
+`captureElement` is client-side only (uses `modern-screenshot`). It captures the **live DOM** — exactly what's on screen — for both `card` and `slide` scopes, on desktop **and** mobile. The mobile scope toggle (card / full slide) is enabled for both themes.
+
+- **Space card** → the live `[data-share-card]` is cloned and composited on the accent gradient (with stars + watermark).
+- **World Cup card** → the visible card (`.wc-original-card-layer [data-share-card]`) is cropped from the live slide with a dark vignette, keeping the real stadium backdrop.
+- **Full slide** (either theme) → the live slide root is captured as-is.
+
+(There is no longer an off-screen desktop-layout render path; mobile shares now reflect the actual mobile layout.)
 
 ---
 

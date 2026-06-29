@@ -243,6 +243,15 @@ export default function WrappedPage() {
 
 
   const fetchNarrative = useCallback(async (p: WrappedProfile, wc: boolean) => {
+    const cacheKey = wc ? "narrative:worldcup" : "narrative:space";
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const narrative = JSON.parse(cached) as WrappedProfile["narrative"];
+        setProfile(prev => prev ? { ...prev, narrative } : prev);
+        return; // only skip fetch if parse succeeded
+      } catch { /* corrupt cache — fall through to fetch */ }
+    }
     setNarrativeLoading(true);
     try {
       const res = await fetch(`/api/narrative?theme=${wc ? "worldcup" : "space"}`, {
@@ -251,15 +260,23 @@ export default function WrappedPage() {
       });
       if (!res.ok) return;
       const data = (await res.json()) as WrappedProfile;
-      setProfile(prev => prev ? { ...prev, narrative: data.narrative } : prev);
+      if (data.narrative) {
+        // Don't cache fallbacks — next refresh should retry the real LLM call.
+        if (!data.narrative.isFallback) {
+          sessionStorage.setItem(cacheKey, JSON.stringify(data.narrative));
+        }
+        setProfile(prev => prev ? { ...prev, narrative: data.narrative } : prev);
+      }
     } catch { /* narrative is optional */ }
     finally { setNarrativeLoading(false); }
   }, []);
 
   const fetchWcSpeech = useCallback(async (p: WrappedProfile) => {
     if (wcSpeechFetched.current) return;
-    const award = determineAward(p);
     wcSpeechFetched.current = true;
+    const cached = sessionStorage.getItem("wcSpeech");
+    if (cached) { setWcSpeech(cached); return; }
+    const award = determineAward(p);
     setWcSpeechLoading(true);
     try {
       const res = await fetch("/api/wc-prize", {
@@ -274,8 +291,11 @@ export default function WrappedPage() {
         }),
       });
       if (!res.ok) return;
-      const data = (await res.json()) as { speech?: string };
-      setWcSpeech(data.speech ?? null);
+      const data = (await res.json()) as { speech?: string; isFallback?: boolean };
+      if (data.speech) {
+        if (!data.isFallback) sessionStorage.setItem("wcSpeech", data.speech);
+        setWcSpeech(data.speech);
+      }
     } catch { /* optional */ }
     finally { setWcSpeechLoading(false); }
   }, []);
@@ -509,6 +529,7 @@ export default function WrappedPage() {
               <div className="relative h-full w-full overflow-hidden">
                 {/* space theme — h-full on mobile fills the container; absolute inset-0 on desktop */}
                 <div
+                  data-share-layer="space"
                   className={`relative h-full w-full lg:absolute lg:inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
                     ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
                   }`}
@@ -519,12 +540,13 @@ export default function WrappedPage() {
                 </div>
                 {/* WC theme — absolute overlay over space theme (works on both mobile and desktop) */}
                 <div
+                  data-share-layer="worldcup"
                   className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
                     ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
                   }`}
                 >
                   {/* Mobile-only: stadium background (no cats/decorations) — wc-pawcup-scene is hidden on mobile via CSS */}
-                  <div className="lg:hidden absolute inset-0 z-[5]">
+                  <div data-wc-bg className="lg:hidden absolute inset-0 z-[5]">
                     <WorldCupSlideBackground />
                   </div>
                   {/* Mobile-only: WC chapter heading centered above card (wc-pawcup-scene is hidden on mobile) */}
@@ -553,8 +575,11 @@ export default function WrappedPage() {
           </AnimatePresence>
         </div>
 
-        {/* mobile progress bar — absolute at bottom, gradient bg blends seamlessly into slide */}
-        <div className="pointer-events-auto absolute bottom-0 left-0 right-0 z-20 lg:hidden px-4 pt-2.5"
+        {/* mobile progress bar — absolute at bottom, gradient bg blends seamlessly into slide.
+            data-share-ignore: excluded from the full-slide share capture (the live
+            slide root is captured directly on mobile now) so the shared image stays
+            clean — matching desktop, where the progress bar lives in the fixed top bar. */}
+        <div data-share-ignore className="pointer-events-auto absolute bottom-0 left-0 right-0 z-20 lg:hidden px-4 pt-2.5"
           style={{
             paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))",
             background: "linear-gradient(to bottom, transparent, #080612 38%)",

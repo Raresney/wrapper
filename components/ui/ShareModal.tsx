@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { captureElement, captureDesktopElement } from "@/lib/captureElement";
+import { captureElement, prewarmCapture } from "@/lib/captureElement";
 
 type Scope = "card" | "slide";
 type ShareNav = Navigator & { canShare?: (d?: ShareData) => boolean; share?: (d: ShareData) => Promise<void> };
@@ -147,34 +147,68 @@ export default function ShareModal({
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
     if (scope === "card") {
-      // Mobile: render the slide at desktop width in an off-screen iframe so the
-      // lg: layout fires, then crop to the card. Produces a card identical to the
-      // desktop slides (proper spacing/fonts) instead of the cramped mobile card.
-      // Cap the scale at 2.0 on mobile: the off-screen render is a full 1440×900
-      // and we only keep the cropped card, so 2.5 quadruples raster cost for no
-      // visible gain on a share-sized image. 2.0 is noticeably faster, still crisp.
-      if (isMobile)
-        return await captureDesktopElement(slide, { cropToSelector: "[data-share-card]", scale: Math.min(scale, 2) });
-      const card = document.querySelector("[data-share-card]") as HTMLElement | null;
+      // Both themes use the same fast clone-into-wrapper path: only the card element
+      // is processed (no stadium scenes, no space background nodes) — dramatically
+      // faster than capturing the full slide and cropping.
+      // WC: find the card in the WC layer (the space-theme card is opacity-0 there).
+      // Space: any [data-share-card] works since there is only one visible.
+      const cardSelector = worldCup
+        ? ".wc-original-card-layer [data-share-card]"
+        : "[data-share-card]";
+      const card = document.querySelector(cardSelector) as HTMLElement | null;
       if (!card) return null;
-      const accent    = (card as HTMLElement & { dataset: DOMStringMap }).dataset.accent ?? "#a78bfa";
-      const wrapperBg = `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
+      const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
+      const wrapperBg = worldCup
+        ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
+        : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
       return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
     }
-    // Full slide — desktop only (toggle hidden on mobile)
-    return await captureElement(slide, { scale });
-  }, [scope, slideRef]);
+    // Full slide — same clone-into-wrapper approach as card mode, just bigger:
+    // capture only the VISIBLE layer div (not the full slide container with both
+    // layers). No live-DOM mutation, no restore, no skipLayer/skipSet complexity.
+    //
+    // For WC mode: wc-pawcup-scene has ~500 nodes hidden on mobile by globals.css
+    // display:none — remove them from the clone so they're never serialized.
+    // The bonus slide re-enables wc-pawcup-scene (display:block), so we check first.
+    const mobile = window.innerWidth < 1024;
+
+    // Both themes use the visible layer div. For WC: always strip wc-pawcup-scene
+    // from the clone — on mobile it's display:none, on desktop it's visible but has
+    // 500+ decorative nodes we don't need in the share image.
+    const layerSel = worldCup ? "[data-share-layer='worldcup']" : "[data-share-layer='space']";
+    const layer = slide.querySelector<HTMLElement>(layerSel) ?? slide;
+    const removeFromClone: string[] = [];
+
+    if (worldCup) {
+      // On mobile, wc-pawcup-scene is display:none (globals.css). Remove from clone
+      // to skip serializing 500+ hidden nodes.
+      // On desktop, keep it — it provides the side decorations (astronaut, constellation,
+      // moon, chapter heading) and the background for the share image.
+      if (mobile && layer.querySelector(".wc-pawcup-scene")) {
+        removeFromClone.push(".wc-pawcup-scene");
+      }
+    }
+
+    return await captureElement(layer, {
+      scale: mobile ? 1.5 : 2,
+      wrapperBg: "#080612",
+      wrapperPad: 0,
+      noCardDeco: true,
+      addLogoTopLeft: true,
+      addSlideWatermark: !mobile,
+      ...(removeFromClone.length ? { removeFromClone } : {}),
+    });
+  }, [scope, slideRef, worldCup]);
 
   useEffect(() => {
     if (!open) return;
     let alive = true;
     blobRef.current = null;
     hiPromiseRef.current = null;
-    // Warm the screenshot module so the first capture doesn't pay the dynamic-import
-    // cost (the main reason the first button press felt slow).
-    import("modern-screenshot").catch(() => {});
+    // Pre-import modern-screenshot and pre-fetch the watermark logo in parallel
+    // so neither hits the network during the actual capture.
+    prewarmCapture().catch(() => {});
     const t = setTimeout(async () => {
       if (!alive) return;
       setBusy(true);
@@ -370,8 +404,8 @@ export default function ShareModal({
               </div>
             </div>
 
-            {/* ── scope toggle — desktop only; mobile keeps card always ── */}
-            <div className="mt-4 px-4 hidden lg:block">
+            {/* ── scope toggle — card / full slide, on desktop and mobile, both themes ── */}
+            <div className="mt-4 px-4">
               <div className="relative flex items-center rounded-full py-[3px]"
                    style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.07)" }}>
                 {/* sliding pill — pure CSS transform, no layout recalc */}

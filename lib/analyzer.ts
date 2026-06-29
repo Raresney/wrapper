@@ -40,16 +40,43 @@ function isoToDay(d: string): string {
 
 // --- Sub-functions ---
 
-function calcStreak(contributions: Contribution[], periodEndDate: string): StreakData {
+function calcStreak(contributions: Contribution[], periodEndDate: string, clientToday?: string): StreakData {
   const active = new Set(contributions.filter((c) => c.count > 0).map((c) => c.date));
   if (!active.size) return { currentStreak: 0, longestStreak: 0, lastActiveDate: "" };
 
   const sorted = [...active].sort();
   const lastActiveDate = sorted.at(-1)!;
 
-  let currentStreak = 0;
+  // If today has no contributions yet, the streak from yesterday is still alive —
+  // the day hasn't expired. Start counting from yesterday in that case.
+  // Prefer clientToday (user's local date) over server UTC to handle timezone gaps.
+  const todayUTC = clientToday ?? new Date().toISOString().slice(0, 10);
+  const prevDay = (dateStr: string) => {
+    const d = new Date(`${dateStr}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - 1);
+    return d.toISOString().slice(0, 10);
+  };
+
+  // "Period ends today" — true if periodEndDate is within 1 day of clientToday.
+  // The ±1 day window handles any UTC offset (UTC-12 to UTC+14) without needing
+  // the user's actual timezone setting.
+  const msPerDay = 86_400_000;
+  const periodEndIsNow =
+    Math.abs(
+      new Date(`${periodEndDate}T00:00:00Z`).getTime() -
+      new Date(`${todayUTC}T00:00:00Z`).getTime(),
+    ) <= msPerDay;
+
+  let streakStart: string | null = null;
   if (active.has(periodEndDate)) {
-    const cur = new Date(`${periodEndDate}T00:00:00Z`);
+    streakStart = periodEndDate;
+  } else if (periodEndIsNow && active.has(prevDay(periodEndDate))) {
+    streakStart = prevDay(periodEndDate);
+  }
+
+  let currentStreak = 0;
+  if (streakStart) {
+    const cur = new Date(`${streakStart}T00:00:00Z`);
     while (active.has(cur.toISOString().slice(0, 10))) {
       currentStreak++;
       cur.setUTCDate(cur.getUTCDate() - 1);
@@ -543,8 +570,8 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
 
 // --- Exported functions ---
 
-export function calculateMetrics(data: GitHubRawData): CalculatedMetrics {
-  const streak = calcStreak(data.contributions, data.period.endDate);
+export function calculateMetrics(data: GitHubRawData, clientToday?: string): CalculatedMetrics {
+  const streak = calcStreak(data.contributions, data.period.endDate, clientToday);
   const hourBias = calcHourBias(data.contributions);
   const activeDays = calcActiveDays(data.contributions, data.period);
   const growthDelta = calcGrowthDelta(data.contributions, data.period);

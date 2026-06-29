@@ -164,18 +164,36 @@ export default function ShareModal({
         : document.querySelector<HTMLElement>("[data-share-card]");
       if (!card) return null;
 
-      // Both mobile and desktop use clone-into-wrapper for the gradient background.
-      // The card element is self-contained (no fixed-position or data-share-ignore
-      // children) so the wrapperBg clone path works correctly at any viewport size.
+      if (mobile) {
+        // Mobile: live-DOM path (no cloning) + canvas padding with blurred backdrop.
+        // Captures the card exactly as rendered, then places it on a larger canvas
+        // where the background is a stretched+blurred copy of the card itself.
+        const cardBlob = await captureElement(card, { scale: 2 });
+        if (!cardBlob) return null;
+        const img = await createImageBitmap(cardBlob);
+        const PAD = 96; // pixels of extra space around the card
+        const canvas = document.createElement("canvas");
+        canvas.width  = img.width  + PAD * 2;
+        canvas.height = img.height + PAD * 2;
+        const ctx = canvas.getContext("2d")!;
+        // Stretched + blurred card as background
+        ctx.filter = "blur(28px)";
+        ctx.drawImage(img, -32, -32, canvas.width + 64, canvas.height + 64);
+        ctx.filter = "none";
+        // Dark overlay so the card pops
+        ctx.fillStyle = "rgba(8,6,18,0.65)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Card centred
+        ctx.drawImage(img, PAD, PAD);
+        return new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
+      }
+
+      // Desktop: clone-into-wrapper for the gradient background and star-dot overlay.
       const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
       const wrapperBg = worldCup
         ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
         : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-      return await captureElement(card, {
-        scale: mobile ? 2 : scale,
-        wrapperBg,
-        wrapperPad: 72,
-      });
+      return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
     }
 
     // Full slide

@@ -164,19 +164,18 @@ export default function ShareModal({
         : document.querySelector<HTMLElement>("[data-share-card]");
       if (!card) return null;
 
-      if (mobile) {
-        // Mobile: live-DOM path — capture the card exactly as rendered on screen.
-        // Avoids clone artifacts, fixed-element drift, and data-share-ignore bleed-through
-        // that the wrapperBg clone path suffers from on small viewports.
-        return await captureElement(card, { scale: 2 });
-      }
-
-      // Desktop: clone-into-wrapper for the gradient background and star-dot overlay.
+      // Both mobile and desktop use clone-into-wrapper for the gradient background.
+      // The card element is self-contained (no fixed-position or data-share-ignore
+      // children) so the wrapperBg clone path works correctly at any viewport size.
       const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
       const wrapperBg = worldCup
         ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
         : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-      return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
+      return await captureElement(card, {
+        scale: mobile ? 2 : scale,
+        wrapperBg,
+        wrapperPad: 72,
+      });
     }
 
     // Full slide

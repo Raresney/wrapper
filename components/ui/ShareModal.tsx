@@ -416,7 +416,10 @@ export default function ShareModal({
               </div>
             </div>
 
-            {/* ── scope toggle — card / full slide, on desktop and mobile, both themes ── */}
+            {/* ── scope toggle — desktop only. On mobile we keep it simple: card only
+                (the full-slide capture of the squeezed responsive layout is unreliable
+                on phones), so the toggle is hidden and scope stays "card". ── */}
+            {!isMobile && (
             <div className="mt-4 px-4">
               <div className="relative flex items-center rounded-full py-[3px]"
                    style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.07)" }}>
@@ -443,6 +446,7 @@ export default function ShareModal({
                 ))}
               </div>
             </div>
+            )}
 
             {/* ── action grid ── */}
             {/* Share leads (handles saving to Photos via the OS sheet). Mobile shows

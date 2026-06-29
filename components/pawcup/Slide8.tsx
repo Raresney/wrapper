@@ -73,6 +73,8 @@ export default function Slide8({ profile, speech, speechLoading }: {
       <div data-wc-center-card className="absolute inset-0 z-20 flex items-start justify-center px-4 pt-[96px] pointer-events-none sm:pt-[108px] lg:items-center lg:pt-0">
         {award && profile ? (
           <div
+            data-share-card
+            data-accent={award.color}
             className="relative w-[min(286px,82vw)] max-w-[82vw] overflow-hidden rounded-[26px] pointer-events-auto sm:w-[min(300px,84vw)] sm:max-w-[84vw] lg:w-[430px] lg:max-w-[90vw] lg:rounded-3xl"
             style={{
               background: "rgba(10,4,24,0.94)",

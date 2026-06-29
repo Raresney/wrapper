@@ -149,66 +149,66 @@ export default function ShareModal({
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
+    const mobile = window.innerWidth < 1024;
+
     if (scope === "card") {
-      // Both themes use the same fast clone-into-wrapper path: only the card element
-      // is processed (no stadium scenes, no space background nodes) — dramatically
-      // faster than capturing the full slide and cropping.
-      // WC: find the card in the WC layer (the space-theme card is opacity-0 there).
-      // Space: any [data-share-card] works since there is only one visible.
-      const cardSelector = worldCup
-        ? ".wc-original-card-layer [data-share-card]"
-        : "[data-share-card]";
-      const card = document.querySelector(cardSelector) as HTMLElement | null;
+      // On mobile, wc-pawcup-scene is display:none (globals.css hides it) — the award
+      // card from Slide8 lives there and must NOT be captured when hidden.
+      // Always use wc-original-card-layer on mobile (it shows the visible card).
+      // On desktop, prefer wc-pawcup-scene so the WC bonus slide award card is captured.
+      const card: HTMLElement | null = worldCup
+        ? ((!mobile
+            ? document.querySelector<HTMLElement>(".wc-pawcup-scene [data-share-card]")
+            : null) ??
+           document.querySelector<HTMLElement>(".wc-original-card-layer [data-share-card]"))
+        : document.querySelector<HTMLElement>("[data-share-card]");
       if (!card) return null;
+
+      if (mobile) {
+        // Mobile: live-DOM path — capture the card exactly as rendered on screen.
+        // Avoids clone artifacts, fixed-element drift, and data-share-ignore bleed-through
+        // that the wrapperBg clone path suffers from on small viewports.
+        return await captureElement(card, { scale: 2 });
+      }
+
+      // Desktop: clone-into-wrapper for the gradient background and star-dot overlay.
       const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
       const wrapperBg = worldCup
         ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
         : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-      const mobileCard = window.innerWidth < 1024;
-      return await captureElement(card, {
-        scale,
-        wrapperBg,
-        wrapperPad: 72,
-        // On small phones the card is constrained by vw (e.g. w-[min(300px,84vw)]).
-        // Force a minimum of 300px so the browser reflows content at the intended
-        // design width instead of the squeezed viewport width. Desktop unaffected.
-        ...(mobileCard ? { minCaptureWidth: 300 } : {}),
-      });
+      return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
     }
-    // Full slide — same clone-into-wrapper approach as card mode, just bigger:
-    // capture only the VISIBLE layer div (not the full slide container with both
-    // layers). No live-DOM mutation, no restore, no skipLayer/skipSet complexity.
-    //
-    // For WC mode: wc-pawcup-scene has ~500 nodes hidden on mobile by globals.css
-    // display:none — remove them from the clone so they're never serialized.
-    // The bonus slide re-enables wc-pawcup-scene (display:block), so we check first.
-    const mobile = window.innerWidth < 1024;
 
-    // Both themes use the visible layer div. For WC: always strip wc-pawcup-scene
-    // from the clone — on mobile it's display:none, on desktop it's visible but has
-    // 500+ decorative nodes we don't need in the share image.
+    // Full slide
     const layerSel = worldCup ? "[data-share-layer='worldcup']" : "[data-share-layer='space']";
     const layer = slide.querySelector<HTMLElement>(layerSel) ?? slide;
-    const removeFromClone: string[] = [];
 
-    if (worldCup) {
-      // On mobile, wc-pawcup-scene is display:none (globals.css). Remove from clone
-      // to skip serializing 500+ hidden nodes.
-      // On desktop, keep it — it provides the side decorations (astronaut, constellation,
-      // moon, chapter heading) and the background for the share image.
-      if (mobile && layer.querySelector(".wc-pawcup-scene")) {
-        removeFromClone.push(".wc-pawcup-scene");
+    if (mobile) {
+      // Mobile: live-DOM path — capture the visible layer in-place.
+      // modern-screenshot's filter callback excludes data-share-ignore elements and
+      // skipElements, so no fixed-position overlays or hidden WC nodes bleed through.
+      const skipEls: HTMLElement[] = [];
+      if (worldCup) {
+        // Skip wc-pawcup-scene: display:none on mobile by globals.css, but skipping it
+        // explicitly avoids serializing 500+ hidden nodes (performance).
+        const pawcup = layer.querySelector<HTMLElement>(".wc-pawcup-scene");
+        if (pawcup) skipEls.push(pawcup);
       }
+      return await captureElement(layer, {
+        scale: 2,
+        ...(skipEls.length ? { skipElements: skipEls } : {}),
+      });
     }
 
+    // Desktop: clone-into-wrapper with logo and watermark (unchanged).
+    // Keep wc-pawcup-scene in the clone — it provides WC scene decorations on desktop.
     return await captureElement(layer, {
       scale: 2,
       wrapperBg: "#080612",
       wrapperPad: 0,
       noCardDeco: true,
       addLogoTopLeft: true,
-      addSlideWatermark: !mobile,
-      ...(removeFromClone.length ? { removeFromClone } : {}),
+      addSlideWatermark: true,
     });
   }, [scope, slideRef, worldCup]);
 

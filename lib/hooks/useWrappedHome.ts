@@ -67,13 +67,19 @@ export function useWrappedHome() {
         throw new Error(errBody.error === "github_unavailable" ? "GitHub is unavailable, try again" : "Could not fetch GitHub data");
       }
       const rawData = await res.json();
-      const analyzeRes = await fetch(`/api/analyze?tone=${tone}`, {
+      const _d = new Date();
+      const clientToday = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, "0")}-${String(_d.getDate()).padStart(2, "0")}`;
+      const analyzeRes = await fetch(`/api/analyze?tone=${tone}&clientToday=${clientToday}`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(rawData),
       });
       if (!analyzeRes.ok) throw new Error("Analysis failed");
       const profile = await analyzeRes.json();
       sessionStorage.setItem("wrappedProfile", JSON.stringify({ ...profile, tone }));
+      // Clear cached narratives so the new wrapped session gets fresh LLM output.
+      sessionStorage.removeItem("narrative:space");
+      sessionStorage.removeItem("narrative:worldcup");
+      sessionStorage.removeItem("wcSpeech");
       // Keep `loading` true through the navigation: window.location.href triggers a
       // full-page load, and the slides route shows its own LoadingScreen until the
       // profile is read. Resetting loading here would briefly hide the "generating"

@@ -9,6 +9,30 @@ import logoAsset from "@/components/pawcup/assets/logo3.asset.json";
 // Per-session cache: external img src → data URL (avoids re-fetching on every capture)
 const imgDataCache = new Map<string, string>();
 
+/**
+ * Call once when the share modal opens.
+ * Pre-imports modern-screenshot (eliminates dynamic-import cost on first capture)
+ * and pre-fetches the watermark logo so it's in imgDataCache before capture starts.
+ */
+export async function prewarmCapture(): Promise<void> {
+  // logoAsset is already statically imported above — use it directly.
+  await import("modern-screenshot");
+  toDataUrl(logoAsset.url).catch(() => {});
+  // Pre-fetch any background-image URLs currently in the live DOM (e.g. stadium
+  // in WC mode) so they land in imgDataCache before the first capture starts.
+  const BG_RE = /url\(["']?([^"')]+)["']?\)/g;
+  for (const el of Array.from(document.querySelectorAll<HTMLElement>("[style*='background-image']"))) {
+    let m: RegExpExecArray | null;
+    BG_RE.lastIndex = 0;
+    while ((m = BG_RE.exec(el.style.backgroundImage)) !== null) {
+      const url = m[1];
+      if (url && !url.startsWith("data:") && !url.startsWith("/") && !url.startsWith("blob:")) {
+        toDataUrl(url).catch(() => {});
+      }
+    }
+  }
+}
+
 async function toDataUrl(src: string): Promise<string | null> {
   if (imgDataCache.has(src)) return imgDataCache.get(src)!;
   try {
@@ -28,21 +52,50 @@ async function toDataUrl(src: string): Promise<string | null> {
   }
 }
 
-// Replace all external <img> src with cached data URLs so modern-screenshot
-// doesn't need to fetch them during render (faster + avoids connect-src issues).
+// Replace all external <img> src AND inline background-image URLs with cached
+// data URLs so modern-screenshot never fetches them during render.
+// Handles both <img src="..."> and style="background-image:url(...)" (e.g. stadium).
 async function inlineExternalImages(root: HTMLElement): Promise<() => void> {
-  const imgs = Array.from(root.querySelectorAll<HTMLImageElement>("img"));
   const restores: Array<() => void> = [];
-  await Promise.all(
-    imgs.map(async (img) => {
-      const src = img.getAttribute("src") ?? "";
-      if (!src || src.startsWith("data:") || src.startsWith("/")) return;
-      const dataUrl = await toDataUrl(src);
-      if (!dataUrl) return;
-      img.setAttribute("src", dataUrl);
-      restores.push(() => img.setAttribute("src", src));
-    }),
-  );
+
+  const isExternal = (url: string) =>
+    !!url && !url.startsWith("data:") && !url.startsWith("/") && !url.startsWith("blob:");
+
+  // <img> src attributes
+  const imgJobs = Array.from(root.querySelectorAll<HTMLImageElement>("img")).map(async (img) => {
+    const src = img.getAttribute("src") ?? "";
+    if (!isExternal(src)) return;
+    const dataUrl = await toDataUrl(src);
+    if (!dataUrl) return;
+    img.setAttribute("src", dataUrl);
+    restores.push(() => img.setAttribute("src", src));
+  });
+
+  // Inline background-image: url(...) on any element (catches WorldCupSlideBackground
+  // stadium image which would otherwise be fetched by modern-screenshot at render time).
+  const BG_URL_RE = /url\(["']?([^"')]+)["']?\)/g;
+  const bgJobs = Array.from(root.querySelectorAll<HTMLElement>("*"))
+    .filter((el) => el.style.backgroundImage.includes("url("))
+    .map(async (el) => {
+      const orig = el.style.backgroundImage;
+      const urls: string[] = [];
+      let m: RegExpExecArray | null;
+      BG_URL_RE.lastIndex = 0;
+      while ((m = BG_URL_RE.exec(orig)) !== null) urls.push(m[1]);
+      const externals = urls.filter(isExternal);
+      if (!externals.length) return;
+      let replaced = orig;
+      await Promise.all(externals.map(async (url) => {
+        const dataUrl = await toDataUrl(url);
+        if (dataUrl) replaced = replaced.replace(url, dataUrl);
+      }));
+      if (replaced !== orig) {
+        el.style.backgroundImage = replaced;
+        restores.push(() => { el.style.backgroundImage = orig; });
+      }
+    });
+
+  await Promise.all([...imgJobs, ...bgJobs]);
   return () => restores.forEach((fn) => fn());
 }
 
@@ -84,37 +137,6 @@ function cropWithVignette(
   ctx.fillRect(0, 0, W, H);
 
   return out;
-}
-
-/**
- * Extract all CSS custom properties from live document stylesheets so they
- * can be re-injected into the off-screen iframe (theme vars, etc.).
- */
-function extractCSSVars(): string {
-  let out = ":root{";
-  try {
-    for (const sheet of Array.from(document.styleSheets)) {
-      try {
-        for (const rule of Array.from(sheet.cssRules)) {
-          if (
-            rule instanceof CSSStyleRule &&
-            /^(:root|html)$/i.test(rule.selectorText.trim())
-          ) {
-            const s = rule.style;
-            for (let i = 0; i < s.length; i++) {
-              const p = s[i];
-              if (p.startsWith("--")) out += `${p}:${s.getPropertyValue(p)};`;
-            }
-          }
-        }
-      } catch {
-        /* cross-origin stylesheet — skip */
-      }
-    }
-  } catch {
-    /* ignore */
-  }
-  return out + "}";
 }
 
 // ── text-fix helpers ──────────────────────────────────────────────────────────
@@ -233,6 +255,28 @@ function applyNodeFixes(
   }
 }
 
+// ── GrindIT logo top-left for full-slide wrapper ─────────────────────────────
+
+async function addLogoTopLeftEl(container: HTMLElement): Promise<void> {
+  const logoDataUrl = await toDataUrl(logoAsset.url);
+  if (!logoDataUrl) return;
+  const el = document.createElement("div");
+  el.style.cssText = [
+    "position:absolute", "top:12px", "left:8px", "z-index:20",
+    "pointer-events:none",
+  ].join(";");
+  const img = document.createElement("img");
+  img.src = logoDataUrl;
+  img.width = 48; img.height = 48;
+  img.style.cssText = [
+    "width:48px", "height:48px", "border-radius:50%",
+    "background:#080612", "display:block",
+    "box-shadow:0 0 0 2px oklch(0.72 0.18 295 / 0.7),0 0 14px oklch(0.72 0.18 295 / 0.55),0 0 28px oklch(0.72 0.18 295 / 0.25)",
+  ].join(";");
+  el.appendChild(img);
+  container.appendChild(el);
+}
+
 // ── GrindIT watermark for card wrapper ───────────────────────────────────────
 
 async function addCardWatermark(container: HTMLElement): Promise<void> {
@@ -311,13 +355,42 @@ type Opts = {
   wrapperBg?: string;
   /** Padding (px) around the element when wrapperBg is used. Default 40. */
   wrapperPad?: number;
+  /** When true, skip star-dot overlay and GrindIT watermark badge (used for full-slide clones). */
+  noCardDeco?: boolean;
+  /** Add GrindIT logo (with purple glow) to the top-left of the wrapper. */
+  addLogoTopLeft?: boolean;
+  /** Add GrindIT watermark badge to the bottom-right of the wrapper (desktop full-slide). */
+  addSlideWatermark?: boolean;
+  /**
+   * CSS selectors — matching elements are removed from the clone before processing.
+   * Useful for stripping display:none subtrees that CSS hides on the live DOM
+   * (e.g. wc-pawcup-scene on mobile has ~500 nodes hidden by globals.css).
+   */
+  removeFromClone?: string[];
+  /**
+   * CSS selectors — matching elements in the clone get display:block forced.
+   * Overrides Tailwind responsive classes (e.g. lg:hidden) so elements visible
+   * only on one breakpoint can be shown in the capture regardless of viewport.
+   */
+  revealInClone?: string[];
+  /**
+   * data-share-layer value to skip entirely (node-walking + render).
+   * Only used in the live-DOM path (no wrapperBg).
+   */
+  skipLayer?: string;
+  /** Extra elements to skip in the live-DOM path. */
+  skipElements?: HTMLElement[];
+  /** Light fix mode for the live-DOM path (CSS injection + class-heuristic flex only). */
+  lightFixes?: boolean;
 };
 
 export async function captureElement(root: HTMLElement, opts: Opts = {}): Promise<Blob | null> {
-  const { scale = 2.5, background = "#080612", cropTo = null, wrapperBg, wrapperPad = 40 } = opts;
+  const { scale = 2.5, background = "#080612", cropTo = null, wrapperBg, wrapperPad = 40,
+          noCardDeco, addLogoTopLeft, addSlideWatermark, removeFromClone, revealInClone,
+          skipLayer, lightFixes, skipElements } = opts;
 
-  // Clone-into-wrapper mode: captures the element on a styled gradient background
-  // without touching the live DOM (safe with React).
+  // Clone-into-wrapper mode: captures the element on a styled background without
+  // touching the live DOM (safe with React). Used for both card and full-slide.
   if (wrapperBg && !cropTo) {
     const W = root.offsetWidth || 380;
     const H = root.offsetHeight || 580;
@@ -332,14 +405,35 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
       "overflow:hidden",
     ].join(";") + ";";
 
-    const accent = (root.dataset as DOMStringMap).accent ?? "#a78bfa";
-    addStarDots(wrap, accent);
+    if (!noCardDeco) {
+      const accent = (root.dataset as DOMStringMap).accent ?? "#a78bfa";
+      addStarDots(wrap, accent);
+    }
 
     const clone = root.cloneNode(true) as HTMLElement;
-    clone.style.width  = `${W}px`;
-    clone.style.height = `${H}px`;
+    clone.style.width     = `${W}px`;
+    clone.style.height    = `${H}px`;
     clone.style.minWidth  = `${W}px`;
     clone.style.minHeight = `${H}px`;
+
+    // Remove unwanted subtrees from the clone (e.g. display:none desktop scenes
+    // that CSS hides on mobile but that still exist in the DOM).
+    if (removeFromClone) {
+      for (const sel of removeFromClone) {
+        for (const el of Array.from(clone.querySelectorAll(sel))) el.remove();
+      }
+    }
+
+    // Force-show elements hidden by responsive classes (e.g. lg:hidden) so they
+    // appear in the capture regardless of viewport breakpoint.
+    if (revealInClone) {
+      for (const sel of revealInClone) {
+        for (const el of Array.from(clone.querySelectorAll<HTMLElement>(sel))) {
+          el.style.display = "block";
+        }
+      }
+    }
+
     wrap.appendChild(clone);
     document.body.appendChild(wrap);
     try {
@@ -351,7 +445,10 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
         }, () => {});
       }
       await inlineExternalImages(clone);
-      await addCardWatermark(wrap);
+      await Promise.all([
+        addLogoTopLeft  ? addLogoTopLeftEl(wrap)  : Promise.resolve(),
+        (!noCardDeco || addSlideWatermark) ? addCardWatermark(wrap) : Promise.resolve(),
+      ]);
       const { domToCanvas } = await import("modern-screenshot");
       const canvas = await domToCanvas(wrap, { backgroundColor: background, scale });
       return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
@@ -361,6 +458,36 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
   }
 
   const restores: Array<() => void> = [];
+
+  // Build a set of nodes to exclude from both node-walking and SVG render.
+  const skipSet = new Set<Node>();
+  if (skipLayer) {
+    const skipRoot = root.querySelector<HTMLElement>(`[data-share-layer="${skipLayer}"]`);
+    if (skipRoot) {
+      skipSet.add(skipRoot);
+      for (const child of skipRoot.querySelectorAll("*")) skipSet.add(child);
+    }
+  }
+  // Extra elements (e.g. display:none subtrees that CSS hides but DOM still contains).
+  if (skipElements) {
+    for (const el of skipElements) {
+      skipSet.add(el);
+      for (const child of el.querySelectorAll("*")) skipSet.add(child);
+    }
+  }
+
+  // Full-slide light path: one global CSS rule removes backdrop-filter everywhere —
+  // faster than checking getComputedStyle on every node.
+  // Matches complete class tokens only: `flex` matches but `flex-col` does not.
+  const FLEX_TOKEN_RE = /(?:^| )(flex|grid|inline-flex|inline-grid)(?= |$)/;
+
+  let bfStyleEl: HTMLStyleElement | null = null;
+  if (lightFixes) {
+    bfStyleEl = document.createElement("style");
+    bfStyleEl.textContent =
+      "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }";
+    document.head.appendChild(bfStyleEl);
+  }
 
   const setStyle = (el: HTMLElement, props: Record<string, string>) => {
     const prev: Record<string, string> = {};
@@ -378,6 +505,33 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
 
   const nodes: HTMLElement[] = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
   for (const el of nodes) {
+    if (skipSet.has(el)) continue;
+    if (el !== root && el.hasAttribute("data-share-ignore")) continue;
+
+    if (lightFixes) {
+      // Light path: only lock flex/grid widths (prevents foreignObject reflow).
+      // backdrop-filter already handled by CSS injection; text fixes skipped for speed.
+      // Use class-name heuristic to avoid getComputedStyle on non-flex elements.
+      const cls = typeof el.className === "string" ? el.className : "";
+      if (!FLEX_TOKEN_RE.test(cls)) continue;
+      const d = getComputedStyle(el).display;
+      if (d !== "flex" && d !== "grid" && d !== "inline-flex" && d !== "inline-grid") continue;
+      const w = el.getBoundingClientRect().width;
+      if (w > 0) {
+        el.style.setProperty("min-width", `${w}px`);
+        restores.push(() => el.style.removeProperty("min-width"));
+      }
+      if (d === "inline-flex" || d === "inline-grid") {
+        el.style.setProperty("white-space", "nowrap");
+        el.style.setProperty("width", "max-content");
+        restores.push(() => {
+          el.style.removeProperty("white-space");
+          el.style.removeProperty("width");
+        });
+      }
+      continue;
+    }
+
     const cs = getComputedStyle(el);
     applyNodeFixes(el, cs, setStyle, (elem, orig) => {
       restores.push(() => { elem.textContent = orig; });
@@ -390,7 +544,11 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     const canvas = await domToCanvas(root, {
       backgroundColor: background,
       scale,
-      filter: (node) => !(node instanceof Element && node.hasAttribute("data-share-ignore")),
+      filter: (node) => {
+        if (skipSet.has(node)) return false;
+        if (node instanceof Element && node.hasAttribute("data-share-ignore")) return false;
+        return true;
+      },
     });
 
     // Full-slide mode — return as-is
@@ -409,155 +567,8 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     const final = cropWithVignette(canvas, cLeft, cTop, cW, cH, scale);
     return await new Promise<Blob | null>((res) => final.toBlob((b) => res(b), "image/png"));
   } finally {
+    bfStyleEl?.remove();
     restoreImgs();
     restores.forEach((fn) => fn());
-  }
-}
-
-// ── desktop-layout capture (for mobile share) ────────────────────────────────
-// On phones the live DOM is in mobile layout; Tailwind `lg:` rules don't fire.
-// We clone the slide into an off-screen iframe sized to desktop width so that
-// lg: breakpoints re-evaluate and produce the desktop appearance.
-
-type DesktopOpts = {
-  scale?: number;
-  background?: string;
-  cropToSelector?: string | null;
-  width?: number;
-  height?: number;
-};
-
-function waitForImages(el: HTMLElement): Promise<void> {
-  const imgs = Array.from(el.querySelectorAll("img"));
-  return Promise.all(
-    imgs.map((img) =>
-      img.complete && img.naturalWidth > 0
-        ? Promise.resolve()
-        : new Promise<void>((res) => {
-            const done = () => res();
-            img.addEventListener("load", done, { once: true });
-            img.addEventListener("error", done, { once: true });
-            setTimeout(done, 2500);
-          }),
-    ),
-  ).then(() => undefined);
-}
-
-export async function captureDesktopElement(
-  root: HTMLElement,
-  opts: DesktopOpts = {},
-): Promise<Blob | null> {
-  const {
-    scale = 2.5,
-    background = "#080612",
-    cropToSelector = null,
-    width = 1440,
-    height = 900,
-  } = opts;
-
-  const iframe = document.createElement("iframe");
-  iframe.setAttribute("aria-hidden", "true");
-  iframe.style.cssText = `position:fixed;left:0;top:0;width:${width}px;height:${height}px;border:0;opacity:0;pointer-events:none;z-index:-1;`;
-  document.body.appendChild(iframe);
-
-  try {
-    const doc = iframe.contentDocument;
-    const win = iframe.contentWindow;
-    if (!doc || !win) return null;
-
-    doc.open();
-    doc.write("<!DOCTYPE html><html><head><meta charset='utf-8'></head><body></body></html>");
-    doc.close();
-
-    // Copy app stylesheets (Tailwind + fonts)
-    document.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
-      doc.head.appendChild(node.cloneNode(true));
-    });
-
-    // Inject CSS custom properties so theme vars work in the iframe
-    const varsStyle = doc.createElement("style");
-    varsStyle.textContent = extractCSSVars();
-    doc.head.appendChild(varsStyle);
-
-    doc.documentElement.style.cssText = `width:${width}px;`;
-    doc.body.style.cssText = `margin:0;width:${width}px;min-height:${height}px;background:${background};overflow:hidden;`;
-
-    // Clone slide and force desktop layout
-    const clone = root.cloneNode(true) as HTMLElement;
-    clone.style.cssText += `position:relative;width:${width}px;height:${height}px;min-height:${height}px;`;
-    doc.body.appendChild(clone);
-
-    // Wait: styles parse → media queries re-evaluate → fonts & images load
-    await new Promise<void>((r) =>
-      win.requestAnimationFrame(() => win.requestAnimationFrame(() => r())),
-    );
-    try {
-      await (doc as Document & { fonts?: FontFaceSet }).fonts?.ready;
-    } catch {
-      /* fonts optional */
-    }
-    await waitForImages(clone);
-    // Brief settle for layout/paint after fonts+images are ready. Kept short — the
-    // fonts.ready and image waits above already cover the slow parts.
-    await new Promise((r) => setTimeout(r, 60));
-
-    // Fix clone elements — same logic as captureElement but without restore bookkeeping
-    const nodes = [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))];
-    for (const el of nodes) {
-      // Reset Framer Motion inline opacity so we capture the settled (visible) state
-      if (el.style.opacity !== "" && parseFloat(el.style.opacity) < 1) {
-        el.style.removeProperty("opacity");
-      }
-      // Reset FM translate frozen at entry state
-      if (el.style.transform && el.style.transform !== "none") {
-        if (/translateY\((?:1[5-9]|[2-9]\d)px\)/.test(el.style.transform)) {
-          el.style.removeProperty("transform");
-        }
-      }
-
-      const cs = win.getComputedStyle(el);
-
-      // Inline setter (no restore needed — clone is throw-away)
-      const setStyleInline = (_el: HTMLElement, props: Record<string, string>) => {
-        for (const k of Object.keys(props)) _el.style.setProperty(k, props[k]);
-      };
-
-      applyNodeFixes(el, cs, setStyleInline, (elem, _orig) => {
-        // No restore needed in iframe clone
-        void elem; void _orig;
-      });
-    }
-
-    const cropEl = cropToSelector
-      ? clone.querySelector<HTMLElement>(cropToSelector)
-      : null;
-
-    await inlineExternalImages(clone);
-    const { domToCanvas } = await import("modern-screenshot");
-    const canvas = await domToCanvas(clone, {
-      backgroundColor: background,
-      scale,
-      width,
-      height,
-      filter: (node) => !(node instanceof Element && node.hasAttribute("data-share-ignore")),
-    });
-
-    // Full-slide mode — return as-is
-    if (!cropEl) {
-      return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
-    }
-
-    // Card mode — composite full slide onto custom background via roundRect clip
-    const r0 = clone.getBoundingClientRect();
-    const rc = cropEl.getBoundingClientRect();
-    const cLeft = Math.round((rc.left - r0.left) * scale);
-    const cTop  = Math.round((rc.top  - r0.top)  * scale);
-    const cW    = Math.round(rc.width  * scale);
-    const cH    = Math.round(rc.height * scale);
-
-    const final = cropWithVignette(canvas, cLeft, cTop, cW, cH, scale);
-    return await new Promise<Blob | null>((res) => final.toBlob((b) => res(b), "image/png"));
-  } finally {
-    iframe.remove();
   }
 }

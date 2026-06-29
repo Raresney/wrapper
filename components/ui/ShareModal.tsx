@@ -168,11 +168,16 @@ export default function ShareModal({
       // radial gradient background (no blurred-card backdrop) plus star-dot overlay.
       // The clone path freezes animations to a final frame, so the card never shows
       // a pulsing glow / mid-animation artifact like the old mobile live-DOM path did.
+      // Mobile: widen the squeezed card so the desktop-tuned text fixes have room
+      // (no edge clipping) and let it fit its content height (no empty gap below).
       const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
       const wrapperBg = worldCup
         ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
         : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-      return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
+      return await captureElement(card, {
+        scale, wrapperBg, wrapperPad: 72,
+        ...(mobile ? { minCaptureWidth: 360, mobileCard: true } : {}),
+      });
     }
 
     // Full slide
